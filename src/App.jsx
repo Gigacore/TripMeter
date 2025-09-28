@@ -37,6 +37,9 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState('miles'); // 'miles' or 'km'
 
+  const [totalTrips, setTotalTrips] = useState(0);
+  const [successfulTrips, setSuccessfulTrips] = useState(0);
+  const [canceledTrips, setCanceledTrips] = useState(0);
   // --- Refs for Leaflet objects and file input ---
   const mapRef = useRef(null);
   const beginLayerRef = useRef(null);
@@ -101,6 +104,9 @@ function App() {
     setShortestTripByDistRow(null);
     setAvgTripDuration(0);
     setFocusedTrip(null);
+    setTotalTrips(0);
+    setSuccessfulTrips(0);
+    setCanceledTrips(0);
     clearError();
     fileInputRef.current.value = ''; // Clear file input
     if (mapRef.current) {
@@ -391,9 +397,12 @@ function App() {
       let totalDurationHours = 0;
       const tripsWithDuration = [];
       const tripsWithDistance = [];
+      let completedCount = 0;
+      let canceledCount = 0;
 
       rows.forEach(r => {
-        if (r.status === 'completed') {
+        if (r.status?.toLowerCase() === 'completed') {
+          completedCount++;
           const distanceMiles = parseFloat(r.distance);
           const beginTime = new Date(r.begin_trip_time);
           const dropoffTime = new Date(r.dropoff_time);
@@ -411,9 +420,14 @@ function App() {
               tripsWithDistance.push({ distance: convertDistance(distanceMiles), row: r });
             }
           }
+        } else if (r.status?.toLowerCase() === 'rider_canceled' || r.status?.toLowerCase() === 'driver_canceled') {
+          canceledCount++;
         }
       });
 
+      setTotalTrips(rows.length);
+      setSuccessfulTrips(completedCount);
+      setCanceledTrips(canceledCount);
       if (totalDurationHours > 0) {
         setAvgSpeed(totalDistance / totalDurationHours);
       } else {
@@ -506,6 +520,18 @@ function App() {
           )}
 
           <div className="section stats">
+            <div className="stat">
+              <div>Total Trips</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{totalTrips}</div>
+            </div>
+            <div className="stat">
+              <div>Successful Trips</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{successfulTrips}</div>
+            </div>
+            <div className="stat">
+              <div>Canceled Trips</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{canceledTrips}</div>
+            </div>
             <div className="stat">
               <div>Begintrip points</div>
               <div style={{fontSize: '20px', fontWeight: 700}}>{beginCount}</div>
