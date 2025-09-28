@@ -48,6 +48,15 @@ const Stats = ({
     costPerDurationByCurrency,
   } = data;
 
+  const currencies = Object.keys(totalFareByCurrency);
+  const [activeCurrency, setActiveCurrency] = React.useState(currencies.length > 0 ? currencies[0] : null);
+
+  React.useEffect(() => {
+    if (currencies.length > 0 && !currencies.includes(activeCurrency)) {
+      setActiveCurrency(currencies[0]);
+    }
+  }, [currencies, activeCurrency]);
+
   const fileInputRef = React.useRef();
 
   const actionsEnabled = rows.length > 0 && !isProcessing;
@@ -132,44 +141,55 @@ const Stats = ({
           </div>
         </div>
 
-        {Object.keys(totalFareByCurrency).length > 0 && (
+        {currencies.length > 0 && (
           <div className="stats-group">
             <h3>Fare</h3>
-            <div className="stats-grid">
-              {Object.entries(totalFareByCurrency).map(([currency, amount]) => (
-                <Stat
-                  key={currency}
-                  label="Total Fare"
-                  unit={currency}
-                  value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                />
-              ))}
-              {Object.entries(avgFareByCurrency).map(([currency, amount]) => (
-                <Stat
-                  key={currency}
-                  label="Avg. Fare"
-                  unit={currency}
-                  value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                />
-              ))}
-              {Object.entries(lowestFareByCurrency).map(([currency, data]) => (
-                <Stat
-                  key={`${currency}-lowest`}
-                  label="Lowest Fare"
-                  unit={currency}
-                  value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  onClick={() => onFocusOnTrip(data.row)}
-                />
-              ))}
-              {Object.entries(highestFareByCurrency).map(([currency, data]) => (
-                <Stat
-                  key={`${currency}-highest`}
-                  label="Highest Fare"
-                  unit={currency}
-                  value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  onClick={() => onFocusOnTrip(data.row)}
-                />
-              ))}
+            <div style={{ display: 'flex', gap: '16px' }}>
+              {currencies.length > 1 && (
+                <div className="tabs vertical-tabs" style={{ flex: '0 0 20%' }}>
+                  {currencies.map(currency => (
+                    <button
+                      key={currency}
+                      className={`tab-button ${activeCurrency === currency ? 'active' : ''}`}
+                      onClick={() => setActiveCurrency(currency)}
+                    >
+                      {currency} - Total: {totalFareByCurrency[currency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {activeCurrency && (
+                <div className="stats-grid" style={{ flex: '1 1 80%' }}>
+                  {currencies.length === 1 && (
+                    <Stat
+                    label="Total Fare"
+                    unit={activeCurrency}
+                    value={totalFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  />
+                  )}
+                  <Stat
+                    label="Avg. Fare"
+                    unit={activeCurrency}
+                    value={avgFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  />
+                  {lowestFareByCurrency[activeCurrency] && (
+                    <Stat
+                      label="Lowest Fare"
+                      unit={activeCurrency}
+                      value={lowestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      onClick={() => onFocusOnTrip(lowestFareByCurrency[activeCurrency].row)}
+                    />
+                  )}
+                  {highestFareByCurrency[activeCurrency] && (
+                    <Stat
+                      label="Highest Fare"
+                      unit={activeCurrency}
+                      value={highestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      onClick={() => onFocusOnTrip(highestFareByCurrency[activeCurrency].row)}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
