@@ -41,6 +41,7 @@ function App() {
   const [successfulTrips, setSuccessfulTrips] = useState(0);
   const [canceledTrips, setCanceledTrips] = useState(0);
   // --- Refs for Leaflet objects and file input ---
+  const [totalFareByCurrency, setTotalFareByCurrency] = useState({});
   const mapRef = useRef(null);
   const beginLayerRef = useRef(null);
   const dropLayerRef = useRef(null);
@@ -107,6 +108,7 @@ function App() {
     setTotalTrips(0);
     setSuccessfulTrips(0);
     setCanceledTrips(0);
+    setTotalFareByCurrency({});
     clearError();
     fileInputRef.current.value = ''; // Clear file input
     if (mapRef.current) {
@@ -399,6 +401,7 @@ function App() {
       const tripsWithDistance = [];
       let completedCount = 0;
       let canceledCount = 0;
+      const fareByCurrency = {};
 
       rows.forEach(r => {
         if (r.status?.toLowerCase() === 'completed') {
@@ -420,6 +423,15 @@ function App() {
               tripsWithDistance.push({ distance: convertDistance(distanceMiles), row: r });
             }
           }
+
+          const fare = parseFloat(r.fare_amount);
+          const currency = r.fare_currency;
+          if (currency && !isNaN(fare)) {
+            if (!fareByCurrency[currency]) {
+              fareByCurrency[currency] = 0;
+            }
+            fareByCurrency[currency] += fare;
+          }
         } else if (r.status?.toLowerCase() === 'rider_canceled' || r.status?.toLowerCase() === 'driver_canceled') {
           canceledCount++;
         }
@@ -428,6 +440,7 @@ function App() {
       setTotalTrips(rows.length);
       setSuccessfulTrips(completedCount);
       setCanceledTrips(canceledCount);
+      setTotalFareByCurrency(fareByCurrency);
       if (totalDurationHours > 0) {
         setAvgSpeed(totalDistance / totalDurationHours);
       } else {
@@ -463,6 +476,7 @@ function App() {
         setShortestTripByDist(0); setShortestTripByDistRow(null);
         setLongestTripByDist(0); setLongestTripByDistRow(null);
       }
+
     }
 
   }, [rows, distanceUnit]); // Re-run this effect when rows or distanceUnit changes
@@ -477,6 +491,11 @@ function App() {
         <span className="pill"><span className="dot green"></span> begintrip pins</span>
         <span className="pill"><span className="dot red"></span> dropoff pins</span>
         <span className="hint">Expected headers: <code>begintrip_lat</code>, <code>begintrip_lng</code>, <code>dropoff_lat</code>, <code>dropoff_lng</code></span>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="hint">Unit:</span>
+          <button className={distanceUnit === 'miles' ? 'primary' : ''} onClick={() => setDistanceUnit('miles')}>Miles</button>
+          <button className={distanceUnit === 'km' ? 'primary' : ''} onClick={() => setDistanceUnit('km')}>Kilometers</button>
+        </div>
       </header>
 
       <div className="container">
@@ -502,14 +521,6 @@ function App() {
             onDragLeave={handleDragEvents}
           >
             Drag & drop CSV here
-          </div>
-
-          <div className="section">
-            <label>Distance Unit</label>
-            <div className="row" style={{gap: '6px'}}>
-              <button className={distanceUnit === 'miles' ? 'primary' : ''} onClick={() => setDistanceUnit('miles')}>Miles</button>
-              <button className={distanceUnit === 'km' ? 'primary' : ''} onClick={() => setDistanceUnit('km')}>Kilometers</button>
-            </div>
           </div>
 
 
@@ -564,6 +575,12 @@ function App() {
               <div>Shortest Trip ({distanceUnit})</div>
               <div style={{fontSize: '20px', fontWeight: 700}}>{shortestTripByDist.toFixed(2)}</div>
             </div>
+            {Object.entries(totalFareByCurrency).map(([currency, amount]) => (
+              <div className="stat" key={currency}>
+                <div>Total Fare ({currency})</div>
+                <div style={{fontSize: '20px', fontWeight: 700}}>{amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              </div>
+            ))}
           </div>
 
           <div className="section">
