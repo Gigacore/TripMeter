@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet.heat';
 import Papa from 'papaparse';
 import './App.css';
+import 'leaflet/dist/leaflet.css';
 
 // --- Leaflet Icon Setup ---
 // It's better to have these outside the component to avoid re-creation on re-renders.
@@ -16,10 +17,19 @@ const redIcon = L.icon({
   iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28]
 });
 
-const Stat = ({ label, value, onClick, unit }) => (
+const Stat = ({ label, value, onClick, unit, unitClassName }) => (
   <div className={`stat ${onClick ? 'clickable' : ''}`} onClick={onClick}>
-    <div>{label}{unit && ` (${unit})`}</div>
-    <div style={{fontSize: '20px', fontWeight: 700}}>{value}</div>
+    <div>{label}</div>
+    <div className="stat-value">
+      {value}
+      {unit && <span className={`stat-unit ${unitClassName || ''}`}>{unit}</span>}
+    </div>
+  </div>
+);
+
+const Spinner = () => (
+  <div className="spinner-overlay">
+    <div className="spinner"></div>
   </div>
 );
 
@@ -646,6 +656,7 @@ function App() {
 
   return (
     <>
+      {isProcessing && <Spinner />}
       <header>
         <h1 className="text-3xl font-bold underline">CSV → Map & KML</h1>
         <div className="layout-controls">
@@ -704,6 +715,20 @@ function App() {
             className="sidebar"
             style={layout === 'split' ? { flex: '0 0 70%' } : {}}
           >
+            {focusedTrip && (
+              <div className="section focused-trip-info">
+                <div className="trip-list-header">
+                  <h3>Focused Trip</h3>
+                  <button onClick={handleShowAll} style={{marginLeft: 'auto'}}>Show All</button>
+                </div>
+                <p>
+                  <strong>Status:</strong> <span className={`status-pill ${focusedTrip.status?.toLowerCase()}`}>{focusedTrip.status || 'N/A'}</span><br/>
+                  <strong>From:</strong> {focusedTrip.begintrip_address || 'N/A'}<br/>
+                  <strong>To:</strong> {focusedTrip.dropoff_address || 'N/A'}<br/>
+                  <strong>Distance:</strong> {convertDistance(parseFloat(focusedTrip.distance)).toFixed(2)} {distanceUnit}
+                </p>
+              </div>
+            )}
             {sidebarView === 'stats' && (
               <>
                 {error && (
@@ -718,10 +743,8 @@ function App() {
                     <div className="stats-grid">
                       <Stat label="Total Requests" value={totalTrips} onClick={() => handleShowTripList('all')} />
                       <Stat label="Successful" value={successfulTrips} onClick={() => handleShowTripList('successful')} />
-                      <Stat label="Total Canceled" value={`${riderCanceledTrips + driverCanceledTrips} (${totalTrips > 0 ? ((riderCanceledTrips + driverCanceledTrips) / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('canceled')} />
-                      <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => handleShowTripList('unfulfilled')} />
-                      <Stat label="Rider Canceled" value={`${riderCanceledTrips} (${totalTrips > 0 ? (riderCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('rider_canceled')} />
-                      <Stat label="Driver Canceled" value={`${driverCanceledTrips} (${totalTrips > 0 ? (driverCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('driver_canceled')} />
+                      <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => handleShowTripList('rider_canceled')} />
+                      <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => handleShowTripList('driver_canceled')} />
                     </div>
                   </div>
 
@@ -787,7 +810,7 @@ function App() {
                         <Stat
                           key={currency}
                           label={`Cost per ${distanceUnit}`}
-                          unit={currency}
+                        unit={`${currency}/${distanceUnit}`}
                           value={amount.toFixed(2)}
                         />
                       ))}
@@ -803,7 +826,7 @@ function App() {
                       {Object.entries(costPerDurationByCurrency).map(([currency, amount]) => (
                         <Stat
                           key={currency}
-                          label="Cost per minute"
+                          label="Cost"
                           unit={currency}
                           value={amount.toFixed(2)}
                         />
