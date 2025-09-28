@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CSV → Map & KML (Begin/Dropoff Pins)</title>
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <!-- Papa Parse for CSV -->
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root { --bg: #0f172a; --panel: #111827; --muted: #9ca3af; --fg: #f8fafc; --accent: #22c55e; --accent2: #ef4444; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    header { padding: 16px 20px; border-bottom: 1px solid #1f2937; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+    header h1 { font-size: 18px; margin: 0 8px 0 0; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .container { display: grid; grid-template-columns: 360px 1fr; gap: 0; min-height: calc(100vh - 60px); }
+    .sidebar { background: var(--panel); border-right: 1px solid #1f2937; padding: 16px; }
+    .section { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; color: #cbd5e1; font-weight: 600; }
+    input[type="file"] { width: 100%; padding: 10px; border: 1px dashed #374151; background: #0b1220; border-radius: 10px; color: #e5e7eb; }
+    .dropzone { border: 2px dashed #334155; padding: 14px; border-radius: 10px; text-align: center; color: var(--muted); cursor: pointer; }
+    .dropzone.drag { border-color: #64748b; background: #0b1220; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    button { background: #1f2937; border: 1px solid #374151; color: #e5e7eb; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+    button.primary { background: #075985; border-color: #0ea5e9; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .pill { display:inline-flex; align-items:center; gap:6px; border:1px solid #334155; padding:6px 8px; border-radius: 999px; font-size: 12px; color:#cbd5e1 }
+    .pill .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .dot.green { background:#22c55e; }
+    .dot.red { background:#ef4444; }
+    .stats { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .stat { background:#0b1220; border:1px solid #1f2937; border-radius:10px; padding:10px; }
+    #map { width: 100%; height: calc(100vh - 60px); }
+    .footer { color: var(--muted); font-size: 12px; margin-top: 8px; }
+    .error { color: #fecaca; background:#7f1d1d; border:1px solid #ef4444; padding:10px; border-radius:8px; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CSV → Map & KML</h1>
+    <span class="pill"><span class="dot green"></span> begintrip pins</span>
+    <span class="pill"><span class="dot red"></span> dropoff pins</span>
+    <span class="hint">Expected headers (case-insensitive): <code>begintrip_lat</code>, <code>begintrip_lng</code>, <code>dropoff_lat</code>, <code>dropoff_lng</code></span>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <div class="section">
+        <label for="fileInput">Upload CSV</label>
+        <input id="fileInput" type="file" accept=".csv" />
+      </div>
+
+      <div id="dz" class="section dropzone">Drag & drop CSV here</div>
+
+      <div id="errors" class="section hidden"></div>
+
+      <div class="section stats">
+        <div class="stat">
+          <div>Begintrip points</div>
+          <div id="beginCount" style="font-size:20px; font-weight:700;">0</div>
+        </div>
+        <div class="stat">
+          <div>Dropoff points</div>
+          <div id="dropoffCount" style="font-size:20px; font-weight:700;">0</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="row" style="gap:6px;">
+          <button id="btnKmlAll" disabled>Download KML (both)</button>
+          <button id="btnKmlBegin" disabled>Begintrip KML</button>
+          <button id="btnKmlDrop" disabled>Dropoff KML</button>
+        </div>
+        <div class="footer">KML uses colored icons (green/red). Works in Google Earth / Maps (My Maps).</div>
+      </div>
+
+      <div class="section">
+        <button id="btnClear" disabled>Clear Map</button>
+      </div>
+    </aside>
+
+    <main id="map"></main>
+  </div>
+
+  <script>
+    // --- Map setup ---
+    const map = L.map('map');
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    map.setView([20, 0], 2);
+
+    const greenIcon = L.icon({
+      iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+      iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28]
+    });
+    const redIcon = L.icon({
+      iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+      iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28]
+    });
+
+    const beginLayer = L.layerGroup().addTo(map);
+    const dropLayer  = L.layerGroup().addTo(map);
+
+    L.control.layers(null, { 'Begintrip (green)': beginLayer, 'Dropoff (red)': dropLayer }).addTo(map);
+
+    // --- State ---
+    let rows = [];
+
+    // --- Helpers ---
+    function toNumber(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+
+    function normalizeHeaders(hdrs){
+      const idx = {};
+      hdrs.forEach((h, i) => idx[h.trim().toLowerCase()] = i);
+      // required keys
+      const req = ['begintrip_lat', 'begintrip_lng', 'dropoff_lat', 'dropoff_lng'];
+      for (const k of req){ if (!(k in idx)) return null; }
+      return idx;
+    }
+
+    function showError(msg){
+      const el = document.getElementById('errors');
+      el.classList.remove('hidden');
+      el.className = 'section error';
+      el.textContent = msg;
+    }
+    function clearError(){
+      const el = document.getElementById('errors');
+      el.classList.add('hidden');
+      el.textContent = '';
+      el.className = 'section hidden';
+    }
+
+    function enableActions(enabled){
+      document.getElementById('btnKmlAll').disabled   = !enabled;
+      document.getElementById('btnKmlBegin').disabled = !enabled;
+      document.getElementById('btnKmlDrop').disabled  = !enabled;
+      document.getElementById('btnClear').disabled    = !enabled;
+    }
+
+    function fitToLayers(){
+      const group = L.featureGroup([beginLayer, dropLayer]);
+      try {
+        const b = group.getBounds();
+        if (b.isValid()) map.fitBounds(b.pad(0.1));
+      } catch {}
+    }
+
+    function resetMap(){
+      beginLayer.clearLayers();
+      dropLayer.clearLayers();
+      rows = [];
+      document.getElementById('beginCount').textContent = '0';
+      document.getElementById('dropoffCount').textContent = '0';
+      enableActions(false);
+      clearError();
+      map.setView([20, 0], 2);
+    }
+
+    function parseCSV(file){
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: results => resolve(results),
+          error: err => reject(err)
+        });
+      });
+    }
+
+    function render(rows){
+      beginLayer.clearLayers();
+      dropLayer.clearLayers();
+
+      let beginCount = 0, dropCount = 0;
+
+      rows.forEach((r, idx) => {
+        const blt = toNumber(r.begintrip_lat);
+        const bln = toNumber(r.begintrip_lng);
+        const dlt = toNumber(r.dropoff_lat);
+        const dln = toNumber(r.dropoff_lng);
+
+        if (blt != null && bln != null){
+          beginCount++;
+          const m = L.marker([blt, bln], { icon: greenIcon })
+            .bindPopup(`<b>Begintrip</b><br/>Row: ${idx+1}<br/>Lat: ${blt}<br/>Lng: ${bln}`);
+          beginLayer.addLayer(m);
+        }
+        if (dlt != null && dln != null){
+          dropCount++;
+          const m = L.marker([dlt, dln], { icon: redIcon })
+            .bindPopup(`<b>Dropoff</b><br/>Row: ${idx+1}<br/>Lat: ${dlt}<br/>Lng: ${dln}`);
+          dropLayer.addLayer(m);
+        }
+      });
+
+      document.getElementById('beginCount').textContent = String(beginCount);
+      document.getElementById('dropoffCount').textContent = String(dropCount);
+
+      enableActions((beginCount + dropCount) > 0);
+      fitToLayers();
+    }
+
+    function buildKML(parts){
+      // parts: array of { name, coords: [lon,lat], description? }
+      const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const style = (id, href) => `\n  <Style id="${id}">\n    <IconStyle>\n      <scale>1.1</scale>\n      <Icon><href>${href}</href></Icon>\n    </IconStyle>\n  </Style>`;
+
+      const items = parts.map(p => `\n  <Placemark>\n    <name>${esc(p.name)}</name>\n    ${p.styleUrl ? `<styleUrl>#${p.styleUrl}</styleUrl>` : ''}\n    ${p.desc ? `<description>${esc(p.desc)}</description>` : ''}\n    <Point><coordinates>${p.coords[0]},${p.coords[1]},0</coordinates></Point>\n  </Placemark>`).join('');
+
+      const kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n  <name>Trips (Begin/Dropoff)</name>`
+        + style('beginStyle','https://maps.google.com/mapfiles/ms/icons/green-dot.png')
+        + style('dropStyle','https://maps.google.com/mapfiles/ms/icons/red-dot.png')
+        + items + '\n</Document>\n</kml>';
+      return kml;
+    }
+
+    function download(filename, text){
+      const blob = new Blob([text], { type: 'application/vnd.google-earth.kml+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.style.display = 'none';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+    }
+
+    function makeParts({ which = 'both' } = {}){
+      const parts = [];
+      rows.forEach((r, idx) => {
+        const rowNo = idx + 1;
+        if (which === 'both' || which === 'begin'){
+          const lat = toNumber(r.begintrip_lat), lng = toNumber(r.begintrip_lng);
+          if (lat != null && lng != null){
+            parts.push({ name: `Begintrip #${rowNo}` , styleUrl: 'beginStyle', coords: [lng, lat] });
+          }
+        }
+        if (which === 'both' || which === 'drop'){
+          const lat = toNumber(r.dropoff_lat), lng = toNumber(r.dropoff_lng);
+          if (lat != null && lng != null){
+            parts.push({ name: `Dropoff #${rowNo}` , styleUrl: 'dropStyle', coords: [lng, lat] });
+          }
+        }
+      });
+      return parts;
+    }
+
+    // --- Event wiring ---
+    async function handleFile(file){
+      resetMap();
+      if (!file) return;
+      if (!file.name.toLowerCase().endsWith('.csv')){
+        showError('Please select a .csv file.');
+        return;
+      }
+      try {
+        const result = await parseCSV(file);
+        if (!result || !result.meta || !result.data){ throw new Error('Failed to parse CSV.'); }
+        const idxMap = normalizeHeaders(result.meta.fields || []);
+        if (!idxMap){
+          showError('Missing required headers. Expected: begintrip_lat, begintrip_lng, dropoff_lat, dropoff_lng (case-insensitive).');
+          return;
+        }
+        // Normalize row keys to our canonical header names
+        rows = result.data.map(obj => {
+          const out = {};
+          for (const k in obj){ if (!Object.hasOwn(obj, k)) continue; out[k.trim().toLowerCase()] = obj[k]; }
+          return {
+            begintrip_lat: out['begintrip_lat'],
+            begintrip_lng: out['begintrip_lng'],
+            dropoff_lat:   out['dropoff_lat'],
+            dropoff_lng:   out['dropoff_lng']
+          };
+        });
+        clearError();
+        render(rows);
+      } catch (e){
+        console.error(e);
+        showError('Unable to read this CSV. Please check formatting.');
+      }
+    }
+
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const f = e.target.files?.[0];
+      handleFile(f);
+    });
+
+    // Drag & drop
+    const dz = document.getElementById('dz');
+    ;['dragenter','dragover'].forEach(evt => dz.addEventListener(evt, (e)=>{ e.preventDefault(); dz.classList.add('drag'); }));
+    ;['dragleave','drop'].forEach(evt => dz.addEventListener(evt, (e)=>{ e.preventDefault(); dz.classList.remove('drag'); }));
+    dz.addEventListener('drop', (e)=>{
+      const f = e.dataTransfer.files?.[0];
+      handleFile(f);
+    });
+    dz.addEventListener('click', ()=> document.getElementById('fileInput').click());
+
+    // Buttons
+    document.getElementById('btnKmlAll').addEventListener('click', ()=>{
+      const parts = makeParts({ which: 'both' });
+      const kml = buildKML(parts);
+      download('trips_both.kml', kml);
+    });
+    document.getElementById('btnKmlBegin').addEventListener('click', ()=>{
+      const parts = makeParts({ which: 'begin' });
+      const kml = buildKML(parts);
+      download('trips_begintrip.kml', kml);
+    });
+    document.getElementById('btnKmlDrop').addEventListener('click', ()=>{
+      const parts = makeParts({ which: 'drop' });
+      const kml = buildKML(parts);
+      download('trips_dropoff.kml', kml);
+    });
+
+    document.getElementById('btnClear').addEventListener('click', resetMap);
+  </script>
+</body>
+</html>
