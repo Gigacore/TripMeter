@@ -3,6 +3,7 @@ import './App.css';
 import 'leaflet/dist/leaflet.css';
 import { useTripData } from './hooks/useTripData';
 import { parseCSV } from './services/csvParser';
+import { downloadKML } from './services/kmlService';
 import { normalizeHeaders } from './utils/csv';
 import { KM_PER_MILE } from './constants';
 import Header from './components/organisms/Header';
@@ -10,6 +11,7 @@ import InitialView from './components/organisms/InitialView';
 import Sidebar from './components/organisms/Sidebar';
 import Map from './components/organisms/Map';
 import Spinner from './components/atoms/Spinner';
+import Settings from './components/organisms/Settings';
 
 function App() {
   const [rows, setRows] = useState([]);
@@ -21,6 +23,7 @@ function App() {
   const [sidebarView, setSidebarView] = useState('stats'); // 'stats' or 'tripList'
   const [tripList, setTripList] = useState([]);
   const [tripListTitle, setTripListTitle] = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const tripData = useTripData(rows, distanceUnit);
@@ -157,15 +160,25 @@ function App() {
 
   const actionsEnabled = rows.length > 0 && !isProcessing;
 
+  const toggleSettings = () => {
+    setIsSettingsOpen(!isSettingsOpen);
+  };
+
   return (
     <>
       {isProcessing && <Spinner />}
       <Header
-        distanceUnit={distanceUnit}
-        onDistanceUnitChange={setDistanceUnit}
         onReset={resetMap}
         actionsEnabled={actionsEnabled}
         error={error}
+        toggleSettings={toggleSettings}
+      />
+      <Settings
+        unit={distanceUnit}
+        setUnit={setDistanceUnit}
+        downloadKml={() => downloadKML(rows)}
+        isMenuOpen={isSettingsOpen}
+        toggleMenu={toggleSettings}
       />
 
       {rows.length === 0 ? (

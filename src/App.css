@@ -2,15 +2,32 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-header { padding: 16px 20px; border-bottom: 1px solid #1f2937; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+header { padding: 16px 20px; border-bottom: 1px solid #1f2937; display:flex; gap:14px; align-items:center; flex-wrap:wrap; justify-content: space-between; }
 header h1 { font-size: 18px; margin: 0 8px 0 0; }
 .hint { color: var(--muted); font-size: 12px; }
-.layout-controls { display: flex; gap: 4px; margin-left: 16px; }
-.layout-controls button { padding: 6px 8px; font-size: 16px; line-height: 1; }
+
+.settings-menu { position: relative; }
+.settings-button { padding: 6px 8px; font-size: 16px; line-height: 1; }
+.settings-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--panel);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 8px;
+  min-width: 200px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.settings-dropdown .section { margin-bottom: 12px; }
 
 .container {
   display: flex;
   flex-direction: column;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 .sidebar {
   background: var(--panel);
@@ -185,6 +202,6 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .leaflet-container a.leaflet-popup-close-button:hover { color: var(--fg); }
 .map-hero {
   width: 100%;
-  height: 30vh;
-  min-height: 250px; /* Ensure map is not too small on short screens */
+  height: 60vh;
+  min-height: 400px; /* Ensure map is not too small on short screens */
 }

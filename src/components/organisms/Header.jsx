@@ -1,6 +1,7 @@
 import React from 'react';
+import SettingsIcon from '../atoms/SettingsIcon';
 
-const Header = ({ distanceUnit, onDistanceUnitChange, onReset, actionsEnabled, error }) => {
+const Header = ({ onReset, actionsEnabled, error, toggleSettings }) => {
   return (
     <header>
       <h1 className="text-3xl font-bold underline">CSV → Map & KML</h1>
@@ -8,12 +9,7 @@ const Header = ({ distanceUnit, onDistanceUnitChange, onReset, actionsEnabled, e
         {actionsEnabled && (
           <button onClick={onReset} disabled={!actionsEnabled && !error}>Clear</button>
         )}
-      </div>
-
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span className="hint">Unit:</span>
-        <button className={distanceUnit === 'miles' ? 'primary' : ''} onClick={() => onDistanceUnitChange('miles')}>Miles</button>
-        <button className={distanceUnit === 'km' ? 'primary' : ''} onClick={() => onDistanceUnitChange('km')}>Kilometers</button>
+        <SettingsIcon onClick={toggleSettings} />
       </div>
     </header>
   );
