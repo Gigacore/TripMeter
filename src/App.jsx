@@ -45,6 +45,12 @@ function App() {
   const [shortestTrip, setShortestTrip] = useState(0);
   const [shortestTripByDist, setShortestTripByDist] = useState(0);
   const [longestTripRow, setLongestTripRow] = useState(null);
+  const [totalWaitingTime, setTotalWaitingTime] = useState(0);
+  const [avgWaitingTime, setAvgWaitingTime] = useState(0);
+  const [shortestWaitingTime, setShortestWaitingTime] = useState(0);
+  const [longestWaitingTime, setLongestWaitingTime] = useState(0);
+  const [shortestWaitingTimeRow, setShortestWaitingTimeRow] = useState(null);
+  const [longestWaitingTimeRow, setLongestWaitingTimeRow] = useState(null);
   const [fastestTripBySpeed, setFastestTripBySpeed] = useState(0);
   const [fastestTripBySpeedRow, setFastestTripBySpeedRow] = useState(null);
   const [slowestTripBySpeed, setSlowestTripBySpeed] = useState(0);
@@ -89,6 +95,52 @@ function App() {
     return distanceUnit === 'km' ? miles * KM_PER_MILE : miles;
   };
   // --- Helper Functions ---
+  const formatDuration = (totalMinutes, includeSeconds = false) => {
+    if (totalMinutes < 0) return 'N/A';
+    if (totalMinutes === 0) return '0 minutes';
+  
+    const MIN_PER_YEAR = 365.25 * 24 * 60;
+    const MIN_PER_MONTH = 30.44 * 24 * 60;
+    const MIN_PER_DAY = 24 * 60;
+    const MIN_PER_HOUR = 60;
+  
+    let remainingMinutes = totalMinutes;
+  
+    const years = Math.floor(remainingMinutes / MIN_PER_YEAR);
+    remainingMinutes %= MIN_PER_YEAR;
+    const months = Math.floor(remainingMinutes / MIN_PER_MONTH);
+    remainingMinutes %= MIN_PER_MONTH;
+    const days = Math.floor(remainingMinutes / MIN_PER_DAY);
+    remainingMinutes %= MIN_PER_DAY;
+    const hours = Math.floor(remainingMinutes / MIN_PER_HOUR);
+    remainingMinutes %= MIN_PER_HOUR;
+    const minutes = Math.floor(remainingMinutes);
+    const seconds = includeSeconds ? Math.floor((remainingMinutes - minutes) * 60) : 0;
+  
+    const parts = [
+      years > 0 && `${years}y`,
+      months > 0 && `${months}mo`,
+      days > 0 && `${days}d`,
+      hours > 0 && `${hours}h`,
+      minutes > 0 && `${minutes}min`,
+      seconds > 0 && `${seconds}s`
+    ].filter(Boolean);
+  
+    return parts.length > 0 ? parts.join(' ') : '0min';
+  };
+
+  const formatDurationWithSeconds = (totalMinutes) => {
+    if (totalMinutes < 0) return 'N/A';
+    if (totalMinutes === 0) return '0 seconds';
+
+    if (totalMinutes < 1) {
+      const seconds = Math.round(totalMinutes * 60);
+      return `${seconds}s`;
+    }
+
+    return formatDuration(totalMinutes, true);
+  }
+
   const toNumber = (x) => {
     const n = Number(x);
     return Number.isFinite(n) ? n : null;
@@ -134,6 +186,12 @@ function App() {
     setShortestTrip(0);
     setShortestTripByDist(0);
     setLongestTripRow(null);
+    setTotalWaitingTime(0);
+    setAvgWaitingTime(0);
+    setShortestWaitingTime(0);
+    setLongestWaitingTime(0);
+    setShortestWaitingTimeRow(null);
+    setLongestWaitingTimeRow(null);
     setFastestTripBySpeed(0);
     setFastestTripBySpeedRow(null);
     setSlowestTripBySpeed(0);
@@ -501,6 +559,7 @@ function App() {
       const tripsWithDuration = [];
       const tripsWithDistance = [];
       const tripsWithSpeed = [];
+      const tripsWithWaitingTime = [];
       let completedCount = 0;      
       let riderCanceledCount = 0;
       let driverCanceledCount = 0;
@@ -516,7 +575,15 @@ function App() {
           const distanceMiles = parseFloat(r.distance);
           const beginTime = new Date(r.begin_trip_time);
           const dropoffTime = new Date(r.dropoff_time);
+          const requestTime = new Date(r.request_time);
  
+          // Waiting time calculation
+          if (requestTime.getTime() && beginTime.getTime() && beginTime > requestTime) {
+            const waitingMinutes = (beginTime - requestTime) / (1000 * 60);
+            if (isFinite(waitingMinutes)) {
+              tripsWithWaitingTime.push({ waitingTime: waitingMinutes, row: r });
+            }
+          }
           if (!isNaN(distanceMiles) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
             const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
             if (durationHours > 0) {
@@ -616,6 +683,21 @@ function App() {
         setShortestTrip(shortest.duration * 60);
         setLongestTripRow(longest.row);
         setShortestTripRow(shortest.row);
+      } else {
+        setAvgTripDuration(0); setLongestTrip(0); setShortestTrip(0); setLongestTripRow(null); setShortestTripRow(null); setTotalTripDuration(0);
+      }
+
+      if (tripsWithWaitingTime.length > 0) {
+        tripsWithWaitingTime.sort((a, b) => a.waitingTime - b.waitingTime);
+        const shortest = tripsWithWaitingTime[0];
+        const longest = tripsWithWaitingTime[tripsWithWaitingTime.length - 1];
+        const totalWaitingTime = tripsWithWaitingTime.reduce((sum, trip) => sum + trip.waitingTime, 0);
+        setTotalWaitingTime(totalWaitingTime);
+        setAvgWaitingTime(totalWaitingTime / tripsWithWaitingTime.length);
+        setShortestWaitingTime(shortest.waitingTime);
+        setShortestWaitingTimeRow(shortest.row);
+        setLongestWaitingTime(longest.waitingTime);
+        setLongestWaitingTimeRow(longest.row);
       } else {
         setAvgTripDuration(0); setLongestTrip(0); setShortestTrip(0); setLongestTripRow(null); setShortestTripRow(null); setTotalTripDuration(0);
       }
@@ -791,12 +873,19 @@ function App() {
                   )}
 
                   <div className="stats-group">
-                    <h3>Duration</h3>
+                    <h3>Ride Duration</h3>
                     <div className="stats-grid">
-                      <Stat label="Total" value={totalTripDuration.toFixed(2)} unit="min" />
-                      <Stat label="Average" value={avgTripDuration.toFixed(2)} unit="min" />
-                      <Stat label="Longest" value={longestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(longestTripRow)} />
-                      <Stat label="Shortest" value={shortestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(shortestTripRow)} />
+                      <Stat label="Total" value={formatDuration(totalTripDuration, true)} />
+                      <Stat label="Average" value={formatDurationWithSeconds(avgTripDuration)} />
+                      <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => handleFocusOnTrip(longestTripRow)} />
+                      <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => handleFocusOnTrip(shortestTripRow)} />
+                    </div>
+                    <h3 style={{marginTop: '16px'}}>Waiting Time</h3>
+                    <div className="stats-grid">
+                      <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
+                      <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
+                      <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => handleFocusOnTrip(longestWaitingTimeRow)} />
+                      <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => handleFocusOnTrip(shortestWaitingTimeRow)} />
                     </div>
                   </div>
 
