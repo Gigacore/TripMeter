@@ -23,8 +23,19 @@ function App() {
   const [beginCount, setBeginCount] = useState(0);
   const [dropoffCount, setDropoffCount] = useState(0);
   const [avgSpeed, setAvgSpeed] = useState(0);
+  const [longestTrip, setLongestTrip] = useState(0);
+  const [longestTripByDist, setLongestTripByDist] = useState(0);
+  const [shortestTrip, setShortestTrip] = useState(0);
+  const [shortestTripByDist, setShortestTripByDist] = useState(0);
+  const [longestTripRow, setLongestTripRow] = useState(null);
+  const [longestTripByDistRow, setLongestTripByDistRow] = useState(null);
+  const [shortestTripRow, setShortestTripRow] = useState(null);
+  const [shortestTripByDistRow, setShortestTripByDistRow] = useState(null);
+  const [avgTripDuration, setAvgTripDuration] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [focusedTrip, setFocusedTrip] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [distanceUnit, setDistanceUnit] = useState('miles'); // 'miles' or 'km'
 
   // --- Refs for Leaflet objects and file input ---
   const mapRef = useRef(null);
@@ -33,6 +44,12 @@ function App() {
   const heatLayerRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  // --- Constants ---
+  const KM_PER_MILE = 1.60934;
+
+  const convertDistance = (miles) => {
+    return distanceUnit === 'km' ? miles * KM_PER_MILE : miles;
+  };
   // --- Helper Functions ---
   const toNumber = (x) => {
     const n = Number(x);
@@ -74,6 +91,16 @@ function App() {
     setBeginCount(0);
     setDropoffCount(0);
     setAvgSpeed(0);
+    setLongestTrip(0);
+    setLongestTripByDist(0);
+    setShortestTrip(0);
+    setShortestTripByDist(0);
+    setLongestTripRow(null);
+    setLongestTripByDistRow(null);
+    setShortestTripRow(null);
+    setShortestTripByDistRow(null);
+    setAvgTripDuration(0);
+    setFocusedTrip(null);
     clearError();
     fileInputRef.current.value = ''; // Clear file input
     if (mapRef.current) {
@@ -203,6 +230,21 @@ function App() {
       download(`trips_${which}.kml`, kml);
   };
 
+  const handleFocusOnTrip = (tripRow) => {
+    if (!tripRow || !mapRef.current) return;
+
+    const blt = toNumber(tripRow.begintrip_lat);
+    const bln = toNumber(tripRow.begintrip_lng);
+    const dlt = toNumber(tripRow.dropoff_lat);
+    const dln = toNumber(tripRow.dropoff_lng);
+
+    if (blt != null && bln != null && dlt != null && dln != null) {
+      const bounds = L.latLngBounds([[blt, bln], [dlt, dln]]);
+      mapRef.current.fitBounds(bounds.pad(0.2));
+      setFocusedTrip(tripRow);
+    }
+  };
+
   // --- Effects ---
   // Initialize map
   useEffect(() => {
@@ -228,6 +270,11 @@ function App() {
     }
   }, []); // Empty dependency array ensures this runs only once
 
+  const handleShowAll = () => {
+    setFocusedTrip(null);
+    fitToLayers();
+  };
+
   // Render markers when rows change
   useEffect(() => {
     beginLayerRef.current?.clearLayers();
@@ -236,6 +283,8 @@ function App() {
 
     let bCount = 0, dCount = 0;
     const heatPoints = [];
+
+    const tripsToRender = focusedTrip ? [focusedTrip] : rows;
 
     const createPopupContent = (pointType, data) => {
       const {
@@ -260,17 +309,25 @@ function App() {
       const lng = pointType === 'begin' ? begintrip_lng : dropoff_lng;
       const address = pointType === 'begin' ? begintrip_address : dropoff_address;
       let speedContent = '';
+      let waitingTimeContent = '';
+      
+      const tripDistanceMiles = parseFloat(distance);
+      const displayDistance = convertDistance(tripDistanceMiles);
 
       if (status === 'completed') {
-        const tripDistance = parseFloat(distance);
+        const requestTime = new Date(request_time);
         const beginTime = new Date(begin_trip_time);
+        if (beginTime.getTime() && requestTime.getTime() && beginTime > requestTime) {
+          const waitingMinutes = (beginTime - requestTime) / (1000 * 60);
+          waitingTimeContent = `<b>Waiting Time:</b> ${waitingMinutes.toFixed(2)} minutes<br>`;
+        }
         const dropoffTime = new Date(dropoff_time);
 
-        if (!isNaN(tripDistance) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
+        if (!isNaN(tripDistanceMiles) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
           const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
           if (durationHours > 0) {
-            const speed = tripDistance / durationHours;
-            speedContent = `<b>Average Speed:</b> ${speed.toFixed(2)} km/h<br>`;
+            const speed = displayDistance / durationHours;
+            speedContent = `<b>Average Speed:</b> ${speed.toFixed(2)} ${distanceUnit === 'miles' ? 'mph' : 'km/h'}<br>`;
           }
         }
       }
@@ -282,9 +339,10 @@ function App() {
         <b>Status:</b> ${status || 'N/A'}<br>
         <b>Request Time:</b> ${request_time || 'N/A'}<br>
         <b>Begin Trip Time:</b> ${begin_trip_time || 'N/A'}<br>
+        ${waitingTimeContent}
         <b>Dropoff Time:</b> ${dropoff_time || 'N/A'}<br>
         <b>Address:</b> ${address || 'N/A'}<br>
-        <b>Distance:</b> ${distance || 'N/A'}<br>
+        <b>Distance:</b> ${!isNaN(displayDistance) ? `${displayDistance.toFixed(2)} ${distanceUnit}` : 'N/A'}<br>
         ${speedContent}
         <b>Fare:</b> ${fare_amount || 'N/A'} ${fare_currency || ''}<br>
         <b>Coordinates:</b> ${lat}, ${lng}<br>
@@ -293,7 +351,7 @@ function App() {
       return content;
     };
 
-    rows.forEach((r) => {
+    tripsToRender.forEach((r) => {
       const blt = toNumber(r.begintrip_lat);
       const bln = toNumber(r.begintrip_lng);
       const dlt = toNumber(r.dropoff_lat);
@@ -316,41 +374,84 @@ function App() {
     });
 
     heatLayerRef.current.setLatLngs(heatPoints);
-    setBeginCount(bCount);
-    setDropoffCount(dCount);
-
-    if (bCount + dCount > 0) {
-        fitToLayers();
+    // Only update counts if we are showing all rows, not a focused trip
+    if (!focusedTrip) {
+      setBeginCount(bCount);
+      setDropoffCount(dCount);
     }
 
+    if (bCount + dCount > 0 && !focusedTrip) {
+        fitToLayers();
+    }
+  }, [rows, focusedTrip]); // Re-run this effect when rows or focusedTrip changes
+
+  useEffect(() => {
     if (rows.length > 0) {
       let totalDistance = 0;
-      let totalDuration = 0;
+      let totalDurationHours = 0;
+      const tripsWithDuration = [];
+      const tripsWithDistance = [];
 
       rows.forEach(r => {
         if (r.status === 'completed') {
-          const distance = parseFloat(r.distance);
+          const distanceMiles = parseFloat(r.distance);
           const beginTime = new Date(r.begin_trip_time);
           const dropoffTime = new Date(r.dropoff_time);
-
-          if (!isNaN(distance) && distance > 0 && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
+ 
+          if (!isNaN(distanceMiles) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
             const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
             if (durationHours > 0) {
-              totalDistance += distance;
-              totalDuration += durationHours;
+              if (distanceMiles > 0) {
+                totalDistance += convertDistance(distanceMiles);
+                totalDurationHours += durationHours;
+              }
+              tripsWithDuration.push({ duration: durationHours, row: r });
+            }
+            if (distanceMiles > 0) {
+              tripsWithDistance.push({ distance: convertDistance(distanceMiles), row: r });
             }
           }
         }
       });
 
-      if (totalDuration > 0) {
-        setAvgSpeed(totalDistance / totalDuration);
+      if (totalDurationHours > 0) {
+        setAvgSpeed(totalDistance / totalDurationHours);
       } else {
         setAvgSpeed(0);
       }
+
+      if (tripsWithDuration.length > 0) {
+        tripsWithDuration.sort((a, b) => a.duration - b.duration);
+
+        const shortest = tripsWithDuration[0];
+        const longest = tripsWithDuration[tripsWithDuration.length - 1];
+        const totalDurationMinutes = tripsWithDuration.reduce((sum, trip) => sum + trip.duration * 60, 0);
+
+        setAvgTripDuration(totalDurationMinutes / tripsWithDuration.length);
+        setLongestTrip(longest.duration * 60);
+        setShortestTrip(shortest.duration * 60);
+        setLongestTripRow(longest.row);
+        setShortestTripRow(shortest.row);
+      } else {
+        setAvgTripDuration(0); setLongestTrip(0); setShortestTrip(0); setLongestTripRow(null); setShortestTripRow(null);
+      }
+
+      if (tripsWithDistance.length > 0) {
+        tripsWithDistance.sort((a, b) => a.distance - b.distance);
+        const shortest = tripsWithDistance[0];
+        const longest = tripsWithDistance[tripsWithDistance.length - 1];
+
+        setShortestTripByDist(shortest.distance);
+        setShortestTripByDistRow(shortest.row);
+        setLongestTripByDist(longest.distance);
+        setLongestTripByDistRow(longest.row);
+      } else {
+        setShortestTripByDist(0); setShortestTripByDistRow(null);
+        setLongestTripByDist(0); setLongestTripByDistRow(null);
+      }
     }
 
-  }, [rows]); // Re-run this effect whenever 'rows' state changes
+  }, [rows, distanceUnit]); // Re-run this effect when rows or distanceUnit changes
 
 
   const actionsEnabled = rows.length > 0 && !isProcessing;
@@ -389,6 +490,15 @@ function App() {
             Drag & drop CSV here
           </div>
 
+          <div className="section">
+            <label>Distance Unit</label>
+            <div className="row" style={{gap: '6px'}}>
+              <button className={distanceUnit === 'miles' ? 'primary' : ''} onClick={() => setDistanceUnit('miles')}>Miles</button>
+              <button className={distanceUnit === 'km' ? 'primary' : ''} onClick={() => setDistanceUnit('km')}>Kilometers</button>
+            </div>
+          </div>
+
+
           {error && (
             <div className="section error">
               {error}
@@ -405,8 +515,28 @@ function App() {
               <div style={{fontSize: '20px', fontWeight: 700}}>{dropoffCount}</div>
             </div>
             <div className="stat">
-              <div>Avg. Speed (km/h)</div>
+              <div>Avg. Speed ({distanceUnit === 'miles' ? 'mph' : 'km/h'})</div>
               <div style={{fontSize: '20px', fontWeight: 700}}>{avgSpeed.toFixed(2)}</div>
+            </div>
+            <div className="stat">
+              <div>Avg. Duration (min)</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{avgTripDuration.toFixed(2)}</div>
+            </div>
+            <div className="stat clickable" onClick={() => handleFocusOnTrip(longestTripRow)}>
+              <div>Longest Trip (min)</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{longestTrip.toFixed(2)}</div>
+            </div>
+            <div className="stat clickable" onClick={() => handleFocusOnTrip(shortestTripRow)}>
+              <div>Shortest Trip (min)</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{shortestTrip.toFixed(2)}</div>
+            </div>
+            <div className="stat clickable" onClick={() => handleFocusOnTrip(longestTripByDistRow)}>
+              <div>Longest Trip ({distanceUnit})</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{longestTripByDist.toFixed(2)}</div>
+            </div>
+            <div className="stat clickable" onClick={() => handleFocusOnTrip(shortestTripByDistRow)}>
+              <div>Shortest Trip ({distanceUnit})</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{shortestTripByDist.toFixed(2)}</div>
             </div>
           </div>
 
@@ -420,6 +550,11 @@ function App() {
           </div>
 
           <div className="section">
+            {focusedTrip && (
+              <button onClick={handleShowAll} className="primary full-width">
+                Show All Trips
+              </button>
+            )}
             <button onClick={resetMap} disabled={!actionsEnabled && !error}>Clear Map</button>
           </div>
         </aside>
