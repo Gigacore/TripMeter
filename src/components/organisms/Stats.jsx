@@ -1,8 +1,31 @@
 import React from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
+
+const SankeyNode = ({ x, y, width, height, index, payload, onShowTripList }) => {
+  const isClickable = payload.name !== 'Total Requests';
+  const handleClick = () => {
+    if (!isClickable) return;
+    const typeMap = {
+      'Successful': 'successful',
+      'Rider Canceled': 'rider_canceled',
+      'Driver Canceled': 'driver_canceled',
+      'Unfulfilled': 'unfulfilled',
+    };
+    onShowTripList(typeMap[payload.name]);
+  };
+
+  return (
+    <Layer key={`CustomNode${index}`}>
+      <Rectangle x={x} y={y} width={width} height={height} fill="#666" fillOpacity="1" onClick={handleClick} cursor={isClickable ? 'pointer' : 'default'} />
+      <text textAnchor="middle" x={x + width / 2} y={y + height / 2} fontSize="14" fill="#fff" strokeWidth="0">
+        {payload.name} ({payload.value})
+      </text>
+    </Layer>
+  );
+};
 
 const Stats = ({
   data,
@@ -83,29 +106,26 @@ const Stats = ({
     ].filter(link => link.value > 0),
   };
 
-  // Custom node for Sankey to allow clicking
-  const SankeyNode = ({ x, y, width, height, index, payload }) => {
-    const isClickable = payload.name !== 'Total Requests';
-    const handleClick = () => {
-      if (!isClickable) return;
-      const typeMap = {
-        'Successful': 'successful',
-        'Rider Canceled': 'rider_canceled',
-        'Driver Canceled': 'driver_canceled',
-        'Unfulfilled': 'unfulfilled',
-      };
-      onShowTripList(typeMap[payload.name]);
-    };
+  const productTypeData = React.useMemo(() => {
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const counts = rows.reduce((acc, trip) => {
+      const product = trip.product_type || 'N/A';
+      acc[product] = (acc[product] || 0) + 1;
+      return acc;
+    }, {});
 
-    return (
-      <Layer key={`CustomNode${index}`}>
-        <Rectangle x={x} y={y} width={width} height={height} fill="#666" fillOpacity="1" onClick={handleClick} cursor={isClickable ? 'pointer' : 'default'} />
-        <text textAnchor="middle" x={x + width / 2} y={y + height / 2} fontSize="14" fill="#fff" strokeWidth="0">
-          {payload.name} ({payload.value})
-        </text>
-      </Layer>
-    );
-  };
+    return Object.entries(counts).map(([name, size]) => ({ name: `${name} (${size})`, size }));
+  }, [rows]);
+
+  const renderSankeyNode = React.useCallback(
+    (props) => <SankeyNode {...props} onShowTripList={onShowTripList} />,
+    [onShowTripList]
+  );
+
+  const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
+  const renderTreemapContent = React.useCallback((props) => <CustomizedContent {...props} colors={treemapColors} />, [treemapColors]);
 
   return (
     <>
@@ -113,10 +133,10 @@ const Stats = ({
         {sankeyData.links.length > 0 && (
           <div className="stats-group">
             <h3>Trip Summary</h3>
-            <ResponsiveContainer width="100%" height={700}>
+            <ResponsiveContainer width="100%" height={250}>
               <Sankey
                 data={sankeyData}
-                node={<SankeyNode />}
+                node={renderSankeyNode}
                 nodePadding={50}
                 margin={{
                 left: 200,
@@ -244,6 +264,25 @@ const Stats = ({
             ))}
           </div>
         </div>
+
+        {productTypeData.length > 0 && (
+          <div className="stats-group">
+            <h3>Product Types</h3>
+            <ResponsiveContainer width="100%" height={700}>
+              <Treemap
+                data={productTypeData}
+                dataKey="size"
+                ratio={4 / 3}
+                stroke="#fff"
+                fill="#8884d8"
+                isAnimationActive={false}
+                content={renderTreemapContent}
+              >
+                <Tooltip formatter={(value, name, props) => [props.payload.name.split(' (')[0], `Count: ${value}`]} />
+              </Treemap>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       <div className="section">
@@ -260,6 +299,25 @@ const Stats = ({
         <div className="footer">Select a new CSV file to replace the current data.</div>
       </div>
     </>
+  );
+};
+
+const CustomizedContent = ({ root, depth, x, y, width, height, index, colors, name }) => {
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        style={{
+          fill: colors[index % colors.length],
+          stroke: '#fff',
+          strokeWidth: 2 / (depth + 1e-10),
+          strokeOpacity: 1 / (depth + 1e-10),
+        }} />
+      {depth === 1 ? <text x={x + width / 2} y={y + height / 2 + 7} textAnchor="middle" fill="#fff" fontSize={14}>{name}</text> : null}
+    </g>
   );
 };
 
