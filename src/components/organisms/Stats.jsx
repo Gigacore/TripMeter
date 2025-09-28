@@ -1,4 +1,5 @@
 import React from 'react';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
@@ -55,16 +56,79 @@ const Stats = ({
     downloadKML(rows, which);
   };
 
+  const unfulfilledTrips = totalTrips - successfulTrips - riderCanceledTrips - driverCanceledTrips;
+
+  const sankeyData = {
+    nodes: [
+      { name: 'Total Requests' },
+      { name: 'Successful' },
+      { name: 'Rider Canceled' },
+      { name: 'Driver Canceled' },
+      { name: 'Unfulfilled' },
+    ],
+    links: [
+      { source: 0, target: 1, value: successfulTrips },
+      { source: 0, target: 2, value: riderCanceledTrips },
+      { source: 0, target: 3, value: driverCanceledTrips },
+      { source: 0, target: 4, value: unfulfilledTrips },
+    ].filter(link => link.value > 0),
+  };
+
+  // Custom node for Sankey to allow clicking
+  const SankeyNode = ({ x, y, width, height, index, payload }) => {
+    const isClickable = payload.name !== 'Total Requests';
+    const handleClick = () => {
+      if (!isClickable) return;
+      const typeMap = {
+        'Successful': 'successful',
+        'Rider Canceled': 'rider_canceled',
+        'Driver Canceled': 'driver_canceled',
+        'Unfulfilled': 'unfulfilled',
+      };
+      onShowTripList(typeMap[payload.name]);
+    };
+
+    return (
+      <Layer key={`CustomNode${index}`}>
+        <Rectangle x={x} y={y} width={width} height={height} fill="#666" fillOpacity="1" onClick={handleClick} cursor={isClickable ? 'pointer' : 'default'} />
+        <text textAnchor="middle" x={x + width / 2} y={y + height / 2} fontSize="14" fill="#fff" strokeWidth="0">
+          {payload.name} ({payload.value})
+        </text>
+      </Layer>
+    );
+  };
+
   return (
     <>
       <div className="section">
+        {sankeyData.links.length > 0 && (
+          <div className="stats-group">
+            <h3>Trip Summary</h3>
+            <ResponsiveContainer width="100%" height={700}>
+              <Sankey
+                data={sankeyData}
+                node={<SankeyNode />}
+                nodePadding={50}
+                margin={{
+                left: 200,
+                  right: 200,
+                  top: 100,
+                  bottom: 100
+                }}
+                link={{ stroke: '#77c878' }}
+              >
+                <Tooltip />
+              </Sankey>
+            </ResponsiveContainer>
+          </div>
+        )}
         <div className="stats-group">
-          <h3>Trip Summary</h3>
           <div className="stats-grid">
             <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
             <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
             <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
             <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />
+            {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
           </div>
         </div>
 

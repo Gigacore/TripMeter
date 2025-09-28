@@ -10,6 +10,22 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
     const dropLayerRef = useRef(null);
     const heatLayerRef = useRef(null);
 
+    const fitToLayers = () => {
+        if (mapRef.current && beginLayerRef.current && dropLayerRef.current) {
+            const group = L.featureGroup([beginLayerRef.current, dropLayerRef.current]);
+            if (group.getLayers().length > 0) {
+                try {
+                    const b = group.getBounds();
+                    if (b.isValid()) {
+                        mapRef.current.fitBounds(b.pad(0.1));
+                    }
+                } catch (e) {
+                    console.error("Could not fit bounds", e);
+                }
+            }
+        }
+    };
+
     useEffect(() => {
         if (rows.length > 0 && !mapRef.current) {
             const map = L.map('map');
@@ -18,8 +34,8 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
             }).addTo(map);
 
             mapRef.current = map;
-            beginLayerRef.current = L.layerGroup().addTo(map);
-            dropLayerRef.current = L.layerGroup().addTo(map);
+            beginLayerRef.current = L.featureGroup().addTo(map);
+            dropLayerRef.current = L.featureGroup().addTo(map);
             heatLayerRef.current = L.heatLayer([], { radius: 25 }).addTo(map);
 
             L.control.layers(null, {
@@ -28,7 +44,6 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
                 'Heatmap': heatLayerRef.current
             }).addTo(map);
 
-            map.setView([20, 0], 2);
         }
     }, [rows]);
 
@@ -40,20 +55,6 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
             return () => clearTimeout(timer);
         }
     }, [layout]);
-
-    const fitToLayers = () => {
-        if (beginLayerRef.current && dropLayerRef.current) {
-            const group = L.featureGroup([beginLayerRef.current, dropLayerRef.current]);
-            try {
-                const b = group.getBounds();
-                if (b.isValid()) {
-                    mapRef.current.fitBounds(b.pad(0.1));
-                }
-            } catch {
-                // no layers
-            }
-        }
-    };
 
     useEffect(() => {
         if (!mapRef.current) return;
