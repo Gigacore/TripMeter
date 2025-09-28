@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
@@ -124,6 +124,129 @@ const Stats = ({
     [onShowTripList]
   );
 
+  const fareDistributionData = React.useMemo(() => {
+    if (!rows || rows.length === 0 || !activeCurrency) return [];
+    const fares = rows
+      .filter(r => r.fare_currency === activeCurrency && r.fare_amount && parseFloat(r.fare_amount) > 0)
+      .map(r => parseFloat(r.fare_amount));
+    if (fares.length === 0) return [];
+
+    const maxFare = Math.max(...fares);
+    const bucketCount = 10;
+    const bucketSize = Math.ceil(maxFare / bucketCount);
+    if (bucketSize === 0) return [];
+
+    const buckets = Array.from({ length: bucketCount }, () => 0);
+    fares.forEach(fare => {
+      const bucketIndex = Math.min(Math.floor(fare / bucketSize), bucketCount - 1);
+      buckets[bucketIndex]++;
+    });
+
+    return buckets.map((count, i) => ({
+      name: `${i * bucketSize}-${(i + 1) * bucketSize}`,
+      count,
+    }));
+  }, [rows, activeCurrency]);
+
+  const durationDistributionData = React.useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+    const durations = rows
+      .filter(r => r.status?.toLowerCase() === 'completed' && r.begin_trip_time && r.dropoff_time)
+      .map(r => (new Date(r.dropoff_time) - new Date(r.begin_trip_time)) / (1000 * 60)) // in minutes
+      .filter(d => d > 0);
+    if (durations.length === 0) return [];
+
+    const maxDuration = Math.max(...durations);
+    const bucketCount = 10;
+    const bucketSize = Math.ceil(maxDuration / bucketCount) || 1;
+
+    const buckets = Array.from({ length: bucketCount }, () => 0);
+    durations.forEach(duration => {
+      const bucketIndex = Math.min(Math.floor(duration / bucketSize), bucketCount - 1);
+      buckets[bucketIndex]++;
+    });
+
+    return buckets.map((count, i) => ({
+      name: `${i * bucketSize}-${(i + 1) * bucketSize} min`,
+      count,
+    }));
+  }, [rows]);
+
+  const waitingTimeDistributionData = React.useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+    const waitingTimes = rows
+      .filter(r => r.status?.toLowerCase() === 'completed' && r.request_time && r.begin_trip_time)
+      .map(r => (new Date(r.begin_trip_time) - new Date(r.request_time)) / (1000 * 60)) // in minutes
+      .filter(d => d > 0);
+    if (waitingTimes.length === 0) return [];
+
+    const maxWaitingTime = Math.max(...waitingTimes);
+    const bucketCount = 10;
+    const bucketSize = Math.ceil(maxWaitingTime / bucketCount) || 1;
+
+    const buckets = Array.from({ length: bucketCount }, () => 0);
+    waitingTimes.forEach(waitingTime => {
+      const bucketIndex = Math.min(Math.floor(waitingTime / bucketSize), bucketCount - 1);
+      buckets[bucketIndex]++;
+    });
+
+    return buckets.map((count, i) => ({
+      name: `${i * bucketSize}-${(i + 1) * bucketSize} min`,
+      count,
+    }));
+  }, [rows]);
+
+  const distanceDistributionData = React.useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+    const distances = rows
+      .filter(r => r.status?.toLowerCase() === 'completed' && r.distance && parseFloat(r.distance) > 0)
+      .map(r => parseFloat(r.distance));
+    if (distances.length === 0) return [];
+
+    const maxDistance = Math.max(...distances);
+    const bucketCount = 10;
+    const bucketSize = Math.ceil(maxDistance / bucketCount) || 1;
+
+    const buckets = Array.from({ length: bucketCount }, () => 0);
+    distances.forEach(distance => {
+      const bucketIndex = Math.min(Math.floor(distance / bucketSize), bucketCount - 1);
+      buckets[bucketIndex]++;
+    });
+
+    return buckets.map((count, i) => ({
+      name: `${(i * bucketSize).toFixed(1)}-${((i + 1) * bucketSize).toFixed(1)} ${distanceUnit}`,
+      count,
+    }));
+  }, [rows, distanceUnit]);
+
+  const speedDistributionData = React.useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+    const speeds = rows
+      .filter(r => r.status?.toLowerCase() === 'completed' && r.distance && parseFloat(r.distance) > 0 && r.begin_trip_time && r.dropoff_time)
+      .map(r => {
+        const durationHours = (new Date(r.dropoff_time) - new Date(r.begin_trip_time)) / (1000 * 60 * 60);
+        if (durationHours <= 0) return null;
+        return parseFloat(r.distance) / durationHours;
+      })
+      .filter(speed => speed !== null && speed > 0);
+    if (speeds.length === 0) return [];
+
+    const maxSpeed = Math.max(...speeds);
+    const bucketCount = 10;
+    const bucketSize = Math.ceil(maxSpeed / bucketCount) || 1;
+
+    const buckets = Array.from({ length: bucketCount }, () => 0);
+    speeds.forEach(speed => {
+      const bucketIndex = Math.min(Math.floor(speed / bucketSize), bucketCount - 1);
+      buckets[bucketIndex]++;
+    });
+
+    return buckets.map((count, i) => ({
+      name: `${i * bucketSize}-${(i + 1) * bucketSize}`,
+      count,
+    }));
+  }, [rows]);
+
   const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
   const renderTreemapContent = React.useCallback((props) => <CustomizedContent {...props} colors={treemapColors} />, [treemapColors]);
 
@@ -165,51 +288,72 @@ const Stats = ({
           <div className="stats-group">
             <h3>Fare</h3>
             <div style={{ display: 'flex', gap: '16px' }}>
-              {currencies.length > 1 && (
-                <div className="tabs vertical-tabs" style={{ flex: '0 0 20%' }}>
-                  {currencies.map(currency => (
+              {/* Redesigned vertical tab UI for Fare section */}
+              <div style={{ display: 'flex', width: '100%', minHeight: 220 }}>
+                <div style={{ width: 180, borderRight: '1px solid #ddd', display: 'flex', flexDirection: 'column' }}>
+                  {currencies.map((currency, idx) => (
                     <button
                       key={currency}
-                      className={`tab-button ${activeCurrency === currency ? 'active' : ''}`}
                       onClick={() => setActiveCurrency(currency)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10, padding: '18px 12px', border: 'none', outline: 'none', background: activeCurrency === currency ? '#fff' : 'transparent', fontWeight: activeCurrency === currency ? 600 : 400, cursor: 'pointer', borderBottom: idx !== currencies.length - 1 ? '1px solid #eee' : 'none', position: 'relative', minHeight: 72
+                      }}
                     >
-                      {currency} - Total: {totalFareByCurrency[currency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span style={{ width: 32, height: 32, background: '#f0f0f0', borderRadius: 6, display: 'inline-block', marginRight: 8 }} />
+                      <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
+                        <span style={{ fontSize: 16, fontWeight: 500, marginBottom: 2 }}>{currency}</span>
+                        <span style={{ fontSize: 13, fontWeight: 400 }}>Total: {totalFareByCurrency[currency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </span>
+                      {activeCurrency === currency && <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: '#bbb', borderRadius: '12px 0 0 12px' }} />}
                     </button>
                   ))}
                 </div>
-              )}
-              {activeCurrency && (
-                <div className="stats-grid" style={{ flex: '1 1 80%' }}>
-                  {currencies.length === 1 && (
+                <div style={{ flex: 1, padding: '32px 24px', display: 'flex', alignItems: 'flex-start', flexDirection: 'column', gap: 24 }}>
+                  <div style={{ width: '100%' }}>
+                    {currencies.length === 1 && (
+                      <Stat
+                        label="Total Fare"
+                        unit={activeCurrency}
+                        value={totalFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      />
+                    )}
                     <Stat
-                    label="Total Fare"
-                    unit={activeCurrency}
-                    value={totalFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  />
-                  )}
-                  <Stat
-                    label="Avg. Fare"
-                    unit={activeCurrency}
-                    value={avgFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  />
-                  {lowestFareByCurrency[activeCurrency] && (
-                    <Stat
-                      label="Lowest Fare"
+                      label="Avg. Fare"
                       unit={activeCurrency}
-                      value={lowestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      onClick={() => onFocusOnTrip(lowestFareByCurrency[activeCurrency].row)}
+                      value={avgFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     />
-                  )}
-                  {highestFareByCurrency[activeCurrency] && (
-                    <Stat
-                      label="Highest Fare"
-                      unit={activeCurrency}
-                      value={highestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      onClick={() => onFocusOnTrip(highestFareByCurrency[activeCurrency].row)}
-                    />
-                  )}
+                    {lowestFareByCurrency[activeCurrency] && (
+                      <Stat
+                        label="Lowest Fare"
+                        unit={activeCurrency}
+                        value={lowestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        onClick={() => onFocusOnTrip(lowestFareByCurrency[activeCurrency].row)}
+                      />
+                    )}
+                    {highestFareByCurrency[activeCurrency] && (
+                      <Stat
+                        label="Highest Fare"
+                        unit={activeCurrency}
+                        value={highestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        onClick={() => onFocusOnTrip(highestFareByCurrency[activeCurrency].row)}
+                      />
+                    )}
+                  </div>
+                  <div style={{ width: '100%' }}>
+                    {fareDistributionData.length > 0 && (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={fareDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#8884d8" name="Number of Trips" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}
@@ -222,6 +366,19 @@ const Stats = ({
             <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => onFocusOnTrip(longestTripRow)} />
             <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => onFocusOnTrip(shortestTripRow)} />
           </div>
+          {durationDistributionData.length > 0 && (
+            <div style={{ marginTop: '16px' }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={durationDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#82ca9d" name="Number of Trips" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
           <h3 style={{ marginTop: '16px' }}>Waiting Time</h3>
           <div className="stats-grid">
             <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
@@ -229,6 +386,19 @@ const Stats = ({
             <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => onFocusOnTrip(longestWaitingTimeRow)} />
             <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => onFocusOnTrip(shortestWaitingTimeRow)} />
           </div>
+          {waitingTimeDistributionData.length > 0 && (
+            <div style={{ marginTop: '16px' }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={waitingTimeDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#ffc658" name="Number of Trips" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
         <div className="stats-group">
@@ -246,6 +416,19 @@ const Stats = ({
               />
             ))}
           </div>
+          {distanceDistributionData.length > 0 && (
+            <div style={{ marginTop: '16px' }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={distanceDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#ff8042" name="Number of Trips" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
         <div className="stats-group">
@@ -254,14 +437,25 @@ const Stats = ({
             <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
             <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => onFocusOnTrip(fastestTripBySpeedRow)} />
             <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => onFocusOnTrip(slowestTripBySpeedRow)} />
-            {Object.entries(costPerDurationByCurrency).map(([currency, amount]) => (
+            {Object.entries(costPerDurationByCurrency).map(([currency, amount]) =>
               <Stat
                 key={currency}
                 label="Cost"
                 unit={currency}
                 value={amount.toFixed(2)}
               />
-            ))}
+            )}
+            <div style={{ marginTop: '16px' }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={speedDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#8dd1e1" name="Number of Trips" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
