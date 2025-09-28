@@ -146,7 +146,7 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
     }, [rows, focusedTrip, convertDistance, distanceUnit]);
 
     return (
-        <div className="map-container" style={layout === 'split' ? { flex: '1 1 30%' } : {}}>
+        <div className="map-container map-hero">
             <main id="map"></main>
         </div>
     );

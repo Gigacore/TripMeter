@@ -18,7 +18,6 @@ function App() {
   const [focusedTrip, setFocusedTrip] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState('miles'); // 'miles' or 'km'
-  const [layout, setLayout] = useState('split'); // 'split', 'map', 'sidebar'
   const [sidebarView, setSidebarView] = useState('stats'); // 'stats' or 'tripList'
   const [tripList, setTripList] = useState([]);
   const [tripListTitle, setTripListTitle] = useState('');
@@ -143,11 +142,12 @@ function App() {
         list = rows.filter(r => r.status?.toLowerCase() === 'driver_canceled');
         title = `Driver Canceled Trips (${list.length})`;
         break;
-      case 'unfulfilled':
+      case 'unfulfilled': {
         const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
         list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase()));
         title = `Unfulfilled Trips (${list.length})`;
         break;
+      }
       default: return;
     }
     setTripList(list);
@@ -161,8 +161,6 @@ function App() {
     <>
       {isProcessing && <Spinner />}
       <Header
-        layout={layout}
-        onLayoutChange={setLayout}
         distanceUnit={distanceUnit}
         onDistanceUnitChange={setDistanceUnit}
         onReset={resetMap}
@@ -180,9 +178,14 @@ function App() {
           onDrop={handleDrop}
         />
       ) : (
-        <div className={`container layout-${layout}`}>
+        <div className="container">
+          <Map
+            rows={rows}
+            focusedTrip={focusedTrip}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+          />
           <Sidebar
-            layout={layout}
             focusedTrip={focusedTrip}
             onShowAll={handleShowAll}
             convertDistance={convertDistance}
@@ -198,13 +201,6 @@ function App() {
             tripList={tripList}
             tripListTitle={tripListTitle}
             onBackToStats={() => setSidebarView('stats')}
-          />
-          <Map
-            rows={rows}
-            focusedTrip={focusedTrip}
-            layout={layout}
-            distanceUnit={distanceUnit}
-            convertDistance={convertDistance}
           />
         </div>
       )}
