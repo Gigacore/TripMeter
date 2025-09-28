@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
+import 'leaflet.heat';
 import Papa from 'papaparse';
 import './App.css';
 
@@ -15,13 +16,13 @@ const redIcon = L.icon({
   iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28]
 });
 
-
 function App() {
   // --- State ---
   const [rows, setRows] = useState([]);
   const [error, setError] = useState('');
   const [beginCount, setBeginCount] = useState(0);
   const [dropoffCount, setDropoffCount] = useState(0);
+  const [avgSpeed, setAvgSpeed] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -29,6 +30,7 @@ function App() {
   const mapRef = useRef(null);
   const beginLayerRef = useRef(null);
   const dropLayerRef = useRef(null);
+  const heatLayerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // --- Helper Functions ---
@@ -58,7 +60,7 @@ function App() {
         if (b.isValid()) {
           mapRef.current.fitBounds(b.pad(0.1));
         }
-      } catch (e) {
+      } catch {
         // This can happen if there are no layers, which is fine.
       }
     }
@@ -67,9 +69,11 @@ function App() {
   const resetMap = () => {
     beginLayerRef.current?.clearLayers();
     dropLayerRef.current?.clearLayers();
+    heatLayerRef.current?.setLatLngs([]);
     setRows([]);
     setBeginCount(0);
     setDropoffCount(0);
+    setAvgSpeed(0);
     clearError();
     fileInputRef.current.value = ''; // Clear file input
     if (mapRef.current) {
@@ -158,12 +162,7 @@ function App() {
             out[k.trim().toLowerCase()] = obj[k];
           }
         }
-        return {
-          begintrip_lat: out['begintrip_lat'],
-          begintrip_lng: out['begintrip_lng'],
-          dropoff_lat:   out['dropoff_lat'],
-          dropoff_lng:   out['dropoff_lng']
-        };
+        return out;
       });
 
       setRows(normalizedRows);
@@ -216,10 +215,13 @@ function App() {
       mapRef.current = map;
       beginLayerRef.current = L.layerGroup().addTo(map);
       dropLayerRef.current = L.layerGroup().addTo(map);
+      heatLayerRef.current = L.heatLayer([], { radius: 25 }).addTo(map);
+
 
       L.control.layers(null, {
         'Begintrip (green)': beginLayerRef.current,
-        'Dropoff (red)': dropLayerRef.current
+        'Dropoff (red)': dropLayerRef.current,
+        'Heatmap': heatLayerRef.current
       }).addTo(map);
 
       map.setView([20, 0], 2);
@@ -230,10 +232,68 @@ function App() {
   useEffect(() => {
     beginLayerRef.current?.clearLayers();
     dropLayerRef.current?.clearLayers();
+    heatLayerRef.current?.setLatLngs([]);
 
     let bCount = 0, dCount = 0;
+    const heatPoints = [];
 
-    rows.forEach((r, idx) => {
+    const createPopupContent = (pointType, data) => {
+      const {
+        city,
+        product_type,
+        status,
+        request_time,
+        begin_trip_time,
+        begintrip_address,
+        dropoff_time,
+        dropoff_address,
+        distance,
+        fare_amount,
+        fare_currency,
+        begintrip_lat,
+        begintrip_lng,
+        dropoff_lat,
+        dropoff_lng
+      } = data;
+
+      const lat = pointType === 'begin' ? begintrip_lat : dropoff_lat;
+      const lng = pointType === 'begin' ? begintrip_lng : dropoff_lng;
+      const address = pointType === 'begin' ? begintrip_address : dropoff_address;
+      let speedContent = '';
+
+      if (status === 'completed') {
+        const tripDistance = parseFloat(distance);
+        const beginTime = new Date(begin_trip_time);
+        const dropoffTime = new Date(dropoff_time);
+
+        if (!isNaN(tripDistance) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
+          const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
+          if (durationHours > 0) {
+            const speed = tripDistance / durationHours;
+            speedContent = `<b>Average Speed:</b> ${speed.toFixed(2)} km/h<br>`;
+          }
+        }
+      }
+
+      let content = `
+        <b>${pointType === 'begin' ? 'Begin Trip' : 'Dropoff'} Details</b><br>
+        <b>City:</b> ${city || 'N/A'}<br>
+        <b>Product Type:</b> ${product_type || 'N/A'}<br>
+        <b>Status:</b> ${status || 'N/A'}<br>
+        <b>Request Time:</b> ${request_time || 'N/A'}<br>
+        <b>Begin Trip Time:</b> ${begin_trip_time || 'N/A'}<br>
+        <b>Dropoff Time:</b> ${dropoff_time || 'N/A'}<br>
+        <b>Address:</b> ${address || 'N/A'}<br>
+        <b>Distance:</b> ${distance || 'N/A'}<br>
+        ${speedContent}
+        <b>Fare:</b> ${fare_amount || 'N/A'} ${fare_currency || ''}<br>
+        <b>Coordinates:</b> ${lat}, ${lng}<br>
+      `;
+
+      return content;
+    };
+
+    rows.forEach((r) => {
       const blt = toNumber(r.begintrip_lat);
       const bln = toNumber(r.begintrip_lng);
       const dlt = toNumber(r.dropoff_lat);
@@ -241,23 +301,53 @@ function App() {
 
       if (blt != null && bln != null) {
         bCount++;
-        const m = L.marker([blt, bln], { icon: greenIcon })
-          .bindPopup(`<b>Begintrip</b><br/>Row: ${idx + 1}<br/>Lat: ${blt}<br/>Lng: ${bln}`);
+        heatPoints.push([blt, bln]);
+        const m = L.marker([blt, bln], { icon: greenIcon });
+        m.bindPopup(createPopupContent('begin', r));
         beginLayerRef.current.addLayer(m);
       }
       if (dlt != null && dln != null) {
         dCount++;
-        const m = L.marker([dlt, dln], { icon: redIcon })
-          .bindPopup(`<b>Dropoff</b><br/>Row: ${idx + 1}<br/>Lat: ${dlt}<br/>Lng: ${dln}`);
+        heatPoints.push([dlt, dln]);
+        const m = L.marker([dlt, dln], { icon: redIcon });
+        m.bindPopup(createPopupContent('drop', r));
         dropLayerRef.current.addLayer(m);
       }
     });
 
+    heatLayerRef.current.setLatLngs(heatPoints);
     setBeginCount(bCount);
     setDropoffCount(dCount);
 
     if (bCount + dCount > 0) {
         fitToLayers();
+    }
+
+    if (rows.length > 0) {
+      let totalDistance = 0;
+      let totalDuration = 0;
+
+      rows.forEach(r => {
+        if (r.status === 'completed') {
+          const distance = parseFloat(r.distance);
+          const beginTime = new Date(r.begin_trip_time);
+          const dropoffTime = new Date(r.dropoff_time);
+
+          if (!isNaN(distance) && distance > 0 && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
+            const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
+            if (durationHours > 0) {
+              totalDistance += distance;
+              totalDuration += durationHours;
+            }
+          }
+        }
+      });
+
+      if (totalDuration > 0) {
+        setAvgSpeed(totalDistance / totalDuration);
+      } else {
+        setAvgSpeed(0);
+      }
     }
 
   }, [rows]); // Re-run this effect whenever 'rows' state changes
@@ -313,6 +403,10 @@ function App() {
             <div className="stat">
               <div>Dropoff points</div>
               <div style={{fontSize: '20px', fontWeight: 700}}>{dropoffCount}</div>
+            </div>
+            <div className="stat">
+              <div>Avg. Speed (km/h)</div>
+              <div style={{fontSize: '20px', fontWeight: 700}}>{avgSpeed.toFixed(2)}</div>
             </div>
           </div>
 
