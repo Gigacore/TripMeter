@@ -268,7 +268,7 @@ function App() {
   return (
     <>
       <header>
-        <h1>CSV → Map & KML</h1>
+        <h1 className="text-3xl font-bold underline">CSV → Map & KML</h1>
         <span className="pill"><span className="dot green"></span> begintrip pins</span>
         <span className="pill"><span className="dot red"></span> dropoff pins</span>
         <span className="hint">Expected headers: <code>begintrip_lat</code>, <code>begintrip_lng</code>, <code>dropoff_lat</code>, <code>dropoff_lng</code></span>
@@ -330,7 +330,9 @@ function App() {
           </div>
         </aside>
 
-        <main id="map"></main>
+        <div className="map-container">
+          <main id="map"></main>
+        </div>
       </div>
     </>
   );
