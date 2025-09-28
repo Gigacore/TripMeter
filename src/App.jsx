@@ -63,6 +63,8 @@ function App() {
   const [totalFareByCurrency, setTotalFareByCurrency] = useState({});
   const [sidebarView, setSidebarView] = useState('stats'); // 'stats' or 'tripList'
   const [tripList, setTripList] = useState([]);
+  const [costPerDistanceByCurrency, setCostPerDistanceByCurrency] = useState({});
+  const [costPerDurationByCurrency, setCostPerDurationByCurrency] = useState({});
   const [tripListTitle, setTripListTitle] = useState('');
   const mapRef = useRef(null);
   const beginLayerRef = useRef(null);
@@ -142,6 +144,8 @@ function App() {
     setLowestFareByCurrency({});
     setHighestFareByCurrency({});
     setTotalFareByCurrency({});
+    setCostPerDistanceByCurrency({});
+    setCostPerDurationByCurrency({});
     setSidebarView('stats');
     clearError();
     fileInputRef.current.value = ''; // Clear file input
@@ -564,6 +568,22 @@ function App() {
       setLowestFareByCurrency(localLowestFare);
       setHighestFareByCurrency(localHighestFare);
       setAvgFareByCurrency(avgFares);
+
+      const localCostPerDistance = {};
+      const localCostPerDuration = {};
+
+      for (const currency in fareByCurrency) {
+        if (currentTotalDistance > 0) {
+          localCostPerDistance[currency] = fareByCurrency[currency] / currentTotalDistance;
+        }
+        if (totalDurationMinutes > 0) {
+          localCostPerDuration[currency] = fareByCurrency[currency] / totalDurationMinutes;
+        }
+      }
+
+      setCostPerDistanceByCurrency(localCostPerDistance);
+      setCostPerDurationByCurrency(localCostPerDuration);
+
       setTotalCompletedDistance(currentTotalDistance);
       if (totalDurationHours > 0) {
         setAvgSpeed(currentTotalDistance / totalDurationHours);
@@ -747,6 +767,14 @@ function App() {
                     <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
                     <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(longestTripByDistRow)} />
                     <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(shortestTripByDistRow)} />
+                    {Object.entries(costPerDistanceByCurrency).map(([currency, amount]) => (
+                      <Stat
+                        key={currency}
+                        label={`Cost per ${distanceUnit}`}
+                        unit={currency}
+                        value={amount.toFixed(2)}
+                      />
+                    ))}
                   </div>
                 </div>
 
@@ -756,6 +784,14 @@ function App() {
                     <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
                     <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(fastestTripBySpeedRow)} />
                     <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(slowestTripBySpeedRow)} />
+                    {Object.entries(costPerDurationByCurrency).map(([currency, amount]) => (
+                      <Stat
+                        key={currency}
+                        label="Cost per minute"
+                        unit={currency}
+                        value={amount.toFixed(2)}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
