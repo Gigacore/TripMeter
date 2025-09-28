@@ -133,7 +133,7 @@ const Stats = ({
         {sankeyData.links.length > 0 && (
           <div className="stats-group">
             <h3>Trip Summary</h3>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={700}>
               <Sankey
                 data={sankeyData}
                 node={renderSankeyNode}
