@@ -332,7 +332,7 @@ function App() {
   // --- Effects ---
   // Initialize map
   useEffect(() => {
-    if (!mapRef.current) {
+    if (rows.length > 0 && !mapRef.current) {
       const map = L.map('map');
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -352,7 +352,7 @@ function App() {
 
       map.setView([20, 0], 2);
     }
-  }, []); // Empty dependency array ensures this runs only once
+  }, [rows]);
 
   // Invalidate map size when layout changes
   useEffect(() => {
@@ -371,6 +371,8 @@ function App() {
 
   // Render markers when rows change
   useEffect(() => {
+    if (!mapRef.current) return;
+
     beginLayerRef.current?.clearLayers();
     dropLayerRef.current?.clearLayers();
     heatLayerRef.current?.setLatLngs([]);
@@ -646,13 +648,16 @@ function App() {
     <>
       <header>
         <h1 className="text-3xl font-bold underline">CSV → Map & KML</h1>
-        <span className="pill"><span className="dot green"></span> begintrip pins</span>
-        <span className="pill"><span className="dot red"></span> dropoff pins</span>
-        <span className="hint">Expected headers: <code>begintrip_lat</code>, <code>begintrip_lng</code>, <code>dropoff_lat</code>, <code>dropoff_lng</code></span>
         <div className="layout-controls">
           <button onClick={() => setLayout('sidebar')} className={layout === 'sidebar' ? 'primary' : ''} title="Stats View">📊</button>
           <button onClick={() => setLayout('split')} className={layout === 'split' ? 'primary' : ''} title="Split View">🌗</button>
           <button onClick={() => setLayout('map')} className={layout === 'map' ? 'primary' : ''} title="Map View">🗺️</button>
+        </div>
+
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {rows.length > 0 && (
+            <button onClick={resetMap} disabled={!actionsEnabled && !error}>Clear</button>
+          )}
         </div>
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -662,187 +667,198 @@ function App() {
         </div>
       </header>
 
-      <div className={`container layout-${layout}`}>
-        <aside className="sidebar">
-          {sidebarView === 'stats' && (
-            <>
-              <div
-                className={`section dropzone ${isDragging ? 'drag' : ''}`}
-                onClick={() => fileInputRef.current?.click()}
-                onDrop={handleDrop}
-                onDragEnter={handleDragEvents}
-                onDragOver={handleDragEvents}
-                onDragLeave={handleDragEvents}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <p>Drag & drop CSV here, or click to select file</p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileSelect}
-                  disabled={isProcessing}
-                  className="visually-hidden"
-                />
-              </div>
-
-              {error && (
-                <div className="section error">
-                  {error}
-                </div>
-              )}
-
-              <div className="section">
-                <div className="stats-group">
-                  <h3>Trip Summary</h3>
-                  <div className="stats-grid">
-                    <Stat label="Total Requests" value={totalTrips} onClick={() => handleShowTripList('all')} />
-                    <Stat label="Successful" value={successfulTrips} onClick={() => handleShowTripList('successful')} />
-                    <Stat label="Total Canceled" value={`${riderCanceledTrips + driverCanceledTrips} (${totalTrips > 0 ? ((riderCanceledTrips + driverCanceledTrips) / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('canceled')} />
-                    <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => handleShowTripList('unfulfilled')} />
-                    <Stat label="Rider Canceled" value={`${riderCanceledTrips} (${totalTrips > 0 ? (riderCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('rider_canceled')} />
-                    <Stat label="Driver Canceled" value={`${driverCanceledTrips} (${totalTrips > 0 ? (driverCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('driver_canceled')} />
-                  </div>
-                </div>
-
-                {Object.keys(totalFareByCurrency).length > 0 && (
-                  <div className="stats-group">
-                    <h3>Fare</h3>
-                    <div className="stats-grid">
-                      {Object.entries(totalFareByCurrency).map(([currency, amount]) => (
-                        <Stat
-                          key={currency}
-                          label="Total Fare"
-                          unit={currency}
-                          value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        />
-                      ))}
-                      {Object.entries(avgFareByCurrency).map(([currency, amount]) => (
-                        <Stat
-                          key={currency}
-                          label="Avg. Fare"
-                          unit={currency}
-                          value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        />
-                      ))}
-                      {Object.entries(lowestFareByCurrency).map(([currency, data]) => (
-                        <Stat
-                          key={`${currency}-lowest`}
-                          label="Lowest Fare"
-                          unit={currency}
-                          value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          onClick={() => handleFocusOnTrip(data.row)}
-                        />
-                      ))}
-                      {Object.entries(highestFareByCurrency).map(([currency, data]) => (
-                        <Stat
-                          key={`${currency}-highest`}
-                          label="Highest Fare"
-                          unit={currency}
-                          value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          onClick={() => handleFocusOnTrip(data.row)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="stats-group">
-                  <h3>Duration</h3>
-                  <div className="stats-grid">
-                    <Stat label="Total" value={totalTripDuration.toFixed(2)} unit="min" />
-                    <Stat label="Average" value={avgTripDuration.toFixed(2)} unit="min" />
-                    <Stat label="Longest" value={longestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(longestTripRow)} />
-                    <Stat label="Shortest" value={shortestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(shortestTripRow)} />
-                  </div>
-                </div>
-
-                <div className="stats-group">
-                  <h3>Distance</h3>
-                  <div className="stats-grid">
-                    <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-                    <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(longestTripByDistRow)} />
-                    <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(shortestTripByDistRow)} />
-                    {Object.entries(costPerDistanceByCurrency).map(([currency, amount]) => (
-                      <Stat
-                        key={currency}
-                        label={`Cost per ${distanceUnit}`}
-                        unit={currency}
-                        value={amount.toFixed(2)}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="stats-group">
-                  <h3>Speed</h3>
-                  <div className="stats-grid">
-                    <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
-                    <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(fastestTripBySpeedRow)} />
-                    <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(slowestTripBySpeedRow)} />
-                    {Object.entries(costPerDurationByCurrency).map(([currency, amount]) => (
-                      <Stat
-                        key={currency}
-                        label="Cost per minute"
-                        unit={currency}
-                        value={amount.toFixed(2)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="section">
-                <div className="row" style={{gap: '6px'}}>
-                  <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
-                  <button onClick={() => handleDownloadKML('begin')} disabled={!actionsEnabled}>Begintrip KML</button>
-                  <button onClick={() => handleDownloadKML('drop')} disabled={!actionsEnabled}>Dropoff KML</button>
-                </div>
-                <div className="footer">KML uses colored icons (green/red). Works in Google Earth / Maps.</div>
-              </div>
-
-              <div className="section">
-                {focusedTrip && (
-                  <button onClick={handleShowAll} className="primary full-width">
-                    Show All Trips
-                  </button>
-                )}
-                <button onClick={resetMap} disabled={!actionsEnabled && !error}>Clear Map</button>
-              </div>
-            </>
-          )}
-          {sidebarView === 'tripList' && (
-            <div className="section">
-              <div className="trip-list-header">
-                <button onClick={() => setSidebarView('stats')}>← Back</button>
-                <h3>{tripListTitle}</h3>
-              </div>
-              <ul className="trip-list">
-                {tripList.map((trip, index) => (
-                  <li key={index} onClick={() => handleFocusOnTrip(trip)}>
-                    <div className="trip-list-item-header">
-                      <strong>Trip #{index + 1}</strong>
-                      <span className={`status-pill ${trip.status?.toLowerCase()}`}>{trip.status || 'N/A'}</span>
-                    </div>
-                    <div className="trip-list-item-body">
-                      From: {trip.begintrip_address || 'N/A'}<br/>
-                      To: {trip.dropoff_address || 'N/A'}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+      {rows.length === 0 ? (
+        <div className="initial-view">
+          <div
+            className={`section dropzone ${isDragging ? 'drag' : ''}`}
+            onClick={() => fileInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragEnter={handleDragEvents}
+            onDragOver={handleDragEvents}
+            onDragLeave={handleDragEvents}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p>Drag & drop CSV here, or click to select file</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileSelect}
+              disabled={isProcessing}
+              className="visually-hidden"
+            />
+          </div>
+          {error && (
+            <div className="section error" style={{marginTop: '20px', width: '100%', maxWidth: '600px'}}>
+              {error}
             </div>
           )}
-        </aside>
-
-        <div className="map-container">
-          <main id="map"></main>
         </div>
-      </div>
+      ) : (
+        <div className={`container layout-${layout}`}>
+          <aside
+            className="sidebar"
+            style={layout === 'split' ? { flex: '0 0 70%' } : {}}
+          >
+            {sidebarView === 'stats' && (
+              <>
+                {error && (
+                  <div className="section error">
+                    {error}
+                  </div>
+                )}
+
+                <div className="section">
+                  <div className="stats-group">
+                    <h3>Trip Summary</h3>
+                    <div className="stats-grid">
+                      <Stat label="Total Requests" value={totalTrips} onClick={() => handleShowTripList('all')} />
+                      <Stat label="Successful" value={successfulTrips} onClick={() => handleShowTripList('successful')} />
+                      <Stat label="Total Canceled" value={`${riderCanceledTrips + driverCanceledTrips} (${totalTrips > 0 ? ((riderCanceledTrips + driverCanceledTrips) / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('canceled')} />
+                      <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => handleShowTripList('unfulfilled')} />
+                      <Stat label="Rider Canceled" value={`${riderCanceledTrips} (${totalTrips > 0 ? (riderCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('rider_canceled')} />
+                      <Stat label="Driver Canceled" value={`${driverCanceledTrips} (${totalTrips > 0 ? (driverCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('driver_canceled')} />
+                    </div>
+                  </div>
+
+                  {Object.keys(totalFareByCurrency).length > 0 && (
+                    <div className="stats-group">
+                      <h3>Fare</h3>
+                      <div className="stats-grid">
+                        {Object.entries(totalFareByCurrency).map(([currency, amount]) => (
+                          <Stat
+                            key={currency}
+                            label="Total Fare"
+                            unit={currency}
+                            value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          />
+                        ))}
+                        {Object.entries(avgFareByCurrency).map(([currency, amount]) => (
+                          <Stat
+                            key={currency}
+                            label="Avg. Fare"
+                            unit={currency}
+                            value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          />
+                        ))}
+                        {Object.entries(lowestFareByCurrency).map(([currency, data]) => (
+                          <Stat
+                            key={`${currency}-lowest`}
+                            label="Lowest Fare"
+                            unit={currency}
+                            value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            onClick={() => handleFocusOnTrip(data.row)}
+                          />
+                        ))}
+                        {Object.entries(highestFareByCurrency).map(([currency, data]) => (
+                          <Stat
+                            key={`${currency}-highest`}
+                            label="Highest Fare"
+                            unit={currency}
+                            value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            onClick={() => handleFocusOnTrip(data.row)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="stats-group">
+                    <h3>Duration</h3>
+                    <div className="stats-grid">
+                      <Stat label="Total" value={totalTripDuration.toFixed(2)} unit="min" />
+                      <Stat label="Average" value={avgTripDuration.toFixed(2)} unit="min" />
+                      <Stat label="Longest" value={longestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(longestTripRow)} />
+                      <Stat label="Shortest" value={shortestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(shortestTripRow)} />
+                    </div>
+                  </div>
+
+                  <div className="stats-group">
+                    <h3>Distance</h3>
+                    <div className="stats-grid">
+                      <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+                      <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(longestTripByDistRow)} />
+                      <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(shortestTripByDistRow)} />
+                      {Object.entries(costPerDistanceByCurrency).map(([currency, amount]) => (
+                        <Stat
+                          key={currency}
+                          label={`Cost per ${distanceUnit}`}
+                          unit={currency}
+                          value={amount.toFixed(2)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="stats-group">
+                    <h3>Speed</h3>
+                    <div className="stats-grid">
+                      <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
+                      <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(fastestTripBySpeedRow)} />
+                      <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(slowestTripBySpeedRow)} />
+                      {Object.entries(costPerDurationByCurrency).map(([currency, amount]) => (
+                        <Stat
+                          key={currency}
+                          label="Cost per minute"
+                          unit={currency}
+                          value={amount.toFixed(2)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="section">
+                  <div className="row" style={{gap: '6px'}}>
+                    <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
+                    <button onClick={() => handleDownloadKML('begin')} disabled={!actionsEnabled}>Begintrip KML</button>
+                    <button onClick={() => handleDownloadKML('drop')} disabled={!actionsEnabled}>Dropoff KML</button>
+                  </div>
+                  <div className="footer">KML uses colored icons (green/red). Works in Google Earth / Maps.</div>
+                </div>
+
+                <div className="section">
+                  <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileSelect} disabled={isProcessing} />
+                  <div className="footer">Select a new CSV file to replace the current data.</div>
+                </div>
+              </>
+            )}
+            {sidebarView === 'tripList' && (
+              <div className="section">
+                <div className="trip-list-header">
+                  <button onClick={() => setSidebarView('stats')}>← Back</button>
+                  <h3>{tripListTitle}</h3>
+                </div>
+                <ul className="trip-list">
+                  {tripList.map((trip, index) => (
+                    <li key={index} onClick={() => handleFocusOnTrip(trip)}>
+                      <div className="trip-list-item-header">
+                        <strong>Trip #{index + 1}</strong>
+                        <span className={`status-pill ${trip.status?.toLowerCase()}`}>{trip.status || 'N/A'}</span>
+                      </div>
+                      <div className="trip-list-item-body">
+                        From: {trip.begintrip_address || 'N/A'}<br/>
+                        To: {trip.dropoff_address || 'N/A'}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </aside>
+
+          <div
+            className="map-container"
+            style={layout === 'split' ? { flex: '1 1 30%' } : {}}
+          >
+            <main id="map"></main>
+          </div>
+        </div>
+      )}
     </>
   );
 }

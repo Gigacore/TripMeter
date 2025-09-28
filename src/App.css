@@ -10,13 +10,13 @@ header h1 { font-size: 18px; margin: 0 8px 0 0; }
 .container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr;
-  min-height: calc(100vh - 60px);
+  grid-template-rows: minmax(0, 1fr);
+  height: calc(100vh - 60px);
   transition: grid-template-columns 0.3s ease-in-out;
 }
 .sidebar {
   grid-column: 1; grid-row: 1; z-index: 10;
-  background: var(--panel); border-right: 1px solid #1f2937;
+  background: var(--panel); border-right: 1px solid #1f2937; position: relative;
   padding: 16px; overflow-y: auto;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
