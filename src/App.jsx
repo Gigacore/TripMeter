@@ -16,6 +16,13 @@ const redIcon = L.icon({
   iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28]
 });
 
+const Stat = ({ label, value, onClick, unit }) => (
+  <div className={`stat ${onClick ? 'clickable' : ''}`} onClick={onClick}>
+    <div>{label}{unit && ` (${unit})`}</div>
+    <div style={{fontSize: '20px', fontWeight: 700}}>{value}</div>
+  </div>
+);
+
 function App() {
   // --- State ---
   const [rows, setRows] = useState([]);
@@ -28,20 +35,35 @@ function App() {
   const [shortestTrip, setShortestTrip] = useState(0);
   const [shortestTripByDist, setShortestTripByDist] = useState(0);
   const [longestTripRow, setLongestTripRow] = useState(null);
+  const [fastestTripBySpeed, setFastestTripBySpeed] = useState(0);
+  const [fastestTripBySpeedRow, setFastestTripBySpeedRow] = useState(null);
+  const [slowestTripBySpeed, setSlowestTripBySpeed] = useState(0);
+  const [slowestTripBySpeedRow, setSlowestTripBySpeedRow] = useState(null);
   const [longestTripByDistRow, setLongestTripByDistRow] = useState(null);
   const [shortestTripRow, setShortestTripRow] = useState(null);
   const [shortestTripByDistRow, setShortestTripByDistRow] = useState(null);
   const [avgTripDuration, setAvgTripDuration] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [totalTripDuration, setTotalTripDuration] = useState(0);
   const [focusedTrip, setFocusedTrip] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState('miles'); // 'miles' or 'km'
 
+  const [totalCompletedDistance, setTotalCompletedDistance] = useState(0);
+  const [layout, setLayout] = useState('split'); // 'split', 'map', 'sidebar'
   const [totalTrips, setTotalTrips] = useState(0);
   const [successfulTrips, setSuccessfulTrips] = useState(0);
-  const [canceledTrips, setCanceledTrips] = useState(0);
+  const [riderCanceledTrips, setRiderCanceledTrips] = useState(0);
+  const [driverCanceledTrips, setDriverCanceledTrips] = useState(0);
+  const [unfulfilledTrips, setUnfulfilledTrips] = useState(0);
   // --- Refs for Leaflet objects and file input ---
+  const [avgFareByCurrency, setAvgFareByCurrency] = useState({});
+  const [lowestFareByCurrency, setLowestFareByCurrency] = useState({});
+  const [highestFareByCurrency, setHighestFareByCurrency] = useState({});
   const [totalFareByCurrency, setTotalFareByCurrency] = useState({});
+  const [sidebarView, setSidebarView] = useState('stats'); // 'stats' or 'tripList'
+  const [tripList, setTripList] = useState([]);
+  const [tripListTitle, setTripListTitle] = useState('');
   const mapRef = useRef(null);
   const beginLayerRef = useRef(null);
   const dropLayerRef = useRef(null);
@@ -100,15 +122,27 @@ function App() {
     setShortestTrip(0);
     setShortestTripByDist(0);
     setLongestTripRow(null);
+    setFastestTripBySpeed(0);
+    setFastestTripBySpeedRow(null);
+    setSlowestTripBySpeed(0);
+    setSlowestTripBySpeedRow(null);
     setLongestTripByDistRow(null);
     setShortestTripRow(null);
     setShortestTripByDistRow(null);
     setAvgTripDuration(0);
     setFocusedTrip(null);
+    setTotalTripDuration(0);
     setTotalTrips(0);
-    setSuccessfulTrips(0);
-    setCanceledTrips(0);
+    setSuccessfulTrips(0);    
+    setRiderCanceledTrips(0);
+    setDriverCanceledTrips(0);
+    setUnfulfilledTrips(0);
+    setTotalCompletedDistance(0);
+    setAvgFareByCurrency({});
+    setLowestFareByCurrency({});
+    setHighestFareByCurrency({});
     setTotalFareByCurrency({});
+    setSidebarView('stats');
     clearError();
     fileInputRef.current.value = ''; // Clear file input
     if (mapRef.current) {
@@ -253,6 +287,44 @@ function App() {
     }
   };
 
+  const handleShowTripList = (type) => {
+    if (rows.length === 0) return;
+
+    let list = [];
+    let title = '';
+
+    switch (type) {
+      case 'all':
+        list = rows;
+        title = `All Trip Requests (${rows.length})`;
+        break;
+      case 'successful':
+        list = rows.filter(r => r.status?.toLowerCase() === 'completed');
+        title = `Successful Trips (${list.length})`;
+        break;
+      case 'canceled':
+        list = rows.filter(r => r.status?.toLowerCase() === 'rider_canceled' || r.status?.toLowerCase() === 'driver_canceled');
+        title = `Canceled Trips (${list.length})`;
+        break;
+      case 'rider_canceled':
+        list = rows.filter(r => r.status?.toLowerCase() === 'rider_canceled');
+        title = `Rider Canceled Trips (${list.length})`;
+        break;
+      case 'driver_canceled':
+        list = rows.filter(r => r.status?.toLowerCase() === 'driver_canceled');
+        title = `Driver Canceled Trips (${list.length})`;
+        break;
+      case 'unfulfilled':
+        const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
+        list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase()));
+        title = `Unfulfilled Trips (${list.length})`;
+        break;
+      default: return;
+    }
+    setTripList(list);
+    setTripListTitle(title);
+    setSidebarView('tripList');
+  };
   // --- Effects ---
   // Initialize map
   useEffect(() => {
@@ -278,6 +350,16 @@ function App() {
     }
   }, []); // Empty dependency array ensures this runs only once
 
+  // Invalidate map size when layout changes
+  useEffect(() => {
+    if (mapRef.current) {
+      // Use a short timeout to allow the CSS transition to start.
+      const timer = setTimeout(() => {
+        mapRef.current.invalidateSize({ pan: false });
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [layout]);
   const handleShowAll = () => {
     setFocusedTrip(null);
     fitToLayers();
@@ -365,19 +447,21 @@ function App() {
       const dlt = toNumber(r.dropoff_lat);
       const dln = toNumber(r.dropoff_lng);
 
+      // Only add markers if both begin and dropoff coordinates are valid
       if (blt != null && bln != null) {
         bCount++;
         heatPoints.push([blt, bln]);
         const m = L.marker([blt, bln], { icon: greenIcon });
         m.bindPopup(createPopupContent('begin', r));
         beginLayerRef.current.addLayer(m);
-      }
-      if (dlt != null && dln != null) {
-        dCount++;
-        heatPoints.push([dlt, dln]);
-        const m = L.marker([dlt, dln], { icon: redIcon });
-        m.bindPopup(createPopupContent('drop', r));
-        dropLayerRef.current.addLayer(m);
+
+        if (dlt != null && dln != null) {
+          dCount++;
+          heatPoints.push([dlt, dln]);
+          const m = L.marker([dlt, dln], { icon: redIcon });
+          m.bindPopup(createPopupContent('drop', r));
+          dropLayerRef.current.addLayer(m);
+        }
       }
     });
 
@@ -395,16 +479,23 @@ function App() {
 
   useEffect(() => {
     if (rows.length > 0) {
-      let totalDistance = 0;
+      let currentTotalDistance = 0;
+      let totalDurationMinutes = 0;
       let totalDurationHours = 0;
       const tripsWithDuration = [];
       const tripsWithDistance = [];
-      let completedCount = 0;
-      let canceledCount = 0;
+      const tripsWithSpeed = [];
+      let completedCount = 0;      
+      let riderCanceledCount = 0;
+      let driverCanceledCount = 0;
       const fareByCurrency = {};
+      const fareCountByCurrency = {};
+      const localLowestFare = {};
+      const localHighestFare = {};
 
       rows.forEach(r => {
-        if (r.status?.toLowerCase() === 'completed') {
+        const status = r.status?.toLowerCase();
+        if (status === 'completed') {
           completedCount++;
           const distanceMiles = parseFloat(r.distance);
           const beginTime = new Date(r.begin_trip_time);
@@ -414,8 +505,13 @@ function App() {
             const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
             if (durationHours > 0) {
               if (distanceMiles > 0) {
-                totalDistance += convertDistance(distanceMiles);
+                totalDurationMinutes += durationHours * 60;
+                currentTotalDistance += convertDistance(distanceMiles);
                 totalDurationHours += durationHours;
+                const speed = convertDistance(distanceMiles) / durationHours;
+                if (isFinite(speed)) {
+                  tripsWithSpeed.push({ speed, row: r });
+                }
               }
               tripsWithDuration.push({ duration: durationHours, row: r });
             }
@@ -428,21 +524,50 @@ function App() {
           const currency = r.fare_currency;
           if (currency && !isNaN(fare)) {
             if (!fareByCurrency[currency]) {
-              fareByCurrency[currency] = 0;
+              fareByCurrency[currency] = 0; // total
+              fareCountByCurrency[currency] = 0; // count
+              localLowestFare[currency] = { amount: fare, row: r };
+              localHighestFare[currency] = { amount: fare, row: r };
             }
             fareByCurrency[currency] += fare;
+            fareCountByCurrency[currency]++;
+
+            if (fare < localLowestFare[currency].amount) {
+              localLowestFare[currency] = { amount: fare, row: r };
+            }
+            if (fare > localHighestFare[currency].amount) {
+              localHighestFare[currency] = { amount: fare, row: r };
+            }
           }
-        } else if (r.status?.toLowerCase() === 'rider_canceled' || r.status?.toLowerCase() === 'driver_canceled') {
-          canceledCount++;
+        } else if (status === 'rider_canceled') {
+          riderCanceledCount++;
+        } else if (status === 'driver_canceled') {
+          driverCanceledCount++;
         }
       });
 
+      const canceledCount = riderCanceledCount + driverCanceledCount;
+      const unfulfilledCount = rows.length - completedCount - canceledCount;
       setTotalTrips(rows.length);
       setSuccessfulTrips(completedCount);
-      setCanceledTrips(canceledCount);
+      setRiderCanceledTrips(riderCanceledCount);
+      setDriverCanceledTrips(driverCanceledCount);
+      setUnfulfilledTrips(unfulfilledCount);
+
+      const avgFares = {};
+      for (const currency in fareByCurrency) {
+        if (fareCountByCurrency[currency] > 0) {
+          avgFares[currency] = fareByCurrency[currency] / fareCountByCurrency[currency];
+        }
+      }
       setTotalFareByCurrency(fareByCurrency);
+      setLowestFareByCurrency(localLowestFare);
+      setHighestFareByCurrency(localHighestFare);
+      setAvgFareByCurrency(avgFares);
+      setTotalCompletedDistance(currentTotalDistance);
       if (totalDurationHours > 0) {
-        setAvgSpeed(totalDistance / totalDurationHours);
+        setAvgSpeed(currentTotalDistance / totalDurationHours);
+        setTotalTripDuration(totalDurationMinutes);
       } else {
         setAvgSpeed(0);
       }
@@ -460,7 +585,7 @@ function App() {
         setLongestTripRow(longest.row);
         setShortestTripRow(shortest.row);
       } else {
-        setAvgTripDuration(0); setLongestTrip(0); setShortestTrip(0); setLongestTripRow(null); setShortestTripRow(null);
+        setAvgTripDuration(0); setLongestTrip(0); setShortestTrip(0); setLongestTripRow(null); setShortestTripRow(null); setTotalTripDuration(0);
       }
 
       if (tripsWithDistance.length > 0) {
@@ -477,6 +602,19 @@ function App() {
         setLongestTripByDist(0); setLongestTripByDistRow(null);
       }
 
+      if (tripsWithSpeed.length > 0) {
+        tripsWithSpeed.sort((a, b) => a.speed - b.speed);
+        const slowest = tripsWithSpeed[0];
+        const fastest = tripsWithSpeed[tripsWithSpeed.length - 1];
+
+        setSlowestTripBySpeed(slowest.speed);
+        setSlowestTripBySpeedRow(slowest.row);
+        setFastestTripBySpeed(fastest.speed);
+        setFastestTripBySpeedRow(fastest.row);
+      } else {
+        setSlowestTripBySpeed(0); setSlowestTripBySpeedRow(null);
+        setFastestTripBySpeed(0); setFastestTripBySpeedRow(null);
+      }
     }
 
   }, [rows, distanceUnit]); // Re-run this effect when rows or distanceUnit changes
@@ -491,6 +629,12 @@ function App() {
         <span className="pill"><span className="dot green"></span> begintrip pins</span>
         <span className="pill"><span className="dot red"></span> dropoff pins</span>
         <span className="hint">Expected headers: <code>begintrip_lat</code>, <code>begintrip_lng</code>, <code>dropoff_lat</code>, <code>dropoff_lng</code></span>
+        <div className="layout-controls">
+          <button onClick={() => setLayout('sidebar')} className={layout === 'sidebar' ? 'primary' : ''} title="Stats View">📊</button>
+          <button onClick={() => setLayout('split')} className={layout === 'split' ? 'primary' : ''} title="Split View">🌗</button>
+          <button onClick={() => setLayout('map')} className={layout === 'map' ? 'primary' : ''} title="Map View">🗺️</button>
+        </div>
+
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="hint">Unit:</span>
           <button className={distanceUnit === 'miles' ? 'primary' : ''} onClick={() => setDistanceUnit('miles')}>Miles</button>
@@ -498,108 +642,165 @@ function App() {
         </div>
       </header>
 
-      <div className="container">
+      <div className={`container layout-${layout}`}>
         <aside className="sidebar">
-          <div className="section">
-            <label htmlFor="fileInput">Upload CSV</label>
-            <input
-              ref={fileInputRef}
-              id="fileInput"
-              type="file"
-              accept=".csv"
-              onChange={handleFileSelect}
-              disabled={isProcessing}
-            />
-          </div>
+          {sidebarView === 'stats' && (
+            <>
+              <div
+                className={`section dropzone ${isDragging ? 'drag' : ''}`}
+                onClick={() => fileInputRef.current?.click()}
+                onDrop={handleDrop}
+                onDragEnter={handleDragEvents}
+                onDragOver={handleDragEvents}
+                onDragLeave={handleDragEvents}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p>Drag & drop CSV here, or click to select file</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileSelect}
+                  disabled={isProcessing}
+                  className="visually-hidden"
+                />
+              </div>
 
-          <div
-            className={`section dropzone ${isDragging ? 'drag' : ''}`}
-            onClick={() => fileInputRef.current?.click()}
-            onDrop={handleDrop}
-            onDragEnter={handleDragEvents}
-            onDragOver={handleDragEvents}
-            onDragLeave={handleDragEvents}
-          >
-            Drag & drop CSV here
-          </div>
+              {error && (
+                <div className="section error">
+                  {error}
+                </div>
+              )}
 
+              <div className="section">
+                <div className="stats-group">
+                  <h3>Trip Summary</h3>
+                  <div className="stats-grid">
+                    <Stat label="Total Requests" value={totalTrips} onClick={() => handleShowTripList('all')} />
+                    <Stat label="Successful" value={successfulTrips} onClick={() => handleShowTripList('successful')} />
+                    <Stat label="Total Canceled" value={`${riderCanceledTrips + driverCanceledTrips} (${totalTrips > 0 ? ((riderCanceledTrips + driverCanceledTrips) / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('canceled')} />
+                    <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => handleShowTripList('unfulfilled')} />
+                    <Stat label="Rider Canceled" value={`${riderCanceledTrips} (${totalTrips > 0 ? (riderCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('rider_canceled')} />
+                    <Stat label="Driver Canceled" value={`${driverCanceledTrips} (${totalTrips > 0 ? (driverCanceledTrips / totalTrips * 100).toFixed(1) : 0}%)`} onClick={() => handleShowTripList('driver_canceled')} />
+                  </div>
+                </div>
 
-          {error && (
-            <div className="section error">
-              {error}
+                {Object.keys(totalFareByCurrency).length > 0 && (
+                  <div className="stats-group">
+                    <h3>Fare</h3>
+                    <div className="stats-grid">
+                      {Object.entries(totalFareByCurrency).map(([currency, amount]) => (
+                        <Stat
+                          key={currency}
+                          label="Total Fare"
+                          unit={currency}
+                          value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        />
+                      ))}
+                      {Object.entries(avgFareByCurrency).map(([currency, amount]) => (
+                        <Stat
+                          key={currency}
+                          label="Avg. Fare"
+                          unit={currency}
+                          value={amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        />
+                      ))}
+                      {Object.entries(lowestFareByCurrency).map(([currency, data]) => (
+                        <Stat
+                          key={`${currency}-lowest`}
+                          label="Lowest Fare"
+                          unit={currency}
+                          value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onClick={() => handleFocusOnTrip(data.row)}
+                        />
+                      ))}
+                      {Object.entries(highestFareByCurrency).map(([currency, data]) => (
+                        <Stat
+                          key={`${currency}-highest`}
+                          label="Highest Fare"
+                          unit={currency}
+                          value={data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onClick={() => handleFocusOnTrip(data.row)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="stats-group">
+                  <h3>Duration</h3>
+                  <div className="stats-grid">
+                    <Stat label="Total" value={totalTripDuration.toFixed(2)} unit="min" />
+                    <Stat label="Average" value={avgTripDuration.toFixed(2)} unit="min" />
+                    <Stat label="Longest" value={longestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(longestTripRow)} />
+                    <Stat label="Shortest" value={shortestTrip.toFixed(2)} unit="min" onClick={() => handleFocusOnTrip(shortestTripRow)} />
+                  </div>
+                </div>
+
+                <div className="stats-group">
+                  <h3>Distance</h3>
+                  <div className="stats-grid">
+                    <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+                    <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(longestTripByDistRow)} />
+                    <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => handleFocusOnTrip(shortestTripByDistRow)} />
+                  </div>
+                </div>
+
+                <div className="stats-group">
+                  <h3>Speed</h3>
+                  <div className="stats-grid">
+                    <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
+                    <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(fastestTripBySpeedRow)} />
+                    <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => handleFocusOnTrip(slowestTripBySpeedRow)} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="section">
+                <div className="row" style={{gap: '6px'}}>
+                  <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
+                  <button onClick={() => handleDownloadKML('begin')} disabled={!actionsEnabled}>Begintrip KML</button>
+                  <button onClick={() => handleDownloadKML('drop')} disabled={!actionsEnabled}>Dropoff KML</button>
+                </div>
+                <div className="footer">KML uses colored icons (green/red). Works in Google Earth / Maps.</div>
+              </div>
+
+              <div className="section">
+                {focusedTrip && (
+                  <button onClick={handleShowAll} className="primary full-width">
+                    Show All Trips
+                  </button>
+                )}
+                <button onClick={resetMap} disabled={!actionsEnabled && !error}>Clear Map</button>
+              </div>
+            </>
+          )}
+          {sidebarView === 'tripList' && (
+            <div className="section">
+              <div className="trip-list-header">
+                <button onClick={() => setSidebarView('stats')}>← Back</button>
+                <h3>{tripListTitle}</h3>
+              </div>
+              <ul className="trip-list">
+                {tripList.map((trip, index) => (
+                  <li key={index} onClick={() => handleFocusOnTrip(trip)}>
+                    <div className="trip-list-item-header">
+                      <strong>Trip #{index + 1}</strong>
+                      <span className={`status-pill ${trip.status?.toLowerCase()}`}>{trip.status || 'N/A'}</span>
+                    </div>
+                    <div className="trip-list-item-body">
+                      From: {trip.begintrip_address || 'N/A'}<br/>
+                      To: {trip.dropoff_address || 'N/A'}
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
-
-          <div className="section stats">
-            <div className="stat">
-              <div>Total Trips</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{totalTrips}</div>
-            </div>
-            <div className="stat">
-              <div>Successful Trips</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{successfulTrips}</div>
-            </div>
-            <div className="stat">
-              <div>Canceled Trips</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{canceledTrips}</div>
-            </div>
-            <div className="stat">
-              <div>Begintrip points</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{beginCount}</div>
-            </div>
-            <div className="stat">
-              <div>Dropoff points</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{dropoffCount}</div>
-            </div>
-            <div className="stat">
-              <div>Avg. Speed ({distanceUnit === 'miles' ? 'mph' : 'km/h'})</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{avgSpeed.toFixed(2)}</div>
-            </div>
-            <div className="stat">
-              <div>Avg. Duration (min)</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{avgTripDuration.toFixed(2)}</div>
-            </div>
-            <div className="stat clickable" onClick={() => handleFocusOnTrip(longestTripRow)}>
-              <div>Longest Trip (min)</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{longestTrip.toFixed(2)}</div>
-            </div>
-            <div className="stat clickable" onClick={() => handleFocusOnTrip(shortestTripRow)}>
-              <div>Shortest Trip (min)</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{shortestTrip.toFixed(2)}</div>
-            </div>
-            <div className="stat clickable" onClick={() => handleFocusOnTrip(longestTripByDistRow)}>
-              <div>Longest Trip ({distanceUnit})</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{longestTripByDist.toFixed(2)}</div>
-            </div>
-            <div className="stat clickable" onClick={() => handleFocusOnTrip(shortestTripByDistRow)}>
-              <div>Shortest Trip ({distanceUnit})</div>
-              <div style={{fontSize: '20px', fontWeight: 700}}>{shortestTripByDist.toFixed(2)}</div>
-            </div>
-            {Object.entries(totalFareByCurrency).map(([currency, amount]) => (
-              <div className="stat" key={currency}>
-                <div>Total Fare ({currency})</div>
-                <div style={{fontSize: '20px', fontWeight: 700}}>{amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="section">
-            <div className="row" style={{gap: '6px'}}>
-              <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
-              <button onClick={() => handleDownloadKML('begin')} disabled={!actionsEnabled}>Begintrip KML</button>
-              <button onClick={() => handleDownloadKML('drop')} disabled={!actionsEnabled}>Dropoff KML</button>
-            </div>
-            <div className="footer">KML uses colored icons (green/red). Works in Google Earth / Maps.</div>
-          </div>
-
-          <div className="section">
-            {focusedTrip && (
-              <button onClick={handleShowAll} className="primary full-width">
-                Show All Trips
-              </button>
-            )}
-            <button onClick={resetMap} disabled={!actionsEnabled && !error}>Clear Map</button>
-          </div>
         </aside>
 
         <div className="map-container">
