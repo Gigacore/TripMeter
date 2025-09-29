@@ -1,14 +1,24 @@
 import React, { useEffect, useRef } from 'react';
-import L from 'leaflet';
+import L, { LatLngExpression } from 'leaflet';
 import 'leaflet.heat';
 import { greenIcon, redIcon } from '../../constants';
 import { toNumber } from '../../utils/formatters';
+import { CSVRow } from '../../services/csvParser';
+import { DistanceUnit } from '../../App';
 
-const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
-    const mapRef = useRef(null);
-    const beginLayerRef = useRef(null);
-    const dropLayerRef = useRef(null);
-    const heatLayerRef = useRef(null);
+interface MapProps {
+    rows: CSVRow[];
+    focusedTrip: CSVRow | null;
+    layout?: any;
+    distanceUnit: DistanceUnit;
+    convertDistance: (miles: number) => number;
+}
+
+const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
+    const mapRef = useRef<L.Map | null>(null);
+    const beginLayerRef = useRef<L.FeatureGroup | null>(null);
+    const dropLayerRef = useRef<L.FeatureGroup | null>(null);
+    const heatLayerRef = useRef<any>(null); // Using any because leaflet.heat types are not available
 
     const fitToLayers = () => {
         if (mapRef.current && beginLayerRef.current && dropLayerRef.current) {
@@ -36,7 +46,7 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
             mapRef.current = map;
             beginLayerRef.current = L.featureGroup().addTo(map);
             dropLayerRef.current = L.featureGroup().addTo(map);
-            heatLayerRef.current = L.heatLayer([], { radius: 25 }).addTo(map);
+            heatLayerRef.current = (L as any).heatLayer([], { radius: 25 }).addTo(map);
 
             L.control.layers(null, {
                 'Begintrip (green)': beginLayerRef.current,
@@ -50,7 +60,7 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
     useEffect(() => {
         if (mapRef.current) {
             const timer = setTimeout(() => {
-                mapRef.current.invalidateSize({ pan: false });
+                mapRef.current?.invalidateSize({ pan: false });
             }, 300);
             return () => clearTimeout(timer);
         }
@@ -63,10 +73,10 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
         dropLayerRef.current?.clearLayers();
         heatLayerRef.current?.setLatLngs([]);
 
-        const heatPoints = [];
+        const heatPoints: LatLngExpression[] = [];
         const tripsToRender = focusedTrip ? [focusedTrip] : rows;
 
-        const createPopupContent = (pointType, data) => {
+        const createPopupContent = (pointType: 'begin' | 'drop', data: CSVRow): string => {
             const {
                 city, product_type, status, request_time, begin_trip_time,
                 begintrip_address, dropoff_time, dropoff_address, distance,
@@ -84,16 +94,16 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
             const displayDistance = convertDistance(tripDistanceMiles);
 
             if (status === 'completed') {
-                const requestTime = new Date(request_time);
-                const beginTime = new Date(begin_trip_time);
-                if (beginTime.getTime() && requestTime.getTime() && beginTime > requestTime) {
-                    const waitingMinutes = (beginTime - requestTime) / (1000 * 60);
+                const reqTime = new Date(request_time);
+                const bTime = new Date(begin_trip_time);
+                if (bTime.getTime() && reqTime.getTime() && bTime > reqTime) {
+                    const waitingMinutes = (bTime.getTime() - reqTime.getTime()) / (1000 * 60);
                     waitingTimeContent = `<b>Waiting Time:</b> ${waitingMinutes.toFixed(2)} minutes<br>`;
                 }
-                const dropoffTime = new Date(dropoff_time);
+                const dTime = new Date(dropoff_time);
 
-                if (!isNaN(tripDistanceMiles) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
-                    const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
+                if (!isNaN(tripDistanceMiles) && bTime.getTime() && dTime.getTime() && dTime > bTime) {
+                    const durationHours = (dTime.getTime() - bTime.getTime()) / (1000 * 60 * 60);
                     if (durationHours > 0) {
                         const speed = displayDistance / durationHours;
                         speedContent = `<b>Average Speed:</b> ${speed.toFixed(2)} ${distanceUnit === 'miles' ? 'mph' : 'km/h'}<br>`;
@@ -118,7 +128,7 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
             `;
         };
 
-        tripsToRender.forEach((r) => {
+        tripsToRender.forEach((r: CSVRow) => {
             const blt = toNumber(r.begintrip_lat);
             const bln = toNumber(r.begintrip_lng);
             const dlt = toNumber(r.dropoff_lat);
@@ -128,18 +138,18 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
                 heatPoints.push([blt, bln]);
                 const m = L.marker([blt, bln], { icon: greenIcon });
                 m.bindPopup(createPopupContent('begin', r));
-                beginLayerRef.current.addLayer(m);
+                beginLayerRef.current?.addLayer(m);
 
                 if (dlt != null && dln != null) {
                     heatPoints.push([dlt, dln]);
                     const m = L.marker([dlt, dln], { icon: redIcon });
                     m.bindPopup(createPopupContent('drop', r));
-                    dropLayerRef.current.addLayer(m);
+                    dropLayerRef.current?.addLayer(m);
                 }
             }
         });
 
-        heatLayerRef.current.setLatLngs(heatPoints);
+        heatLayerRef.current?.setLatLngs(heatPoints);
 
         if (rows.length > 0 && !focusedTrip) {
             fitToLayers();

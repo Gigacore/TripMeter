@@ -1,6 +1,14 @@
 import React from 'react';
+import { CSVRow } from '../../services/csvParser';
 
-const TripList = ({ list, title, onBack, onFocusOnTrip }) => {
+interface TripListProps {
+  list: CSVRow[];
+  title: string;
+  onBack: () => void;
+  onFocusOnTrip: (trip: CSVRow) => void;
+}
+
+const TripList: React.FC<TripListProps> = ({ list, title, onBack, onFocusOnTrip }) => {
   return (
   <div className="mb-6">
       <div className="trip-list-header">

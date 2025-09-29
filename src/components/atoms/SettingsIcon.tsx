@@ -1,6 +1,10 @@
 import React from 'react';
 
-const SettingsIcon = ({ onClick }) => {
+interface SettingsIconProps {
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+const SettingsIcon: React.FC<SettingsIconProps> = ({ onClick }) => {
   return (
     <button onClick={onClick} className="p-2 rounded-md hover:bg-gray-200">
       <svg

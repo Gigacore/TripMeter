@@ -1,8 +1,13 @@
 import React from 'react';
 
-function RidesList() {
+interface Ride {
+  id: number;
+  name: string;
+}
+
+const RidesList: React.FC = () => {
   // Placeholder data
-  const rides = [
+  const rides: Ride[] = [
     { id: 1, name: 'Morning Ride' },
     { id: 2, name: 'Afternoon Commute' },
     { id: 3, name: 'Weekend Trip' },

@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import Stats from './Stats';
 import TripList from './TripList';
 import FocusedTripInfo from '../molecules/FocusedTripInfo';
+import { CSVRow } from '../../services/csvParser';
+import { TripStats } from '../../hooks/useTripData';
+import { DistanceUnit } from '../../App';
 
-const Sidebar = ({
+interface SidebarProps {
+  layout?: any;
+  focusedTrip: CSVRow | null;
+  onShowAll: () => void;
+  convertDistance: (miles: number) => number;
+  distanceUnit: DistanceUnit;
+  sidebarView: 'stats' | 'tripList';
+  error: string;
+  tripData: TripStats;
+  onFocusOnTrip: (tripRow: CSVRow) => void;
+  onShowTripList: (type: string) => void;
+  onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
+  isProcessing: boolean;
+  rows: CSVRow[];
+  tripList: CSVRow[];
+  tripListTitle: string;
+  onBackToStats: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({
   layout,
   focusedTrip,
   onShowAll,

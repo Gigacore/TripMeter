@@ -1,7 +1,16 @@
-import React, { useRef } from 'react';
+import React, { useRef, DragEvent, ChangeEvent } from 'react';
 
-const InitialView = ({ onFileSelect, isProcessing, error, isDragging, onDragEvents, onDrop }) => {
-  const fileInputRef = useRef(null);
+interface InitialViewProps {
+  onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
+  isProcessing: boolean;
+  error: string;
+  isDragging: boolean;
+  onDragEvents: (event: DragEvent<HTMLDivElement>) => void;
+  onDrop: (event: DragEvent<HTMLDivElement>) => void;
+}
+
+const InitialView: React.FC<InitialViewProps> = ({ onFileSelect, isProcessing, error, isDragging, onDragEvents, onDrop }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="initial-view">

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Stats() {
+const Stats: React.FC = () => {
   // Placeholder stats
   return (
     <div>

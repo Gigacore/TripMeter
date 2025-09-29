@@ -1,7 +1,14 @@
 import React from 'react';
 import SettingsIcon from '../atoms/SettingsIcon';
 
-const Header = ({ onReset, actionsEnabled, error, toggleSettings }) => {
+interface HeaderProps {
+  onReset: () => void;
+  actionsEnabled: boolean;
+  error: string;
+  toggleSettings: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, error, toggleSettings }) => {
   return (
     <header className="flex items-center justify-between gap-4 px-5 py-4 border-b border-gray-800 bg-slate-900 text-slate-50">
       <h1 className="text-lg font-bold mr-2">CSV → Map & KML</h1>

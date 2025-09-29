@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import './App.css';
 import 'leaflet/dist/leaflet.css';
 import { useTripData } from './hooks/useTripData';
-import { parseCSV } from './services/csvParser';
+import { parseCSV, CSVRow } from './services/csvParser';
 import { downloadKML } from './services/kmlService';
 import { normalizeHeaders } from './utils/csv';
 import { KM_PER_MILE } from './constants';
@@ -14,26 +14,28 @@ import Spinner from './components/atoms/Spinner';
 import TopStats from './components/organisms/TopStats';
 import Settings from './components/organisms/Settings';
 
+export type DistanceUnit = 'miles' | 'km';
+
 function App() {
-  const [rows, setRows] = useState([]);
-  const [error, setError] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [focusedTrip, setFocusedTrip] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [distanceUnit, setDistanceUnit] = useState('miles'); // 'miles' or 'km'
-  const [sidebarView, setSidebarView] = useState('stats'); // 'stats' or 'tripList'
-  const [tripList, setTripList] = useState([]);
-  const [tripListTitle, setTripListTitle] = useState('');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const fileInputRef = useRef(null);
+  const [rows, setRows] = useState<CSVRow[]>([]);
+  const [error, setError] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [focusedTrip, setFocusedTrip] = useState<CSVRow | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>('miles');
+  const [sidebarView, setSidebarView] = useState<'stats' | 'tripList'>('stats');
+  const [tripList, setTripList] = useState<CSVRow[]>([]);
+  const [tripListTitle, setTripListTitle] = useState<string>('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const tripData = useTripData(rows, distanceUnit);
 
-  const convertDistance = (miles) => {
+  const convertDistance = (miles: number): number => {
     return distanceUnit === 'km' ? miles * KM_PER_MILE : miles;
   };
 
-  const showError = (msg) => setError(msg);
+  const showError = (msg: string) => setError(msg);
   const clearError = () => setError('');
 
   const resetMap = () => {
@@ -46,7 +48,7 @@ function App() {
     }
   };
 
-  const handleFile = async (file) => {
+  const handleFile = async (file?: File) => {
     resetMap();
     if (!file) return;
 
@@ -70,7 +72,7 @@ function App() {
       }
 
       const normalizedRows = result.data.map(obj => {
-        const out = {};
+        const out: CSVRow = {};
         for (const k in obj) {
           if (Object.hasOwn(obj, k)) {
             out[k.trim().toLowerCase()] = obj[k];
@@ -90,19 +92,19 @@ function App() {
     }
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     handleFile(f);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     const f = e.dataTransfer.files?.[0];
     handleFile(f);
   };
 
-  const handleDragEvents = (e) => {
+  const handleDragEvents = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setIsDragging(true);
@@ -111,7 +113,7 @@ function App() {
     }
   };
 
-  const handleFocusOnTrip = (tripRow) => {
+  const handleFocusOnTrip = (tripRow: CSVRow) => {
     setFocusedTrip(tripRow);
   };
 
@@ -119,10 +121,10 @@ function App() {
     setFocusedTrip(null);
   };
 
-  const handleShowTripList = (type) => {
+  const handleShowTripList = (type: string) => {
     if (rows.length === 0) return;
 
-    let list = [];
+    let list: CSVRow[] = [];
     let title = '';
 
     switch (type) {
@@ -148,7 +150,7 @@ function App() {
         break;
       case 'unfulfilled': {
         const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
-        list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase()));
+        list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase() || ''));
         title = `Unfulfilled Trips (${list.length})`;
         break;
       }

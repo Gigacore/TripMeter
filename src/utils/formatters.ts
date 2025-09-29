@@ -1,5 +1,5 @@
 // --- Helper Functions ---
-export const formatDuration = (totalMinutes, includeSeconds = false) => {
+export const formatDuration = (totalMinutes: number, includeSeconds = false): string => {
     if (totalMinutes < 0) return 'N/A';
     if (totalMinutes === 0) return '0 minutes';
 
@@ -33,7 +33,7 @@ export const formatDuration = (totalMinutes, includeSeconds = false) => {
     return parts.length > 0 ? parts.join(' ') : '0min';
 };
 
-export const formatDurationWithSeconds = (totalMinutes) => {
+export const formatDurationWithSeconds = (totalMinutes: number): string => {
     if (totalMinutes < 0) return 'N/A';
     if (totalMinutes === 0) return '0 seconds';
 
@@ -45,7 +45,7 @@ export const formatDurationWithSeconds = (totalMinutes) => {
     return formatDuration(totalMinutes, true);
 }
 
-export const toNumber = (x) => {
+export const toNumber = (x: any): number | null => {
     const n = Number(x);
     return Number.isFinite(n) ? n : null;
 };
