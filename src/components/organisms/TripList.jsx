@@ -2,7 +2,7 @@ import React from 'react';
 
 const TripList = ({ list, title, onBack, onFocusOnTrip }) => {
   return (
-    <div className="section">
+  <div className="mb-6">
       <div className="trip-list-header">
         <button onClick={onBack}>← Back</button>
         <h3>{title}</h3>

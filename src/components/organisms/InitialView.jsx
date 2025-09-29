@@ -6,7 +6,7 @@ const InitialView = ({ onFileSelect, isProcessing, error, isDragging, onDragEven
   return (
     <div className="initial-view">
       <div
-        className={`section dropzone ${isDragging ? 'drag' : ''}`}
+        className={`mb-6 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer text-gray-400 flex flex-col ${isDragging ? 'bg-slate-800' : 'bg-slate-900'}`}
         onClick={() => fileInputRef.current?.click()}
         onDrop={onDrop}
         onDragEnter={onDragEvents}
@@ -29,7 +29,7 @@ const InitialView = ({ onFileSelect, isProcessing, error, isDragging, onDragEven
         />
       </div>
       {error && (
-        <div className="section error mt-5 w-full max-w-[600px]">
+  <div className="mb-6 error mt-5 w-full max-w-[600px]">
           {error}
         </div>
       )}

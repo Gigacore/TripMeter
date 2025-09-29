@@ -2,7 +2,7 @@ import React from 'react';
 
 const FocusedTripInfo = ({ trip, onShowAll, distanceUnit, convertDistance }) => {
   return (
-    <div className="section focused-trip-info">
+  <div className="mb-6 focused-trip-info">
       <div className="trip-list-header flex items-center">
         <h3>Focused Trip</h3>
         <button onClick={onShowAll} className="ml-auto">Show All</button>

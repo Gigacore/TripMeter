@@ -479,7 +479,7 @@ const Stats = ({
         )}
       </div>
 
-      <div className="section">
+  <div className="mb-6">
         <div className="row flex gap-1.5">
           <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
           <button onClick={() => handleDownloadKML('begin')} disabled={!actionsEnabled}>Begintrip KML</button>

@@ -23,7 +23,7 @@ const Sidebar = ({
 }) => {
   return (
     <aside
-      className={`sidebar${layout === 'split' ? ' flex-[0_0_70%]' : ''}`}
+      className={`bg-slate-900 border-t border-gray-800 p-4${layout === 'split' ? ' flex-[0_0_70%]' : ''}`}
     >
       {focusedTrip && (
         <FocusedTripInfo
@@ -36,7 +36,7 @@ const Sidebar = ({
       {sidebarView === 'stats' && (
         <>
           {error && (
-            <div className="section error">
+            <div className="mb-6 error">
               {error}
             </div>
           )}
