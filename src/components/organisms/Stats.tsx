@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
@@ -102,6 +102,7 @@ const Stats: React.FC<StatsProps> = ({
     slowestTripBySpeedRow,
     costPerDurationByCurrency,
     longestStreak,
+    avgCostPerDistanceByYear,
     longestGap,
   } = data;
 
@@ -358,6 +359,30 @@ const Stats: React.FC<StatsProps> = ({
 
   return (
     <>
+      {currencies.length > 1 && (
+        <div className="stats-group mb-6 border-b border-slate-800">
+          <div className="flex items-center gap-2">
+            {currencies.map(currency => (
+              <button
+                key={currency}
+                onClick={() => setActiveCurrency(currency)}
+                className={`px-4 py-3 text-sm font-semibold transition-colors text-left border-b-2 ${
+                  activeCurrency === currency
+                    ? 'border-emerald-400 text-slate-100'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 active:bg-slate-800'
+                }`}
+              >
+                <div className="flex flex-col">
+                  <span className="text-xs font-normal">{currency}</span>
+                  <span className="font-bold text-base">
+                    {(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="section">
         {currencies.length > 0 && activeCurrency &&(
           <div className="stats-group">
@@ -365,22 +390,6 @@ const Stats: React.FC<StatsProps> = ({
               <div className="flex gap-4">
                 {/* Redesigned vertical tab UI for Fare section */}
                 <div className="flex w-full min-h-[220px]">
-                  <div className="w-44 border-r border-gray-300 flex flex-col">
-                  {currencies.map((currency, idx) => (
-                    <button
-                      key={currency}
-                      onClick={() => setActiveCurrency(currency)}
-                        className={`flex items-center gap-2 py-4 px-3 border-none outline-none ${activeCurrency === currency ? 'bg-gray-100 text-gray-900 font-semibold' : 'bg-transparent text-gray-500 font-normal'} cursor-pointer ${idx !== currencies.length - 1 ? 'border-b border-gray-800' : ''} relative min-h-[72px]`}
-                    >
-                  
-                        <span className="flex flex-col gap-0.5 items-start flex-1">
-                          <span className="text-lg font-semibold">{(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          <span className="text-xs text-gray-500">{currency}</span>
-                        </span>
-                        {activeCurrency === currency && <span className="absolute left-0 top-0 bottom-0 w-1 bg-gray-400 rounded-l-xl" />}
-                    </button>
-                  ))}
-                </div>
                   <div className="flex-1 p-8 flex flex-col items-start gap-6">
                     <div className="w-full">
                     {fareDistributionData.length > 0 && (
@@ -395,15 +404,6 @@ const Stats: React.FC<StatsProps> = ({
                       </ResponsiveContainer>
                     )}
                   </div>
-                    {currencies.length === 1 && (
-                      <div className="w-full">
-                      <Stat
-                        label="Total Fare"
-                        unit={activeCurrency}
-                        value={(totalFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      />
-                    </div>
-                  )}
                     <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full">
                       <Stat
                         label="Avg. Fare"
@@ -432,6 +432,33 @@ const Stats: React.FC<StatsProps> = ({
             </div>
           </div>
         )}
+      </div>
+      {activeCurrency && avgCostPerDistanceByYear[activeCurrency] && avgCostPerDistanceByYear[activeCurrency]!.length > 0 && (
+        <div className="stats-group">
+          <h3>Average Cost per {distanceUnit} by Year</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={avgCostPerDistanceByYear[activeCurrency]}
+              margin={{
+                top: 5,
+                right: 20,
+                left: 10,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis />
+              <Tooltip
+                formatter={(value: number) => [value.toFixed(2), `Avg. Cost / ${distanceUnit}`]}
+              />
+              <Legend />
+              <Line type="monotone" dataKey="cost" stroke="#8884d8" name={`Avg. Cost / ${distanceUnit} (${activeCurrency})`} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      <div className="section">
         {sankeyData.links.length > 0 && (
           <div className="stats-group">
             <h3>Trip Summary</h3>
@@ -512,14 +539,13 @@ const Stats: React.FC<StatsProps> = ({
             <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
             <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
             <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
-            {Object.entries(costPerDistanceByCurrency).map(([currency, amount]) => (
+            {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
               <Stat
-                key={currency}
                 label={`Cost per ${distanceUnit}`}
-                unit={`${currency}/${distanceUnit}`}
-                value={amount.toFixed(2)}
+                unit={`${activeCurrency}/${distanceUnit}`}
+                value={costPerDistanceByCurrency[activeCurrency]!.toFixed(2)}
               />
-            ))}
+            )}
           </div>
           {distanceDistributionData.length > 0 && (
             <div className="mt-4">
@@ -542,12 +568,11 @@ const Stats: React.FC<StatsProps> = ({
             <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
             <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
             <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
-            {Object.entries(costPerDurationByCurrency).map(([currency, amount]) =>
+            {activeCurrency && costPerDurationByCurrency[activeCurrency] !== undefined && (
               <Stat
-                key={currency}
-                label="Cost"
-                unit={currency}
-                value={amount.toFixed(2)}
+                label="Cost per Minute"
+                unit={activeCurrency}
+                value={costPerDurationByCurrency[activeCurrency]!.toFixed(2)}
               />
             )}
             <div className="mt-4">

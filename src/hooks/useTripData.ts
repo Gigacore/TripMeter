@@ -39,6 +39,7 @@ export interface TripStats {
   totalFareByCurrency: { [key: string]: number };
   costPerDistanceByCurrency: { [key: string]: number };
   costPerDurationByCurrency: { [key: string]: number };
+  avgCostPerDistanceByYear: { [currency: string]: { year: number; cost: number }[] };
   longestStreak: {
     days: number;
     startDate: number | null;
@@ -88,6 +89,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     totalFareByCurrency: {},
     costPerDistanceByCurrency: {},
     costPerDurationByCurrency: {},
+    avgCostPerDistanceByYear: {},
     longestStreak: { days: 0, startDate: null, endDate: null },
     longestGap: { days: 0, startDate: null, endDate: null },
   });
@@ -113,6 +115,8 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
       const localLowestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
       const localHighestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
       const completedTripDates: Date[] = [];
+      const yearlyDistanceByCurrency: { [currency: string]: { [year: number]: number } } = {};
+      const yearlyFareByCurrency: { [currency: string]: { [year: number]: number } } = {};
 
       rows.forEach((r: CSVRow) => {
         const status = r.status?.toLowerCase();
@@ -122,6 +126,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
           const beginTime = new Date(r.begin_trip_time);
           const dropoffTime = new Date(r.dropoff_time);
           const requestTime = new Date(r.request_time);
+          const year = requestTime.getFullYear();
 
           if (requestTime.getTime()) {
             completedTripDates.push(requestTime);
@@ -170,6 +175,19 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
             if (fare > localHighestFare[currency].amount) {
               localHighestFare[currency] = { amount: fare, row: r };
             }
+
+            if (!isNaN(year) && !isNaN(distanceMiles) && distanceMiles > 0) {
+              if (!yearlyFareByCurrency[currency]) {
+                yearlyFareByCurrency[currency] = {};
+                yearlyDistanceByCurrency[currency] = {};
+              }
+              if (!yearlyFareByCurrency[currency][year]) {
+                yearlyFareByCurrency[currency][year] = 0;
+                yearlyDistanceByCurrency[currency][year] = 0;
+              }
+              yearlyFareByCurrency[currency][year] += fare;
+              yearlyDistanceByCurrency[currency][year] += convertDistance(distanceMiles);
+            }
           }
         } else if (status === 'rider_canceled') {
           riderCanceledCount++;
@@ -197,6 +215,20 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         }
         if (totalDurationMinutes > 0) {
           localCostPerDuration[currency] = fareByCurrency[currency] / totalDurationMinutes;
+        }
+      }
+
+      const avgCostPerDistanceByYear: { [currency: string]: { year: number; cost: number }[] } = {};
+      for (const currency in yearlyFareByCurrency) {
+        avgCostPerDistanceByYear[currency] = [];
+        const yearlyData = yearlyFareByCurrency[currency];
+        const years = Object.keys(yearlyData).map(Number).sort((a, b) => a - b);
+
+        for (const year of years) {
+          const totalDistanceForYear = yearlyDistanceByCurrency[currency][year];
+          if (totalDistanceForYear > 0) {
+            avgCostPerDistanceByYear[currency].push({ year, cost: yearlyData[year] / totalDistanceForYear });
+          }
         }
       }
 
@@ -263,6 +295,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         avgFareByCurrency: avgFares,
         costPerDistanceByCurrency: localCostPerDistance,
         costPerDurationByCurrency: localCostPerDuration,
+        avgCostPerDistanceByYear,
         totalCompletedDistance: currentTotalDistance,
         avgSpeed: totalDurationHours > 0 ? currentTotalDistance / totalDurationHours : 0,
         totalTripDuration: totalDurationMinutes,
