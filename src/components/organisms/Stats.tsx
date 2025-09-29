@@ -277,15 +277,17 @@ const Stats: React.FC<StatsProps> = ({
   const contributionData = React.useMemo(() => {
     if (!rows || rows.length === 0) return {};
     const dailyCounts: { [key: string]: number } = {};
-    rows.forEach(row => {
-      if (row.request_time) {
-        const date = new Date(row.request_time);
-        if (!isNaN(date.getTime())) {
-          const day = date.toISOString().split('T')[0];
-          dailyCounts[day] = (dailyCounts[day] || 0) + 1;
+    rows
+      .filter(row => row.status?.toLowerCase() === 'completed')
+      .forEach(row => {
+        if (row.request_time) {
+          const date = new Date(row.request_time);
+          if (!isNaN(date.getTime())) {
+            const day = date.toISOString().split('T')[0];
+            dailyCounts[day] = (dailyCounts[day] || 0) + 1;
+          }
         }
-      }
-    });
+      });
     return dailyCounts;
   }, [rows]);
 

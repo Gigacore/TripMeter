@@ -289,10 +289,10 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.contribution-graph-day[data-level="1"] { background-color: #0e4429; }
-.contribution-graph-day[data-level="2"] { background-color: #006d32; }
-.contribution-graph-day[data-level="3"] { background-color: #26a641; }
-.contribution-graph-day[data-level="4"] { background-color: #39d353; }
+.contribution-graph-day[data-level="1"] { background-color: #0369a1; } /* sky-700 */
+.contribution-graph-day[data-level="2"] { background-color: #0ea5e9; } /* sky-500 */
+.contribution-graph-day[data-level="3"] { background-color: #7dd3fc; } /* sky-300 */
+.contribution-graph-day[data-level="4"] { background-color: #e0f2fe; } /* sky-100 */
 
 .contribution-graph-months {
   display: flex;

@@ -8,10 +8,16 @@ interface ContributionGraphProps {
 const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => {
   const getLevel = (count: number) => {
     if (count === 0) return 0;
-    if (count <= 2) return 1;
-    if (count <= 5) return 2;
-    if (count <= 10) return 3;
+    if (count <= 1) return 1;
+    if (count <= 3) return 2;
+    if (count <= 6) return 3;
     return 4;
+  };
+
+  const getTooltipText = (count: number, dateStr: string) => {
+    const date = new Date(dateStr);
+    const formattedDate = date.toLocaleDateString(undefined, { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
+    return `${count} trip${count === 1 ? '' : 's'} on ${formattedDate}`;
   };
 
   const today = new Date();
@@ -54,7 +60,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
         key={day.date}
         className="contribution-graph-day"
         data-level={day.level}
-        title={`${day.count} trips on ${new Date(day.date).toDateString()}`}
+        title={getTooltipText(day.count, day.date)}
       />
     );
 
@@ -90,7 +96,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
           const prevWeekIndex = index > 0 ? monthLabels[index - 1].weekIndex : 0;
           const weekSpan = label.weekIndex - prevWeekIndex;
           return (
-            <div key={label.name + label.weekIndex} className="contribution-graph-month" style={{ flexGrow: weekSpan }}>
+            <div key={label.name + label.weekIndex} className="contribution-graph-month" style={{ flexGrow: 4 }}>
               {label.name}
             </div>
           );
