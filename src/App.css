@@ -246,3 +246,61 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .leaflet-popup-tip { background: var(--panel); }
 .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
 .leaflet-container a.leaflet-popup-close-button:hover { color: var(--fg); }
+
+/* Contribution Graph */
+.contribution-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contribution-graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contribution-graph-header select {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.contribution-graph-body {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 16px; /* for scrollbar */
+}
+
+.contribution-graph-week {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contribution-graph-day {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background-color: #2d3748; /* level 0 */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.contribution-graph-day[data-level="1"] { background-color: #0e4429; }
+.contribution-graph-day[data-level="2"] { background-color: #006d32; }
+.contribution-graph-day[data-level="3"] { background-color: #26a641; }
+.contribution-graph-day[data-level="4"] { background-color: #39d353; }
+
+.contribution-graph-months {
+  display: flex;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.contribution-graph-month {
+  flex-basis: 0;
+  flex-grow: 1;
+}

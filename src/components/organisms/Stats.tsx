@@ -5,6 +5,7 @@ import { formatDuration, formatDurationWithSeconds } from '../../utils/formatter
 import { downloadKML } from '../../services/kmlService';
 import { CSVRow } from '../../services/csvParser';
 import { TripStats } from '../../hooks/useTripData';
+import ContributionGraph from '../../ContributionGraph';
 import { DistanceUnit } from '../../App';
 
 interface SankeyNodeProps {
@@ -273,6 +274,31 @@ const Stats: React.FC<StatsProps> = ({
   const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
   const renderTreemapContent = React.useCallback((props: any) => <CustomizedContent {...props} colors={treemapColors} />, [treemapColors]);
 
+  const contributionData = React.useMemo(() => {
+    if (!rows || rows.length === 0) return {};
+    const dailyCounts: { [key: string]: number } = {};
+    rows.forEach(row => {
+      if (row.request_time) {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const day = date.toISOString().split('T')[0];
+          dailyCounts[day] = (dailyCounts[day] || 0) + 1;
+        }
+      }
+    });
+    return dailyCounts;
+  }, [rows]);
+
+  const availableYears = React.useMemo(() => {
+    const yearSet = new Set<number>();
+    Object.keys(contributionData).forEach(dateStr => {
+      yearSet.add(new Date(dateStr).getFullYear());
+    });
+    return Array.from(yearSet).sort((a, b) => b - a);
+  }, [contributionData]);
+
+  const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
+
   return (
     <>
       <div className="section">
@@ -479,6 +505,26 @@ const Stats: React.FC<StatsProps> = ({
               </ResponsiveContainer>
             </div>
           </div>
+        </div>
+
+        <div className="stats-group">
+          <div className="contribution-graph-header">
+            <h3>Trip Activity</h3>
+            <select
+              value={contributionView}
+              onChange={(e) => setContributionView(e.target.value === 'last-12-months' ? 'last-12-months' : Number(e.target.value))}
+            >
+              <option value="last-12-months">Last 12 months</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          {Object.keys(contributionData).length > 0 ? (
+            <div className="mt-4">
+              <ContributionGraph data={contributionData} view={contributionView} />
+            </div>
+          ) : <p className="text-slate-500 text-sm mt-2">No trip data with dates to display.</p>}
         </div>
 
         {productTypeData.length > 0 && (
