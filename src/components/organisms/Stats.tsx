@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend, PieChart, Pie, Cell } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
@@ -89,6 +89,9 @@ const Stats: React.FC<StatsProps> = ({
     longestWaitingTimeRow,
     shortestWaitingTime,
     shortestWaitingTimeRow,
+    waitingLongerThanTripCount,
+    totalWaitingTimeForLongerWaits,
+    totalRidingTimeForLongerWaits,
     totalCompletedDistance,
     longestTripByDist,
     longestTripByDistRow,
@@ -532,6 +535,37 @@ const Stats: React.FC<StatsProps> = ({
             </div>
           )}
         </div>
+        {waitingLongerThanTripCount > 0 && (
+          <div className="stats-group">
+            <h3>Trips with Wait {'>'} Ride Duration</h3>
+            <div className="flex flex-col md:flex-row gap-4 items-center">
+              <div className="w-full md:w-1/2">
+                <div className="stats-grid">
+                  <Stat label="Count" value={waitingLongerThanTripCount} subValue="Trips where waiting time exceeded ride duration" />
+                  <Stat label="Total Waiting" value={formatDuration(totalWaitingTimeForLongerWaits, true)} />
+                  <Stat label="Total Riding" value={formatDuration(totalRidingTimeForLongerWaits, true)} />
+                </div>
+              </div>
+              <div className="w-full md:w-1/2 h-64">
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Waiting Time', value: totalWaitingTimeForLongerWaits },
+                        { name: 'Riding Time', value: totalRidingTimeForLongerWaits },
+                      ]}
+                      dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                      <Cell key="cell-0" fill="#ffc658" />
+                      <Cell key="cell-1" fill="#82ca9d" />
+                    </Pie>
+                    <Tooltip formatter={(value: number) => formatDuration(value, true)} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="stats-group">
           <h3>Distance</h3>

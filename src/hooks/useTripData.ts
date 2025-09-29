@@ -18,6 +18,9 @@ export interface TripStats {
   longestWaitingTime: number;
   shortestWaitingTimeRow: CSVRow | null;
   longestWaitingTimeRow: CSVRow | null;
+  waitingLongerThanTripCount: number;
+  totalWaitingTimeForLongerWaits: number;
+  totalRidingTimeForLongerWaits: number;
   fastestTripBySpeed: number;
   fastestTripBySpeedRow: CSVRow | null;
   slowestTripBySpeed: number;
@@ -68,6 +71,9 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     longestWaitingTime: 0,
     shortestWaitingTimeRow: null,
     longestWaitingTimeRow: null,
+    waitingLongerThanTripCount: 0,
+    totalWaitingTimeForLongerWaits: 0,
+    totalRidingTimeForLongerWaits: 0,
     fastestTripBySpeed: 0,
     fastestTripBySpeedRow: null,
     slowestTripBySpeed: 0,
@@ -111,6 +117,9 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
       let riderCanceledCount = 0;
       let driverCanceledCount = 0;
       const fareByCurrency: { [key: string]: number } = {};
+      let waitingLongerThanTripCount = 0;
+      let totalWaitingTimeForLongerWaits = 0;
+      let totalRidingTimeForLongerWaits = 0;
       const fareCountByCurrency: { [key: string]: number } = {};
       const localLowestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
       const localHighestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
@@ -132,14 +141,18 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
             completedTripDates.push(requestTime);
           }
 
+          let waitingMinutes: number | undefined;
           if (requestTime.getTime() && beginTime.getTime() && beginTime > requestTime) {
-            const waitingMinutes = (beginTime.getTime() - requestTime.getTime()) / (1000 * 60);
+            waitingMinutes = (beginTime.getTime() - requestTime.getTime()) / (1000 * 60);
             if (isFinite(waitingMinutes)) {
               tripsWithWaitingTime.push({ waitingTime: waitingMinutes, row: r });
             }
           }
+
+          let durationMinutes: number | undefined;
           if (!isNaN(distanceMiles) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
             const durationHours = (dropoffTime.getTime() - beginTime.getTime()) / (1000 * 60 * 60);
+            durationMinutes = durationHours * 60;
             if (durationHours > 0) {
               if (distanceMiles > 0) {
                 totalDurationMinutes += durationHours * 60;
@@ -155,6 +168,12 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
             if (distanceMiles > 0) {
               tripsWithDistance.push({ distance: convertDistance(distanceMiles), row: r });
             }
+          }
+
+          if (waitingMinutes !== undefined && durationMinutes !== undefined && waitingMinutes > durationMinutes) {
+            waitingLongerThanTripCount++;
+            totalWaitingTimeForLongerWaits += waitingMinutes;
+            totalRidingTimeForLongerWaits += durationMinutes;
           }
 
           const fare = parseFloat(r.fare_amount);
@@ -301,6 +320,9 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         totalTripDuration: totalDurationMinutes,
         longestStreak,
         longestGap,
+        waitingLongerThanTripCount,
+        totalWaitingTimeForLongerWaits,
+        totalRidingTimeForLongerWaits,
       };
 
       if (tripsWithDuration.length > 0) {
