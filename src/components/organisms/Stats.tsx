@@ -276,40 +276,9 @@ const Stats: React.FC<StatsProps> = ({
   return (
     <>
       <div className="section">
-        {sankeyData.links.length > 0 && (
-          <div className="stats-group">
-            <h3>Trip Summary</h3>
-            <ResponsiveContainer width="100%" height={700}>
-              <Sankey
-                data={sankeyData}
-                node={renderSankeyNode}
-                nodePadding={50}
-                margin={{
-                left: 200,
-                  right: 200,
-                  top: 100,
-                  bottom: 100
-                }}
-                link={{ stroke: '#77c878' }}
-              >
-                <Tooltip />
-              </Sankey>
-            </ResponsiveContainer>
-          </div>
-        )}
-        <div className="stats-group">
-          <div className="stats-grid">
-            <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
-            <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
-            <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
-            <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />
-            {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
-          </div>
-        </div>
-
         {currencies.length > 0 && activeCurrency &&(
           <div className="stats-group">
-            <h3>Fare</h3>
+            <h3>Fare Distribution</h3>
               <div className="flex gap-4">
                 {/* Redesigned vertical tab UI for Fare section */}
                 <div className="flex w-full min-h-[220px]">
@@ -380,6 +349,36 @@ const Stats: React.FC<StatsProps> = ({
             </div>
           </div>
         )}
+        {sankeyData.links.length > 0 && (
+          <div className="stats-group">
+            <h3>Trip Summary</h3>
+            <ResponsiveContainer width="100%" height={700}>
+              <Sankey
+                data={sankeyData}
+                node={renderSankeyNode}
+                nodePadding={50}
+                margin={{
+                left: 200,
+                  right: 200,
+                  top: 100,
+                  bottom: 100
+                }}
+                link={{ stroke: '#77c878' }}
+              >
+                <Tooltip />
+              </Sankey>
+            </ResponsiveContainer>
+          </div>
+        )}
+        <div className="stats-group">
+          <div className="stats-grid">
+            <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
+            <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
+            <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
+            <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />
+            {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
+          </div>
+        </div>
 
         <div className="stats-group">
           <h3>Ride Duration</h3>
