@@ -287,29 +287,27 @@ const Stats = ({
         {currencies.length > 0 && (
           <div className="stats-group">
             <h3>Fare</h3>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              {/* Redesigned vertical tab UI for Fare section */}
-              <div style={{ display: 'flex', width: '100%', minHeight: 220 }}>
-                <div style={{ width: 180, borderRight: '1px solid #ddd', display: 'flex', flexDirection: 'column' }}>
+              <div className="flex gap-4">
+                {/* Redesigned vertical tab UI for Fare section */}
+                <div className="flex w-full min-h-[220px]">
+                  <div className="w-44 border-r border-gray-300 flex flex-col">
                   {currencies.map((currency, idx) => (
                     <button
                       key={currency}
                       onClick={() => setActiveCurrency(currency)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 10, padding: '18px 12px', border: 'none', outline: 'none', background: activeCurrency === currency ? 'var(--bg)' : 'transparent', color: activeCurrency === currency ? 'var(--fg)' : 'var(--muted)', fontWeight: activeCurrency === currency ? 600 : 400, cursor: 'pointer', borderBottom: idx !== currencies.length - 1 ? '1px solid #1f2937' : 'none', position: 'relative', minHeight: 72
-                      }}
+                        className={`flex items-center gap-2 py-4 px-3 border-none outline-none ${activeCurrency === currency ? 'bg-gray-100 text-gray-900 font-semibold' : 'bg-transparent text-gray-500 font-normal'} cursor-pointer ${idx !== currencies.length - 1 ? 'border-b border-gray-800' : ''} relative min-h-[72px]`}
                     >
-                      <span style={{ width: 32, height: 32, background: '#f0f0f0', borderRadius: 6, display: 'inline-block', marginRight: 8 }} />
-                      <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
-                        <span style={{ fontSize: 18, fontWeight: 600 }}>{(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        <span style={{ fontSize: 13, color: 'var(--muted)' }}>{currency}</span>
-                      </span>
-                      {activeCurrency === currency && <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: '#bbb', borderRadius: '12px 0 0 12px' }} />}
+                        <span className="w-8 h-8 bg-gray-200 rounded-md inline-block mr-2" />
+                        <span className="flex flex-col gap-0.5 items-start flex-1">
+                          <span className="text-lg font-semibold">{(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span className="text-xs text-gray-500">{currency}</span>
+                        </span>
+                        {activeCurrency === currency && <span className="absolute left-0 top-0 bottom-0 w-1 bg-gray-400 rounded-l-xl" />}
                     </button>
                   ))}
                 </div>
-                <div style={{ flex: 1, padding: '32px 24px', display: 'flex', alignItems: 'flex-start', flexDirection: 'column', gap: 24 }}>
-                  <div style={{ width: '100%' }}>
+                  <div className="flex-1 p-8 flex flex-col items-start gap-6">
+                    <div className="w-full">
                     {fareDistributionData.length > 0 && (
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={fareDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -322,8 +320,8 @@ const Stats = ({
                       </ResponsiveContainer>
                     )}
                   </div>
-                  {currencies.length === 1 && (
-                    <div style={{ width: '100%' }}>
+                    {currencies.length === 1 && (
+                      <div className="w-full">
                       <Stat
                         label="Total Fare"
                         unit={activeCurrency}
@@ -331,7 +329,7 @@ const Stats = ({
                       />
                     </div>
                   )}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', width: '100%' }}>
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full">
                       <Stat
                         label="Avg. Fare"
                         unit={activeCurrency}
@@ -369,7 +367,7 @@ const Stats = ({
             <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => onFocusOnTrip(shortestTripRow)} />
           </div>
           {durationDistributionData.length > 0 && (
-            <div style={{ marginTop: '16px' }}>
+            <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={durationDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -381,7 +379,7 @@ const Stats = ({
               </ResponsiveContainer>
             </div>
           )}
-          <h3 style={{ marginTop: '16px' }}>Waiting Time</h3>
+          <h3 className="mt-4">Waiting Time</h3>
           <div className="stats-grid">
             <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
             <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
@@ -389,7 +387,7 @@ const Stats = ({
             <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => onFocusOnTrip(shortestWaitingTimeRow)} />
           </div>
           {waitingTimeDistributionData.length > 0 && (
-            <div style={{ marginTop: '16px' }}>
+            <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={waitingTimeDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -419,7 +417,7 @@ const Stats = ({
             ))}
           </div>
           {distanceDistributionData.length > 0 && (
-            <div style={{ marginTop: '16px' }}>
+            <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={distanceDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -447,7 +445,7 @@ const Stats = ({
                 value={amount.toFixed(2)}
               />
             )}
-            <div style={{ marginTop: '16px' }}>
+            <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={speedDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -482,7 +480,7 @@ const Stats = ({
       </div>
 
       <div className="section">
-        <div className="row" style={{ gap: '6px' }}>
+        <div className="row flex gap-1.5">
           <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
           <button onClick={() => handleDownloadKML('begin')} disabled={!actionsEnabled}>Begintrip KML</button>
           <button onClick={() => handleDownloadKML('drop')} disabled={!actionsEnabled}>Dropoff KML</button>
@@ -491,7 +489,7 @@ const Stats = ({
       </div>
 
       <div className="section">
-        <input ref={fileInputRef} type="file" accept=".csv" onChange={onFileSelect} disabled={isProcessing} />
+        <input ref={fileInputRef} type="file" accept=".csv" onChange={onFileSelect} disabled={isProcessing} className="block" />
         <div className="footer">Select a new CSV file to replace the current data.</div>
       </div>
     </>

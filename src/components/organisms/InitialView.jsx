@@ -29,7 +29,7 @@ const InitialView = ({ onFileSelect, isProcessing, error, isDragging, onDragEven
         />
       </div>
       {error && (
-        <div className="section error" style={{marginTop: '20px', width: '100%', maxWidth: '600px'}}>
+        <div className="section error mt-5 w-full max-w-[600px]">
           {error}
         </div>
       )}

@@ -23,8 +23,7 @@ const Sidebar = ({
 }) => {
   return (
     <aside
-      className="sidebar"
-      style={layout === 'split' ? { flex: '0 0 70%' } : {}}
+      className={`sidebar${layout === 'split' ? ' flex-[0_0_70%]' : ''}`}
     >
       {focusedTrip && (
         <FocusedTripInfo

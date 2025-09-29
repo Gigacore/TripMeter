@@ -3,9 +3,9 @@ import SettingsIcon from '../atoms/SettingsIcon';
 
 const Header = ({ onReset, actionsEnabled, error, toggleSettings }) => {
   return (
-    <header>
+    <header className="flex items-center">
       <h1 className="text-3xl font-bold underline">CSV → Map & KML</h1>
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="ml-auto flex items-center gap-4">
         {actionsEnabled && (
           <button onClick={onReset} disabled={!actionsEnabled && !error}>Clear</button>
         )}
