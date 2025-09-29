@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
@@ -331,6 +331,29 @@ const Stats: React.FC<StatsProps> = ({
     return Object.entries(countsByHour).map(([hour, count]) => ({ hour: parseInt(hour, 10), count }));
   }, [rows]);
 
+  const tripsByDayOfWeekData = React.useMemo(() => {
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const countsByDay: number[] = Array(7).fill(0);
+
+    rows.forEach(row => {
+      if (row.status?.toLowerCase() === 'completed' && row.request_time) {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const day = date.getDay(); // 0 for Sunday, 1 for Monday, etc.
+          countsByDay[day]++;
+        }
+      }
+    });
+
+    return countsByDay.map((count, index) => ({
+      day: dayNames[index],
+      count,
+    }));
+  }, [rows]);
+
   const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
 
   return (
@@ -592,6 +615,22 @@ const Stats: React.FC<StatsProps> = ({
                 />
                 <Scatter name="Trips" data={tripsByHourData} fill="#8884d8" />
               </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {tripsByDayOfWeekData.length > 0 && (
+          <div className="stats-group">
+            <h3>Trips by Day of Week</h3>
+            <p className="hint -mt-2 mb-4">Number of completed trips for each day of the week.</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={tripsByDayOfWeekData}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="day" />
+                <PolarRadiusAxis angle={30} domain={[0, 'dataMax']} />
+                <Radar name="Trips" dataKey="count" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+                <Tooltip />
+              </RadarChart>
             </ResponsiveContainer>
           </div>
         )}
