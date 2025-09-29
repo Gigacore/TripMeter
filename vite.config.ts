@@ -14,8 +14,30 @@ export default defineConfig({
         short_name: 'Map App',
         description: 'An application to visualize CSV data on a map.',
         theme_color: '#ffffff',
-        // TODO: Add PWA icons
-        icons: []
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ]
       }
     })
   ],

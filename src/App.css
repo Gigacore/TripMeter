@@ -44,9 +44,9 @@ header h1 { font-size: 18px; margin: 0 8px 0 0; }
 /* Map container for hero section */
 .map-hero {
   max-width: 1400px;
-  width: 90vw;
-  height: 70vh;
-  min-height: 500px; /* Ensure map is not too small on short screens */
+  width: 80vw;
+  height: 50vh;
+  min-height: 400px; /* Ensure map is not too small on short screens */
   margin: 24px auto;
   border-radius: 12px;
   overflow: hidden;
@@ -246,12 +246,3 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .leaflet-popup-tip { background: var(--panel); }
 .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
 .leaflet-container a.leaflet-popup-close-button:hover { color: var(--fg); }
-.map-hero {
-  max-width: 1400px;
-  width: 90vw;
-  height: 70vh;
-  min-height: 500px; /* Ensure map is not too small on short screens */
-  margin: 24px auto;
-  border-radius: 12px;
-  overflow: hidden;
-}
