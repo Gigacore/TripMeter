@@ -51,6 +51,14 @@ interface StatsProps {
   rows: CSVRow[];
 }
 
+const formatDateRange = (start: number | null, end: number | null): string | null => {
+  if (!start || !end) return null;
+  const startDate = new Date(start).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const endDate = new Date(end).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  if (startDate === endDate) return startDate;
+  return `${startDate} - ${endDate}`;
+};
+
 const Stats: React.FC<StatsProps> = ({
   data,
   onFocusOnTrip,
@@ -93,6 +101,8 @@ const Stats: React.FC<StatsProps> = ({
     slowestTripBySpeed,
     slowestTripBySpeedRow,
     costPerDurationByCurrency,
+    longestStreak,
+    longestGap,
   } = data;
 
   const currencies = Object.keys(totalFareByCurrency);
@@ -527,6 +537,21 @@ const Stats: React.FC<StatsProps> = ({
               <ContributionGraph data={contributionData} view={contributionView} />
             </div>
           ) : <p className="text-slate-500 text-sm mt-2">No trip data with dates to display.</p>}
+        </div>
+
+        <div className="stats-group">
+          <h3>Streaks & Gaps</h3>
+          <div className="stats-grid">
+            <Stat
+              label="Longest Streak"
+              value={`${longestStreak.days} ${longestStreak.days === 1 ? 'day' : 'days'}`}
+              subValue={formatDateRange(longestStreak.startDate, longestStreak.endDate)} />
+            <Stat
+              label="Longest Gap"
+              value={`${longestGap.days} ${longestGap.days === 1 ? 'day' : 'days'}`}
+              subValue={formatDateRange(longestGap.startDate, longestGap.endDate)} />
+          </div>
+          <p className="hint mt-2">Based on days with at least one completed trip.</p>
         </div>
 
         {productTypeData.length > 0 && (

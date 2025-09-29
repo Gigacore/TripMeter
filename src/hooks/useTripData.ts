@@ -39,6 +39,16 @@ export interface TripStats {
   totalFareByCurrency: { [key: string]: number };
   costPerDistanceByCurrency: { [key: string]: number };
   costPerDurationByCurrency: { [key: string]: number };
+  longestStreak: {
+    days: number;
+    startDate: number | null;
+    endDate: number | null;
+  };
+  longestGap: {
+    days: number;
+    startDate: number | null;
+    endDate: number | null;
+  };
 }
 
 export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripStats => {
@@ -78,6 +88,8 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     totalFareByCurrency: {},
     costPerDistanceByCurrency: {},
     costPerDurationByCurrency: {},
+    longestStreak: { days: 0, startDate: null, endDate: null },
+    longestGap: { days: 0, startDate: null, endDate: null },
   });
 
   const convertDistance = (miles: number) => {
@@ -100,6 +112,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
       const fareCountByCurrency: { [key: string]: number } = {};
       const localLowestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
       const localHighestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
+      const completedTripDates: Date[] = [];
 
       rows.forEach((r: CSVRow) => {
         const status = r.status?.toLowerCase();
@@ -109,6 +122,10 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
           const beginTime = new Date(r.begin_trip_time);
           const dropoffTime = new Date(r.dropoff_time);
           const requestTime = new Date(r.request_time);
+
+          if (requestTime.getTime()) {
+            completedTripDates.push(requestTime);
+          }
 
           if (requestTime.getTime() && beginTime.getTime() && beginTime > requestTime) {
             const waitingMinutes = (beginTime.getTime() - requestTime.getTime()) / (1000 * 60);
@@ -183,6 +200,56 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         }
       }
 
+      let longestStreak = { days: 0, startDate: null as number | null, endDate: null as number | null };
+      let longestGap = { days: 0, startDate: null as number | null, endDate: null as number | null };
+
+      if (completedTripDates.length > 0) {
+        const uniqueDates = Array.from(new Set(
+          completedTripDates.map(d => {
+            const date = new Date(d);
+            date.setUTCHours(0, 0, 0, 0);
+            return date.getTime();
+          })
+        )).sort((a, b) => a - b);
+
+        if (uniqueDates.length === 1) {
+          longestStreak = { days: 1, startDate: uniqueDates[0], endDate: uniqueDates[0] };
+        } else if (uniqueDates.length > 1) {
+          let currentStreak = 1;
+          let currentStreakStartDate = uniqueDates[0];
+          longestStreak = { days: 1, startDate: uniqueDates[0], endDate: uniqueDates[0] };
+
+          const oneDay = 24 * 60 * 60 * 1000;
+
+          for (let i = 1; i < uniqueDates.length; i++) {
+            const diffDays = Math.round((uniqueDates[i] - uniqueDates[i - 1]) / oneDay);
+
+            if (diffDays === 1) {
+              currentStreak++;
+            } else {
+              if (currentStreak > longestStreak.days) {
+                longestStreak = { days: currentStreak, startDate: currentStreakStartDate, endDate: uniqueDates[i - 1] };
+              }
+              currentStreak = 1;
+              currentStreakStartDate = uniqueDates[i];
+
+              const gapDays = diffDays - 1;
+              if (gapDays > longestGap.days) {
+                longestGap = {
+                  days: gapDays,
+                  startDate: uniqueDates[i - 1] + oneDay,
+                  endDate: uniqueDates[i] - oneDay,
+                };
+              }
+            }
+          }
+
+          if (currentStreak > longestStreak.days) {
+            longestStreak = { days: currentStreak, startDate: currentStreakStartDate, endDate: uniqueDates[uniqueDates.length - 1] };
+          }
+        }
+      }
+
       const newStats: TripStats = {
         ...stats,
         totalTrips: rows.length,
@@ -199,6 +266,8 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         totalCompletedDistance: currentTotalDistance,
         avgSpeed: totalDurationHours > 0 ? currentTotalDistance / totalDurationHours : 0,
         totalTripDuration: totalDurationMinutes,
+        longestStreak,
+        longestGap,
       };
 
       if (tripsWithDuration.length > 0) {
