@@ -289,7 +289,7 @@ const Stats: React.FC<StatsProps> = ({
                       onClick={() => setActiveCurrency(currency)}
                         className={`flex items-center gap-2 py-4 px-3 border-none outline-none ${activeCurrency === currency ? 'bg-gray-100 text-gray-900 font-semibold' : 'bg-transparent text-gray-500 font-normal'} cursor-pointer ${idx !== currencies.length - 1 ? 'border-b border-gray-800' : ''} relative min-h-[72px]`}
                     >
-                        <span className="w-8 h-8 bg-gray-200 rounded-md inline-block mr-2" />
+                  
                         <span className="flex flex-col gap-0.5 items-start flex-1">
                           <span className="text-lg font-semibold">{(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           <span className="text-xs text-gray-500">{currency}</span>
