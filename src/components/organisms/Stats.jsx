@@ -296,13 +296,13 @@ const Stats = ({
                       key={currency}
                       onClick={() => setActiveCurrency(currency)}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: 10, padding: '18px 12px', border: 'none', outline: 'none', background: activeCurrency === currency ? '#fff' : 'transparent', fontWeight: activeCurrency === currency ? 600 : 400, cursor: 'pointer', borderBottom: idx !== currencies.length - 1 ? '1px solid #eee' : 'none', position: 'relative', minHeight: 72
+                        display: 'flex', alignItems: 'center', gap: 10, padding: '18px 12px', border: 'none', outline: 'none', background: activeCurrency === currency ? 'var(--bg)' : 'transparent', color: activeCurrency === currency ? 'var(--fg)' : 'var(--muted)', fontWeight: activeCurrency === currency ? 600 : 400, cursor: 'pointer', borderBottom: idx !== currencies.length - 1 ? '1px solid #1f2937' : 'none', position: 'relative', minHeight: 72
                       }}
                     >
                       <span style={{ width: 32, height: 32, background: '#f0f0f0', borderRadius: 6, display: 'inline-block', marginRight: 8 }} />
-                      <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
-                        <span style={{ fontSize: 16, fontWeight: 500, marginBottom: 2 }}>{currency}</span>
-                        <span style={{ fontSize: 13, fontWeight: 400 }}>Total: {totalFareByCurrency[currency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+                        <span style={{ fontSize: 18, fontWeight: 600 }}>{(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span style={{ fontSize: 13, color: 'var(--muted)' }}>{currency}</span>
                       </span>
                       {activeCurrency === currency && <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: '#bbb', borderRadius: '12px 0 0 12px' }} />}
                     </button>
@@ -314,13 +314,13 @@ const Stats = ({
                       <Stat
                         label="Total Fare"
                         unit={activeCurrency}
-                        value={totalFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        value={(totalFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       />
                     )}
                     <Stat
                       label="Avg. Fare"
                       unit={activeCurrency}
-                      value={avgFareByCurrency[activeCurrency].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      value={(avgFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     />
                     {lowestFareByCurrency[activeCurrency] && (
                       <Stat
