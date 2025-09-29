@@ -3,6 +3,7 @@ import './App.css';
 import 'leaflet/dist/leaflet.css';
 import { useTripData } from './hooks/useTripData';
 import { parseCSV } from './services/csvParser';
+import { downloadKML } from './services/kmlService';
 import { normalizeHeaders } from './utils/csv';
 import { KM_PER_MILE } from './constants';
 import Header from './components/organisms/Header';
@@ -10,6 +11,8 @@ import InitialView from './components/organisms/InitialView';
 import Sidebar from './components/organisms/Sidebar';
 import Map from './components/organisms/Map';
 import Spinner from './components/atoms/Spinner';
+import TopStats from './components/organisms/TopStats';
+import Settings from './components/organisms/Settings';
 
 function App() {
   const [rows, setRows] = useState([]);
@@ -18,10 +21,10 @@ function App() {
   const [focusedTrip, setFocusedTrip] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState('miles'); // 'miles' or 'km'
-  const [layout, setLayout] = useState('split'); // 'split', 'map', 'sidebar'
   const [sidebarView, setSidebarView] = useState('stats'); // 'stats' or 'tripList'
   const [tripList, setTripList] = useState([]);
   const [tripListTitle, setTripListTitle] = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const tripData = useTripData(rows, distanceUnit);
@@ -143,11 +146,12 @@ function App() {
         list = rows.filter(r => r.status?.toLowerCase() === 'driver_canceled');
         title = `Driver Canceled Trips (${list.length})`;
         break;
-      case 'unfulfilled':
+      case 'unfulfilled': {
         const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
         list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase()));
         title = `Unfulfilled Trips (${list.length})`;
         break;
+      }
       default: return;
     }
     setTripList(list);
@@ -157,17 +161,25 @@ function App() {
 
   const actionsEnabled = rows.length > 0 && !isProcessing;
 
+  const toggleSettings = () => {
+    setIsSettingsOpen(!isSettingsOpen);
+  };
+
   return (
     <>
       {isProcessing && <Spinner />}
       <Header
-        layout={layout}
-        onLayoutChange={setLayout}
-        distanceUnit={distanceUnit}
-        onDistanceUnitChange={setDistanceUnit}
         onReset={resetMap}
         actionsEnabled={actionsEnabled}
         error={error}
+        toggleSettings={toggleSettings}
+      />
+      <Settings
+        unit={distanceUnit}
+        setUnit={setDistanceUnit}
+        downloadKml={() => downloadKML(rows)}
+        isMenuOpen={isSettingsOpen}
+        toggleMenu={toggleSettings}
       />
 
       {rows.length === 0 ? (
@@ -180,32 +192,35 @@ function App() {
           onDrop={handleDrop}
         />
       ) : (
-        <div className={`container layout-${layout}`}>
-          <Sidebar
-            layout={layout}
-            focusedTrip={focusedTrip}
-            onShowAll={handleShowAll}
-            convertDistance={convertDistance}
-            distanceUnit={distanceUnit}
-            sidebarView={sidebarView}
-            error={error}
-            tripData={tripData}
-            onFocusOnTrip={handleFocusOnTrip}
-            onShowTripList={handleShowTripList}
-            onFileSelect={handleFileSelect}
-            isProcessing={isProcessing}
-            rows={rows}
-            tripList={tripList}
-            tripListTitle={tripListTitle}
-            onBackToStats={() => setSidebarView('stats')}
-          />
-          <Map
-            rows={rows}
-            focusedTrip={focusedTrip}
-            layout={layout}
-            distanceUnit={distanceUnit}
-            convertDistance={convertDistance}
-          />
+        <div className="main-content">
+          <div className="map-and-stats-container">
+            <Map
+              rows={rows}
+              focusedTrip={focusedTrip}
+              distanceUnit={distanceUnit}
+              convertDistance={convertDistance}
+            />
+            <TopStats tripData={tripData} distanceUnit={distanceUnit} />
+          </div>
+          <div className="container">
+            <Sidebar
+              focusedTrip={focusedTrip}
+              onShowAll={handleShowAll}
+              convertDistance={convertDistance}
+              distanceUnit={distanceUnit}
+              sidebarView={sidebarView}
+              error={error}
+              tripData={tripData}
+              onFocusOnTrip={handleFocusOnTrip}
+              onShowTripList={handleShowTripList}
+              onFileSelect={handleFileSelect}
+              isProcessing={isProcessing}
+              rows={rows}
+              tripList={tripList}
+              tripListTitle={tripListTitle}
+              onBackToStats={() => setSidebarView('stats')}
+            />
+          </div>
         </div>
       )}
     </>

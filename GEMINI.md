@@ -1,0 +1,1 @@
+Always decompose components to atomic design structure
