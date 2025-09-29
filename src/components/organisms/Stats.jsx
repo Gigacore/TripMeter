@@ -310,36 +310,6 @@ const Stats = ({
                 </div>
                 <div style={{ flex: 1, padding: '32px 24px', display: 'flex', alignItems: 'flex-start', flexDirection: 'column', gap: 24 }}>
                   <div style={{ width: '100%' }}>
-                    {currencies.length === 1 && (
-                      <Stat
-                        label="Total Fare"
-                        unit={activeCurrency}
-                        value={(totalFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      />
-                    )}
-                    <Stat
-                      label="Avg. Fare"
-                      unit={activeCurrency}
-                      value={(avgFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    />
-                    {lowestFareByCurrency[activeCurrency] && (
-                      <Stat
-                        label="Lowest Fare"
-                        unit={activeCurrency}
-                        value={lowestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        onClick={() => onFocusOnTrip(lowestFareByCurrency[activeCurrency].row)}
-                      />
-                    )}
-                    {highestFareByCurrency[activeCurrency] && (
-                      <Stat
-                        label="Highest Fare"
-                        unit={activeCurrency}
-                        value={highestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        onClick={() => onFocusOnTrip(highestFareByCurrency[activeCurrency].row)}
-                      />
-                    )}
-                  </div>
-                  <div style={{ width: '100%' }}>
                     {fareDistributionData.length > 0 && (
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={fareDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -351,6 +321,38 @@ const Stats = ({
                         </BarChart>
                       </ResponsiveContainer>
                     )}
+                  </div>
+                  {currencies.length === 1 && (
+                    <div style={{ width: '100%' }}>
+                      <Stat
+                        label="Total Fare"
+                        unit={activeCurrency}
+                        value={(totalFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      />
+                    </div>
+                  )}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', width: '100%' }}>
+                      <Stat
+                        label="Avg. Fare"
+                        unit={activeCurrency}
+                        value={(avgFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      />
+                      {lowestFareByCurrency[activeCurrency] && (
+                        <Stat
+                          label="Lowest Fare"
+                          unit={activeCurrency}
+                          value={lowestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onClick={() => onFocusOnTrip(lowestFareByCurrency[activeCurrency].row)}
+                        />
+                      )}
+                      {highestFareByCurrency[activeCurrency] && (
+                        <Stat
+                          label="Highest Fare"
+                          unit={activeCurrency}
+                          value={highestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onClick={() => onFocusOnTrip(highestFareByCurrency[activeCurrency].row)}
+                        />
+                      )}
                   </div>
                 </div>
               </div>
