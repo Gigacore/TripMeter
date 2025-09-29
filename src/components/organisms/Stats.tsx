@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
@@ -309,6 +309,28 @@ const Stats: React.FC<StatsProps> = ({
     return Array.from(yearSet).sort((a, b) => b - a);
   }, [contributionData]);
 
+  const tripsByHourData = React.useMemo(() => {
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const countsByHour: { [hour: number]: number } = Array.from({ length: 24 }, () => 0).reduce((acc, _, i) => {
+      acc[i] = 0;
+      return acc;
+    }, {} as { [hour: number]: number });
+
+    rows.forEach(row => {
+      if (row.status?.toLowerCase() === 'completed' && row.request_time) {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const hour = date.getHours();
+          countsByHour[hour]++;
+        }
+      }
+    });
+
+    return Object.entries(countsByHour).map(([hour, count]) => ({ hour: parseInt(hour, 10), count }));
+  }, [rows]);
+
   const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
 
   return (
@@ -553,6 +575,26 @@ const Stats: React.FC<StatsProps> = ({
           </div>
           <p className="hint mt-2">Based on days with at least one completed trip.</p>
         </div>
+
+        {tripsByHourData.length > 0 && (
+          <div className="stats-group">
+            <h3>Trips by Hour of Day</h3>
+            <p className="hint -mt-2 mb-4">Number of completed trips for each hour of the day.</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                <CartesianGrid />
+                <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={24} />
+                <YAxis type="number" dataKey="count" name="Trips" />
+                <ZAxis type="number" range={[100, 101]} />
+                <Tooltip
+                  cursor={{ strokeDasharray: '3 3' }}
+                  formatter={(value: number, name: string) => (name === 'Hour' ? `${value}:00 - ${value}:59` : value)}
+                />
+                <Scatter name="Trips" data={tripsByHourData} fill="#8884d8" />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        )}
 
         {productTypeData.length > 0 && (
           <div className="stats-group">
