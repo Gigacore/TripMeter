@@ -11,6 +11,7 @@ import InitialView from './components/organisms/InitialView';
 import Sidebar from './components/organisms/Sidebar';
 import Map from './components/organisms/Map';
 import Spinner from './components/atoms/Spinner';
+import TopStats from './components/organisms/TopStats';
 import Settings from './components/organisms/Settings';
 
 function App() {
@@ -191,30 +192,35 @@ function App() {
           onDrop={handleDrop}
         />
       ) : (
-        <div className="container">
-          <Map
-            rows={rows}
-            focusedTrip={focusedTrip}
-            distanceUnit={distanceUnit}
-            convertDistance={convertDistance}
-          />
-          <Sidebar
-            focusedTrip={focusedTrip}
-            onShowAll={handleShowAll}
-            convertDistance={convertDistance}
-            distanceUnit={distanceUnit}
-            sidebarView={sidebarView}
-            error={error}
-            tripData={tripData}
-            onFocusOnTrip={handleFocusOnTrip}
-            onShowTripList={handleShowTripList}
-            onFileSelect={handleFileSelect}
-            isProcessing={isProcessing}
-            rows={rows}
-            tripList={tripList}
-            tripListTitle={tripListTitle}
-            onBackToStats={() => setSidebarView('stats')}
-          />
+        <div className="main-content">
+          <div className="map-and-stats-container">
+            <Map
+              rows={rows}
+              focusedTrip={focusedTrip}
+              distanceUnit={distanceUnit}
+              convertDistance={convertDistance}
+            />
+            <TopStats tripData={tripData} distanceUnit={distanceUnit} />
+          </div>
+          <div className="container">
+            <Sidebar
+              focusedTrip={focusedTrip}
+              onShowAll={handleShowAll}
+              convertDistance={convertDistance}
+              distanceUnit={distanceUnit}
+              sidebarView={sidebarView}
+              error={error}
+              tripData={tripData}
+              onFocusOnTrip={handleFocusOnTrip}
+              onShowTripList={handleShowTripList}
+              onFileSelect={handleFileSelect}
+              isProcessing={isProcessing}
+              rows={rows}
+              tripList={tripList}
+              tripListTitle={tripListTitle}
+              onBackToStats={() => setSidebarView('stats')}
+            />
+          </div>
         </div>
       )}
     </>

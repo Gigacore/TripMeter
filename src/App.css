@@ -201,7 +201,11 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
 .leaflet-container a.leaflet-popup-close-button:hover { color: var(--fg); }
 .map-hero {
-  width: 100%;
-  height: 60vh;
-  min-height: 400px; /* Ensure map is not too small on short screens */
+  max-width: 1400px;
+  width: 90vw;
+  height: 70vh;
+  min-height: 500px; /* Ensure map is not too small on short screens */
+  margin: 24px auto;
+  border-radius: 12px;
+  overflow: hidden;
 }
