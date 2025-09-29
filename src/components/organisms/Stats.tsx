@@ -1,14 +1,27 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
+import { CSVRow } from '../../services/csvParser';
+import { TripStats } from '../../hooks/useTripData';
+import { DistanceUnit } from '../../App';
 
-const SankeyNode = ({ x, y, width, height, index, payload, onShowTripList }) => {
+interface SankeyNodeProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  index: number;
+  payload: { name: string; value: number };
+  onShowTripList: (type: string) => void;
+}
+
+const SankeyNode: React.FC<SankeyNodeProps> = ({ x, y, width, height, index, payload, onShowTripList }) => {
   const isClickable = payload.name !== 'Total Requests';
   const handleClick = () => {
     if (!isClickable) return;
-    const typeMap = {
+    const typeMap: { [key: string]: string } = {
       'Successful': 'successful',
       'Rider Canceled': 'rider_canceled',
       'Driver Canceled': 'driver_canceled',
@@ -27,7 +40,17 @@ const SankeyNode = ({ x, y, width, height, index, payload, onShowTripList }) => 
   );
 };
 
-const Stats = ({
+interface StatsProps {
+  data: TripStats;
+  onFocusOnTrip: (tripRow: CSVRow) => void;
+  onShowTripList: (type: string) => void;
+  distanceUnit: DistanceUnit;
+  onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
+  isProcessing: boolean;
+  rows: CSVRow[];
+}
+
+const Stats: React.FC<StatsProps> = ({
   data,
   onFocusOnTrip,
   onShowTripList,
@@ -72,19 +95,19 @@ const Stats = ({
   } = data;
 
   const currencies = Object.keys(totalFareByCurrency);
-  const [activeCurrency, setActiveCurrency] = React.useState(currencies.length > 0 ? currencies[0] : null);
+  const [activeCurrency, setActiveCurrency] = React.useState<string | null>(currencies.length > 0 ? currencies[0] : null);
 
   React.useEffect(() => {
-    if (currencies.length > 0 && !currencies.includes(activeCurrency)) {
+    if (currencies.length > 0 && (!activeCurrency || !currencies.includes(activeCurrency))) {
       setActiveCurrency(currencies[0]);
     }
   }, [currencies, activeCurrency]);
 
-  const fileInputRef = React.useRef();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const actionsEnabled = rows.length > 0 && !isProcessing;
 
-  const handleDownloadKML = (which) => {
+  const handleDownloadKML = (which: 'both' | 'begin' | 'drop') => {
     downloadKML(rows, which);
   };
 
@@ -110,7 +133,7 @@ const Stats = ({
     if (!rows || rows.length === 0) {
       return [];
     }
-    const counts = rows.reduce((acc, trip) => {
+    const counts = rows.reduce((acc: { [key: string]: number }, trip) => {
       const product = trip.product_type || 'N/A';
       acc[product] = (acc[product] || 0) + 1;
       return acc;
@@ -120,7 +143,7 @@ const Stats = ({
   }, [rows]);
 
   const renderSankeyNode = React.useCallback(
-    (props) => <SankeyNode {...props} onShowTripList={onShowTripList} />,
+    (props: any) => <SankeyNode {...props} onShowTripList={onShowTripList} />,
     [onShowTripList]
   );
 
@@ -152,7 +175,7 @@ const Stats = ({
     if (!rows || rows.length === 0) return [];
     const durations = rows
       .filter(r => r.status?.toLowerCase() === 'completed' && r.begin_trip_time && r.dropoff_time)
-      .map(r => (new Date(r.dropoff_time) - new Date(r.begin_trip_time)) / (1000 * 60)) // in minutes
+      .map(r => (new Date(r.dropoff_time).getTime() - new Date(r.begin_trip_time).getTime()) / (1000 * 60)) // in minutes
       .filter(d => d > 0);
     if (durations.length === 0) return [];
 
@@ -176,7 +199,7 @@ const Stats = ({
     if (!rows || rows.length === 0) return [];
     const waitingTimes = rows
       .filter(r => r.status?.toLowerCase() === 'completed' && r.request_time && r.begin_trip_time)
-      .map(r => (new Date(r.begin_trip_time) - new Date(r.request_time)) / (1000 * 60)) // in minutes
+      .map(r => (new Date(r.begin_trip_time).getTime() - new Date(r.request_time).getTime()) / (1000 * 60)) // in minutes
       .filter(d => d > 0);
     if (waitingTimes.length === 0) return [];
 
@@ -224,11 +247,11 @@ const Stats = ({
     const speeds = rows
       .filter(r => r.status?.toLowerCase() === 'completed' && r.distance && parseFloat(r.distance) > 0 && r.begin_trip_time && r.dropoff_time)
       .map(r => {
-        const durationHours = (new Date(r.dropoff_time) - new Date(r.begin_trip_time)) / (1000 * 60 * 60);
+        const durationHours = (new Date(r.dropoff_time).getTime() - new Date(r.begin_trip_time).getTime()) / (1000 * 60 * 60);
         if (durationHours <= 0) return null;
         return parseFloat(r.distance) / durationHours;
       })
-      .filter(speed => speed !== null && speed > 0);
+      .filter((speed): speed is number => speed !== null && speed > 0);
     if (speeds.length === 0) return [];
 
     const maxSpeed = Math.max(...speeds);
@@ -248,7 +271,7 @@ const Stats = ({
   }, [rows]);
 
   const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
-  const renderTreemapContent = React.useCallback((props) => <CustomizedContent {...props} colors={treemapColors} />, [treemapColors]);
+  const renderTreemapContent = React.useCallback((props: any) => <CustomizedContent {...props} colors={treemapColors} />, [treemapColors]);
 
   return (
     <>
@@ -284,7 +307,7 @@ const Stats = ({
           </div>
         </div>
 
-        {currencies.length > 0 && (
+        {currencies.length > 0 && activeCurrency &&(
           <div className="stats-group">
             <h3>Fare</h3>
               <div className="flex gap-4">
@@ -339,16 +362,16 @@ const Stats = ({
                         <Stat
                           label="Lowest Fare"
                           unit={activeCurrency}
-                          value={lowestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          onClick={() => onFocusOnTrip(lowestFareByCurrency[activeCurrency].row)}
+                          value={lowestFareByCurrency[activeCurrency]!.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onClick={() => lowestFareByCurrency[activeCurrency] && onFocusOnTrip(lowestFareByCurrency[activeCurrency]!.row)}
                         />
                       )}
                       {highestFareByCurrency[activeCurrency] && (
                         <Stat
                           label="Highest Fare"
                           unit={activeCurrency}
-                          value={highestFareByCurrency[activeCurrency].amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          onClick={() => onFocusOnTrip(highestFareByCurrency[activeCurrency].row)}
+                          value={highestFareByCurrency[activeCurrency]!.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onClick={() => highestFareByCurrency[activeCurrency] && onFocusOnTrip(highestFareByCurrency[activeCurrency]!.row)}
                         />
                       )}
                   </div>
@@ -363,8 +386,8 @@ const Stats = ({
           <div className="stats-grid">
             <Stat label="Total" value={formatDuration(totalTripDuration, true)} />
             <Stat label="Average" value={formatDurationWithSeconds(avgTripDuration)} />
-            <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => onFocusOnTrip(longestTripRow)} />
-            <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => onFocusOnTrip(shortestTripRow)} />
+            <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrip(longestTripRow)} />
+            <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrip(shortestTripRow)} />
           </div>
           {durationDistributionData.length > 0 && (
             <div className="mt-4">
@@ -383,8 +406,8 @@ const Stats = ({
           <div className="stats-grid">
             <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
             <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
-            <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => onFocusOnTrip(longestWaitingTimeRow)} />
-            <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => onFocusOnTrip(shortestWaitingTimeRow)} />
+            <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
+            <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
           </div>
           {waitingTimeDistributionData.length > 0 && (
             <div className="mt-4">
@@ -405,8 +428,8 @@ const Stats = ({
           <h3>Distance</h3>
           <div className="stats-grid">
             <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-            <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => onFocusOnTrip(longestTripByDistRow)} />
-            <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => onFocusOnTrip(shortestTripByDistRow)} />
+            <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
+            <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
             {Object.entries(costPerDistanceByCurrency).map(([currency, amount]) => (
               <Stat
                 key={currency}
@@ -435,8 +458,8 @@ const Stats = ({
           <h3>Speed</h3>
           <div className="stats-grid">
             <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
-            <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => onFocusOnTrip(fastestTripBySpeedRow)} />
-            <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => onFocusOnTrip(slowestTripBySpeedRow)} />
+            <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
+            <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
             {Object.entries(costPerDurationByCurrency).map(([currency, amount]) =>
               <Stat
                 key={currency}
@@ -472,7 +495,7 @@ const Stats = ({
                 isAnimationActive={false}
                 content={renderTreemapContent}
               >
-                <Tooltip formatter={(value, name, props) => [props.payload.name.split(' (')[0], `Count: ${value}`]} />
+                <Tooltip formatter={(value: number, name: string, props: any) => [props.payload.name.split(' (')[0], `Count: ${value}`]} />
               </Treemap>
             </ResponsiveContainer>
           </div>
@@ -496,7 +519,19 @@ const Stats = ({
   );
 };
 
-const CustomizedContent = ({ root, depth, x, y, width, height, index, colors, name }) => {
+interface CustomizedContentProps {
+  root: any;
+  depth: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  index: number;
+  colors: string[];
+  name: string;
+}
+
+const CustomizedContent: React.FC<CustomizedContentProps> = ({ root, depth, x, y, width, height, index, colors, name }) => {
   return (
     <g>
       <rect

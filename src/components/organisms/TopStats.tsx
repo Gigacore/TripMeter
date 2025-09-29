@@ -1,8 +1,15 @@
 import React from 'react';
 import Stat from '../atoms/Stat';
 import { formatDuration } from '../../utils/formatters';
+import { TripStats } from '../../hooks/useTripData';
+import { DistanceUnit } from '../../App';
 
-const TopStats = ({ tripData, distanceUnit }) => {
+interface TopStatsProps {
+  tripData: TripStats;
+  distanceUnit: DistanceUnit;
+}
+
+const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
   const {
     totalTrips,
     totalFareByCurrency,

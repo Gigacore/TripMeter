@@ -1,8 +1,48 @@
 import { useState, useEffect } from 'react';
 import { KM_PER_MILE } from '../constants';
+import { CSVRow } from '../services/csvParser';
+import { DistanceUnit } from '../App';
 
-export const useTripData = (rows, distanceUnit) => {
-  const [stats, setStats] = useState({
+export interface TripStats {
+  beginCount: number;
+  dropoffCount: number;
+  avgSpeed: number;
+  longestTrip: number;
+  longestTripByDist: number;
+  shortestTrip: number;
+  shortestTripByDist: number;
+  longestTripRow: CSVRow | null;
+  totalWaitingTime: number;
+  avgWaitingTime: number;
+  shortestWaitingTime: number;
+  longestWaitingTime: number;
+  shortestWaitingTimeRow: CSVRow | null;
+  longestWaitingTimeRow: CSVRow | null;
+  fastestTripBySpeed: number;
+  fastestTripBySpeedRow: CSVRow | null;
+  slowestTripBySpeed: number;
+  slowestTripBySpeedRow: CSVRow | null;
+  longestTripByDistRow: CSVRow | null;
+  shortestTripRow: CSVRow | null;
+  shortestTripByDistRow: CSVRow | null;
+  avgTripDuration: number;
+  totalTripDuration: number;
+  totalCompletedDistance: number;
+  totalTrips: number;
+  successfulTrips: number;
+  riderCanceledTrips: number;
+  driverCanceledTrips: number;
+  unfulfilledTrips: number;
+  avgFareByCurrency: { [key: string]: number };
+  lowestFareByCurrency: { [key: string]: { amount: number; row: CSVRow } };
+  highestFareByCurrency: { [key: string]: { amount: number; row: CSVRow } };
+  totalFareByCurrency: { [key: string]: number };
+  costPerDistanceByCurrency: { [key: string]: number };
+  costPerDurationByCurrency: { [key: string]: number };
+}
+
+export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripStats => {
+  const [stats, setStats] = useState<TripStats>({
     beginCount: 0,
     dropoffCount: 0,
     avgSpeed: 0,
@@ -40,7 +80,7 @@ export const useTripData = (rows, distanceUnit) => {
     costPerDurationByCurrency: {},
   });
 
-  const convertDistance = (miles) => {
+  const convertDistance = (miles: number) => {
     return distanceUnit === 'km' ? miles * KM_PER_MILE : miles;
   };
 
@@ -49,19 +89,19 @@ export const useTripData = (rows, distanceUnit) => {
       let currentTotalDistance = 0;
       let totalDurationMinutes = 0;
       let totalDurationHours = 0;
-      const tripsWithDuration = [];
-      const tripsWithDistance = [];
-      const tripsWithSpeed = [];
-      const tripsWithWaitingTime = [];
+      const tripsWithDuration: { duration: number; row: CSVRow }[] = [];
+      const tripsWithDistance: { distance: number; row: CSVRow }[] = [];
+      const tripsWithSpeed: { speed: number; row: CSVRow }[] = [];
+      const tripsWithWaitingTime: { waitingTime: number; row: CSVRow }[] = [];
       let completedCount = 0;
       let riderCanceledCount = 0;
       let driverCanceledCount = 0;
-      const fareByCurrency = {};
-      const fareCountByCurrency = {};
-      const localLowestFare = {};
-      const localHighestFare = {};
+      const fareByCurrency: { [key: string]: number } = {};
+      const fareCountByCurrency: { [key: string]: number } = {};
+      const localLowestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
+      const localHighestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
 
-      rows.forEach(r => {
+      rows.forEach((r: CSVRow) => {
         const status = r.status?.toLowerCase();
         if (status === 'completed') {
           completedCount++;
@@ -71,13 +111,13 @@ export const useTripData = (rows, distanceUnit) => {
           const requestTime = new Date(r.request_time);
 
           if (requestTime.getTime() && beginTime.getTime() && beginTime > requestTime) {
-            const waitingMinutes = (beginTime - requestTime) / (1000 * 60);
+            const waitingMinutes = (beginTime.getTime() - requestTime.getTime()) / (1000 * 60);
             if (isFinite(waitingMinutes)) {
               tripsWithWaitingTime.push({ waitingTime: waitingMinutes, row: r });
             }
           }
           if (!isNaN(distanceMiles) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
-            const durationHours = (dropoffTime - beginTime) / (1000 * 60 * 60);
+            const durationHours = (dropoffTime.getTime() - beginTime.getTime()) / (1000 * 60 * 60);
             if (durationHours > 0) {
               if (distanceMiles > 0) {
                 totalDurationMinutes += durationHours * 60;
@@ -124,15 +164,15 @@ export const useTripData = (rows, distanceUnit) => {
       const canceledCount = riderCanceledCount + driverCanceledCount;
       const unfulfilledCount = rows.length - completedCount - canceledCount;
 
-      const avgFares = {};
+      const avgFares: { [key: string]: number } = {};
       for (const currency in fareByCurrency) {
         if (fareCountByCurrency[currency] > 0) {
           avgFares[currency] = fareByCurrency[currency] / fareCountByCurrency[currency];
         }
       }
 
-      const localCostPerDistance = {};
-      const localCostPerDuration = {};
+      const localCostPerDistance: { [key: string]: number } = {};
+      const localCostPerDuration: { [key: string]: number } = {};
 
       for (const currency in fareByCurrency) {
         if (currentTotalDistance > 0) {
@@ -143,7 +183,8 @@ export const useTripData = (rows, distanceUnit) => {
         }
       }
 
-      const newStats = {
+      const newStats: TripStats = {
+        ...stats,
         totalTrips: rows.length,
         successfulTrips: completedCount,
         riderCanceledTrips: riderCanceledCount,

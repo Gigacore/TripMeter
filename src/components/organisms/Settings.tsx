@@ -1,6 +1,15 @@
 import React from 'react';
+import { DistanceUnit } from '../../App';
 
-const Settings = ({
+interface SettingsProps {
+  unit: DistanceUnit;
+  setUnit: (unit: DistanceUnit) => void;
+  downloadKml: () => void;
+  isMenuOpen: boolean;
+  toggleMenu: () => void;
+}
+
+const Settings: React.FC<SettingsProps> = ({
   unit,
   setUnit,
   downloadKml,

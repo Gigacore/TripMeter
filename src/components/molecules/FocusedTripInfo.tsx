@@ -1,6 +1,15 @@
 import React from 'react';
+import { CSVRow } from '../../services/csvParser';
+import { DistanceUnit } from '../../App';
 
-const FocusedTripInfo = ({ trip, onShowAll, distanceUnit, convertDistance }) => {
+interface FocusedTripInfoProps {
+  trip: CSVRow;
+  onShowAll: () => void;
+  distanceUnit: DistanceUnit;
+  convertDistance: (miles: number) => number;
+}
+
+const FocusedTripInfo: React.FC<FocusedTripInfoProps> = ({ trip, onShowAll, distanceUnit, convertDistance }) => {
   return (
   <div className="mb-6 focused-trip-info">
       <div className="trip-list-header flex items-center">
