@@ -6,6 +6,52 @@ header { padding: 16px 20px; border-bottom: 1px solid #1f2937; display:flex; gap
 header h1 { font-size: 18px; margin: 0 8px 0 0; }
 .hint { color: var(--muted); font-size: 12px; }
 
+/* Theme variables */
+:root { --bg: #0f172a; --panel: #111827; --muted: #9ca3af; --fg: #f8fafc; --accent: #22c55e; --accent2: #ef4444; }
+
+/* Spinner styles (used in Spinner.jsx) */
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid var(--fg);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Leaflet popup customization */
+.leaflet-popup-content-wrapper { background: var(--panel); color: var(--fg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+.leaflet-popup-content { margin: 14px; font-size: 13px; }
+.leaflet-popup-tip { background: var(--panel); }
+.leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+.leaflet-container a.leaflet-popup-close-button:hover { color: var(--fg); }
+
+/* Map container for hero section */
+.map-hero {
+  max-width: 1400px;
+  width: 90vw;
+  height: 70vh;
+  min-height: 500px; /* Ensure map is not too small on short screens */
+  margin: 24px auto;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 .settings-menu { position: relative; }
 .settings-button { padding: 6px 8px; font-size: 16px; line-height: 1; }
 .settings-dropdown {

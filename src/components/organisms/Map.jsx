@@ -147,7 +147,7 @@ const Map = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
     }, [rows, focusedTrip, convertDistance, distanceUnit]);
 
     return (
-        <div className="map-container map-hero">
+    <div className="flex-shrink-0 map-hero">
             <main id="map"></main>
         </div>
     );

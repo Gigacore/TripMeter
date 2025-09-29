@@ -4,11 +4,11 @@ import Map from '/src/components/Map';
 
 function Rides() {
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      <aside style={{ width: '300px', overflowY: 'auto', borderRight: '1px solid #ccc' }}>
+    <div className="flex h-screen">
+      <aside className="w-[300px] overflow-y-auto border-r border-gray-300">
         <RidesList />
       </aside>
-      <main style={{ flex: 1 }}>
+      <main className="flex-1">
         <Map />
       </main>
     </div>

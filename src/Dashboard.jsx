@@ -8,11 +8,11 @@ function Dashboard() {
       <header>
         <h1>Dashboard</h1>
       </header>
-      <section className="stats-section">
+  <section className="mb-6">
         <h2>High-Level Stats</h2>
         <Stats />
       </section>
-      <section className="map-hero">
+  <section className="mb-6 map-hero">
         <Map />
       </section>
     </div>
