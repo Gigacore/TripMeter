@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend, PieChart, Pie, Cell } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
@@ -107,6 +107,7 @@ const Stats: React.FC<StatsProps> = ({
     longestStreak,
     avgCostPerDistanceByYear,
     longestGap,
+    tripsByYear,
   } = data;
 
   const currencies = Object.keys(totalFareByCurrency);
@@ -543,6 +544,36 @@ const Stats: React.FC<StatsProps> = ({
             {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
           </div>
         </div>
+        )}
+
+        {tripsByYear.length > 0 && (
+          <div className="stats-group">
+            <h3>Trips by Year</h3>
+            <p className="hint -mt-2 mb-4">Total completed trips each year.</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart
+                data={tripsByYear}
+                margin={{
+                  top: 5,
+                  right: 20,
+                  left: 10,
+                  bottom: 5,
+                }}
+              >
+                <defs>
+                  <linearGradient id="colorTrips" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="count" stroke="#8884d8" fillOpacity={1} fill="url(#colorTrips)" name="Trips" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         )}
 
         <div className="stats-group">

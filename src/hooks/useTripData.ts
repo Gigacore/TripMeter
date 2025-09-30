@@ -54,6 +54,7 @@ export interface TripStats {
     startDate: number | null;
     endDate: number | null;
   };
+  tripsByYear: { year: number; count: number }[];
 }
 
 export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripStats => {
@@ -100,6 +101,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     avgCostPerDistanceByYear: {},
     longestStreak: { days: 0, startDate: null, endDate: null },
     longestGap: { days: 0, startDate: null, endDate: null },
+    tripsByYear: [],
   });
 
   const convertDistance = (miles: number) => {
@@ -128,11 +130,13 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
       const completedTripDates: Date[] = [];
       const yearlyDistanceByCurrency: { [currency: string]: { [year: number]: number } } = {};
       const yearlyFareByCurrency: { [currency: string]: { [year: number]: number } } = {};
+      const tripsByYear: { [year: number]: number } = {};
 
       rows.forEach((r: CSVRow) => {
         const status = r.status?.toLowerCase();
         if (status === 'completed') {
           completedCount++;
+
           const distanceMiles = parseFloat(r.distance);
           const beginTime = new Date(r.begin_trip_time);
           const dropoffTime = new Date(r.dropoff_time);
@@ -140,6 +144,12 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
           const year = requestTime.getFullYear();
 
           if (requestTime.getTime()) {
+            if (!isNaN(year)) {
+              if (!tripsByYear[year]) {
+                tripsByYear[year] = 0;
+              }
+              tripsByYear[year]++;
+            }
             completedTripDates.push(requestTime);
           }
 
@@ -303,6 +313,11 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         }
       }
 
+      const formattedTripsByYear = Object.keys(tripsByYear)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .map(year => ({ year, count: tripsByYear[year] }));
+
       const newStats: TripStats = {
         ...stats,
         totalTrips: rows.length,
@@ -326,6 +341,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         waitingLongerThanTripCount,
         totalWaitingTimeForLongerWaits,
         totalRidingTimeForLongerWaits,
+        tripsByYear: formattedTripsByYear,
       };
 
       if (tripsWithDuration.length > 0) {
