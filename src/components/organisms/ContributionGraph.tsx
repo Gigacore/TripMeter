@@ -5,6 +5,10 @@ interface ContributionGraphProps {
   view: 'last-12-months' | number;
 }
 
+const CELL_SIZE = 12;
+const LABEL_COLUMN_WIDTH = 32;
+const WEEKDAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+
 const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => {
   const getLevel = (count: number) => {
     if (count === 0) return 0;
@@ -49,20 +53,29 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
   }
 
   const firstDay = new Date(dayData[0].date).getDay();
-  const emptyDays = Array.from({ length: firstDay }, (_, i) => <div key={`empty-${i}`} className="contribution-graph-day" style={{ visibility: 'hidden' }} />);
 
-  const weeks: JSX.Element[][] = [];
-  let currentWeek: JSX.Element[] = [...emptyDays];
+  type WeekCell = {
+    key: string;
+    isPlaceholder: boolean;
+    date?: string;
+    count?: number;
+    level?: number;
+  };
 
-  dayData.forEach((day, index) => {
-    currentWeek.push(
-      <div
-        key={day.date}
-        className="contribution-graph-day"
-        data-level={day.level}
-        title={getTooltipText(day.count, day.date)}
-      />
-    );
+  const weeks: WeekCell[][] = [];
+  let currentWeek: WeekCell[] = Array.from({ length: firstDay }, (_, index) => ({
+    key: `prefill-${index}`,
+    isPlaceholder: true,
+  }));
+
+  dayData.forEach((day) => {
+    currentWeek.push({
+      key: day.date,
+      isPlaceholder: false,
+      date: day.date,
+      count: day.count,
+      level: day.level,
+    });
 
     if (currentWeek.length === 7) {
       weeks.push(currentWeek);
@@ -71,6 +84,13 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
   });
 
   if (currentWeek.length > 0) {
+    while (currentWeek.length < 7) {
+      const index = currentWeek.length;
+      currentWeek.push({
+        key: `postfill-${weeks.length}-${index}`,
+        isPlaceholder: true,
+      });
+    }
     weeks.push(currentWeek);
   }
 
@@ -91,28 +111,44 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
 
   return (
     <div className="contribution-graph">
-      <div className="contribution-graph-months">
-        {monthLabels.map((label, index) => {
-          const prevWeekIndex = index > 0 ? monthLabels[index - 1].weekIndex : 0;
-          const weekSpan = label.weekIndex - prevWeekIndex;
-          return (
-            <div key={label.name + label.weekIndex} className="contribution-graph-month" style={{ flexGrow: 4 }}>
-              {label.name}
-            </div>
-          );
-        })}
+      <div
+        className="contribution-graph-months"
+        style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px repeat(${weeks.length}, ${CELL_SIZE}px)` }}
+      >
+        <div className="contribution-graph-month contribution-graph-month--spacer" aria-hidden />
+        {monthLabels.map((label) => (
+          <div
+            key={label.name + label.weekIndex}
+            className="contribution-graph-month"
+            style={{ gridColumn: label.weekIndex + 2 }}
+          >
+            {label.name}
+          </div>
+        ))}
       </div>
-      <div className="contribution-graph-body">
-        <div className="contribution-graph-week text-xs text-slate-500">
-          <div className="contribution-graph-day" />
-          <div className="contribution-graph-day">Mon</div>
-          <div className="contribution-graph-day" />
-          <div className="contribution-graph-day">Wed</div>
-          <div className="contribution-graph-day" />
-          <div className="contribution-graph-day">Fri</div>
-          <div className="contribution-graph-day" />
+      <div
+        className="contribution-graph-body"
+        style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px repeat(${weeks.length}, ${CELL_SIZE}px)` }}
+      >
+        <div className="contribution-graph-week contribution-graph-week-labels text-xs text-slate-500">
+          {WEEKDAY_LABELS.map((label, index) => (
+            <div key={`weekday-${index}`} className="contribution-graph-day">
+              {label}
+            </div>
+          ))}
         </div>
-        {weeks.map((week, i) => <div key={i} className="contribution-graph-week">{week}</div>)}
+        {weeks.map((week, weekIndex) => (
+          <div key={`week-${weekIndex}`} className="contribution-graph-week">
+            {week.map((day) => (
+              <div
+                key={day.key}
+                className={`contribution-graph-day${day.isPlaceholder ? ' contribution-graph-day--placeholder' : ''}`}
+                data-level={day.level}
+                title={day.isPlaceholder || !day.date ? undefined : getTooltipText(day.count ?? 0, day.date)}
+              />
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );

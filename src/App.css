@@ -282,16 +282,16 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 .contribution-graph-body {
-  display: flex;
-  gap: 4px;
+  display: grid;
+  column-gap: 4px;
   overflow-x: auto;
   padding-bottom: 16px; /* for scrollbar */
 }
 
 .contribution-graph-week {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  row-gap: 4px;
 }
 
 .contribution-graph-day {
@@ -308,12 +308,34 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .contribution-graph-day[data-level="4"] { background-color: #e0f2fe; } /* sky-100 */
 
 .contribution-graph-months {
-  display: flex;
+  display: grid;
+  column-gap: 4px;
   font-size: 10px;
   color: var(--muted);
 }
 
 .contribution-graph-month {
-  flex-basis: 0;
-  flex-grow: 1;
+  white-space: nowrap;
+  justify-self: start;
+}
+
+.contribution-graph-month--spacer {
+  visibility: hidden;
+}
+
+.contribution-graph-week-labels .contribution-graph-day {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 10px;
+  line-height: 12px;
+  padding-right: 4px;
+}
+
+.contribution-graph-day--placeholder {
+  visibility: hidden;
 }
