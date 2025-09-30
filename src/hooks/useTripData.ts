@@ -44,6 +44,7 @@ export interface TripStats {
   costPerDistanceByCurrency: { [key: string]: number };
   costPerDurationByCurrency: { [key: string]: number };
   avgCostPerDistanceByYear: { [currency: string]: { year: number; cost: number }[] };
+  totalFareByYear: { [currency: string]: { year: number; total: number }[] };
   longestStreak: {
     days: number;
     startDate: number | null;
@@ -99,6 +100,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     costPerDistanceByCurrency: {},
     costPerDurationByCurrency: {},
     avgCostPerDistanceByYear: {},
+    totalFareByYear: {},
     longestStreak: { days: 0, startDate: null, endDate: null },
     longestGap: { days: 0, startDate: null, endDate: null },
     tripsByYear: [],
@@ -263,6 +265,17 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         }
       }
 
+      const totalFareByYear: { [currency: string]: { year: number; total: number }[] } = {};
+      for (const currency in yearlyFareByCurrency) {
+        totalFareByYear[currency] = [];
+        const yearlyData = yearlyFareByCurrency[currency];
+        const years = Object.keys(yearlyData).map(Number).sort((a, b) => a - b);
+
+        for (const year of years) {
+          totalFareByYear[currency].push({ year, total: yearlyData[year] });
+        }
+      }
+
       let longestStreak = { days: 0, startDate: null as number | null, endDate: null as number | null };
       let longestGap = { days: 0, startDate: null as number | null, endDate: null as number | null };
 
@@ -333,6 +346,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         costPerDistanceByCurrency: localCostPerDistance,
         costPerDurationByCurrency: localCostPerDuration,
         avgCostPerDistanceByYear,
+        totalFareByYear,
         totalCompletedDistance: currentTotalDistance,
         avgSpeed: totalDurationHours > 0 ? currentTotalDistance / totalDurationHours : 0,
         totalTripDuration: totalDurationMinutes,
