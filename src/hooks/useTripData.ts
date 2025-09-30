@@ -31,6 +31,7 @@ export interface TripStats {
   avgTripDuration: number;
   totalTripDuration: number;
   totalCompletedDistance: number;
+  avgCompletedDistance: number;
   totalTrips: number;
   successfulTrips: number;
   riderCanceledTrips: number;
@@ -87,6 +88,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     avgTripDuration: 0,
     totalTripDuration: 0,
     totalCompletedDistance: 0,
+    avgCompletedDistance: 0,
     totalTrips: 0,
     successfulTrips: 0,
     riderCanceledTrips: 0,
@@ -348,6 +350,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         avgCostPerDistanceByYear,
         totalFareByYear,
         totalCompletedDistance: currentTotalDistance,
+        avgCompletedDistance: completedCount > 0 ? currentTotalDistance / completedCount : 0,
         avgSpeed: totalDurationHours > 0 ? currentTotalDistance / totalDurationHours : 0,
         totalTripDuration: totalDurationMinutes,
         longestStreak,

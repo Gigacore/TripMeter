@@ -66,7 +66,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-4 rounded-b-2xl border-x border-b border-slate-800 bg-slate-900/70 p-4 backdrop-blur-sm md:gap-6">
-      <Stat label="Completed Trips" value={successfulTrips} />
+      <Stat label="Completed Rides" value={successfulTrips} />
       {currencies.length > 0 && (
         <>
           {currencies.length === 1 && (
@@ -107,7 +107,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
         </>
       )}
       <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-      <Stat label="Total Time" value={formatDuration(totalTripDuration, true)} />
+      <Stat label="Total Ride Time" value={formatDuration(totalTripDuration, true)} />
     </div>
   );
 };

@@ -93,6 +93,7 @@ const Stats: React.FC<StatsProps> = ({
     totalWaitingTimeForLongerWaits,
     totalRidingTimeForLongerWaits,
     totalCompletedDistance,
+    avgCompletedDistance,
     longestTripByDist,
     longestTripByDistRow,
     shortestTripByDist,
@@ -497,7 +498,7 @@ const Stats: React.FC<StatsProps> = ({
       </div>
       {activeCurrency && totalFareByYear[activeCurrency] && totalFareByYear[activeCurrency]!.length > 0 && (
         <div className="stats-group">
-          <h3>Total Fare by Year</h3>
+          <h3>Fare by Year</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart
               data={totalFareByYear[activeCurrency]}
@@ -519,7 +520,7 @@ const Stats: React.FC<StatsProps> = ({
               <YAxis />
               <Tooltip formatter={(value: number) => [value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), `Total Fare (${activeCurrency})`]} />
               <Legend />
-              <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Total Fare (${activeCurrency})`} />
+              <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -642,7 +643,8 @@ const Stats: React.FC<StatsProps> = ({
             </div>
           )}
           <div className="stats-grid four-col mt-4">
-            <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+            <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+            <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
             <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
             <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
             {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
@@ -823,13 +825,13 @@ const Stats: React.FC<StatsProps> = ({
             <div className="grid md:grid-cols-2 gap-8">
               {successfulTripsByDayOfWeekData.length > 0 && (
                 <div>
-                  <h4 className="text-center text-slate-400 mb-2">Successful Trips</h4>
+                  <h4 className="text-center text-slate-400 mb-2">Completed Trips</h4>
                   <ResponsiveContainer width="100%" height={500}>
                     <RadarChart cx="50%" cy="50%" outerRadius="80%" data={successfulTripsByDayOfWeekData}>
                       <PolarGrid />
                       <PolarAngleAxis dataKey="day" />
                       <PolarRadiusAxis angle={70} domain={[0, 'dataMax']} />
-                      <Radar name="Successful Trips" dataKey="count" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+                      <Radar name="Completed Trips" dataKey="count" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
                       <Tooltip />
                     </RadarChart>
                   </ResponsiveContainer>
