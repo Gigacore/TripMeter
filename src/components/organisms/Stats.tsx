@@ -1,10 +1,11 @@
 import React, { ChangeEvent } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
 import { CSVRow } from '../../services/csvParser';
 import { TripStats } from '../../hooks/useTripData';
+import ContributionGraph from '../../ContributionGraph';
 import { DistanceUnit } from '../../App';
 
 interface SankeyNodeProps {
@@ -50,6 +51,14 @@ interface StatsProps {
   rows: CSVRow[];
 }
 
+const formatDateRange = (start: number | null, end: number | null): string | null => {
+  if (!start || !end) return null;
+  const startDate = new Date(start).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const endDate = new Date(end).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  if (startDate === endDate) return startDate;
+  return `${startDate} - ${endDate}`;
+};
+
 const Stats: React.FC<StatsProps> = ({
   data,
   onFocusOnTrip,
@@ -80,7 +89,11 @@ const Stats: React.FC<StatsProps> = ({
     longestWaitingTimeRow,
     shortestWaitingTime,
     shortestWaitingTimeRow,
+    waitingLongerThanTripCount,
+    totalWaitingTimeForLongerWaits,
+    totalRidingTimeForLongerWaits,
     totalCompletedDistance,
+    avgCompletedDistance,
     longestTripByDist,
     longestTripByDistRow,
     shortestTripByDist,
@@ -92,6 +105,11 @@ const Stats: React.FC<StatsProps> = ({
     slowestTripBySpeed,
     slowestTripBySpeedRow,
     costPerDurationByCurrency,
+    longestStreak,
+    avgCostPerDistanceByYear,
+    longestGap,
+    totalFareByYear,
+    tripsByYear,
   } = data;
 
   const currencies = Object.keys(totalFareByCurrency);
@@ -273,62 +291,168 @@ const Stats: React.FC<StatsProps> = ({
   const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
   const renderTreemapContent = React.useCallback((props: any) => <CustomizedContent {...props} colors={treemapColors} />, [treemapColors]);
 
+  const renderWaitingTreemapContent = React.useCallback((props: any, totalTrips: number) => {
+    const { depth, x, y, width, height, index, name, value } = props;
+    const isSmall = width < 150 || height < 50;
+
+    return (
+      <g>
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          style={{
+            fill: treemapColors[index % treemapColors.length],
+            stroke: '#fff',
+            strokeWidth: 2 / (depth + 1e-10),
+            strokeOpacity: 1 / (depth + 1e-10),
+          }}
+        />
+        {depth === 1 && !isSmall ? (
+          <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={14}>
+            <tspan x={x + width / 2} dy="-0.5em" className="font-semibold">{name}</tspan>
+            <tspan x={x + width / 2} dy="1.2em">{formatDuration(value, true)}</tspan>
+          </text>
+        ) : null}
+        {depth === 1 && isSmall ? (
+          <text x={x + 4} y={y + 18} fill="#fff" fontSize={12} fillOpacity={0.9}>{name}</text>
+        ) : null}
+      </g>
+    );
+  }, [treemapColors]);
+
+  const contributionData = React.useMemo(() => {
+    if (!rows || rows.length === 0) return {};
+    const dailyCounts: { [key: string]: number } = {};
+    rows
+      .filter(row => row.status?.toLowerCase() === 'completed')
+      .forEach(row => {
+        if (row.request_time) {
+          const date = new Date(row.request_time);
+          if (!isNaN(date.getTime())) {
+            const day = date.toISOString().split('T')[0];
+            dailyCounts[day] = (dailyCounts[day] || 0) + 1;
+          }
+        }
+      });
+    return dailyCounts;
+  }, [rows]);
+
+  const availableYears = React.useMemo(() => {
+    const yearSet = new Set<number>();
+    Object.keys(contributionData).forEach(dateStr => {
+      yearSet.add(new Date(dateStr).getFullYear());
+    });
+    return Array.from(yearSet).sort((a, b) => b - a);
+  }, [contributionData]);
+
+  const tripsByHourData = React.useMemo(() => {
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const countsByHour: { [hour: number]: number } = Array.from({ length: 24 }, () => 0).reduce((acc, _, i) => {
+      acc[i] = 0;
+      return acc;
+    }, {} as { [hour: number]: number });
+
+    rows.forEach(row => {
+      if (row.status?.toLowerCase() === 'completed' && row.request_time) {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const hour = date.getHours();
+          countsByHour[hour]++;
+        }
+      }
+    });
+
+    return Object.entries(countsByHour).map(([hour, count]) => ({ hour: parseInt(hour, 10), count }));
+  }, [rows]);
+
+  const successfulTripsByDayOfWeekData = React.useMemo(() => {
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const countsByDay: number[] = Array(7).fill(0);
+
+    rows
+      .filter(row => row.status?.toLowerCase() === 'completed' && row.request_time)
+      .forEach(row => {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const day = date.getDay(); // 0 for Sunday, 1 for Monday, etc.
+          countsByDay[day]++;
+        }
+      });
+
+    return countsByDay.map((count, index) => ({
+      day: dayNames[index],
+      count,
+    }));
+  }, [rows]);
+
+  const canceledTripsByDayOfWeekData = React.useMemo(() => {
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const countsByDay: number[] = Array(7).fill(0);
+
+    rows
+      .filter(row => {
+        const status = row.status?.toLowerCase();
+        return (status === 'rider_canceled' || status === 'driver_canceled') && row.request_time;
+      })
+      .forEach(row => {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const day = date.getDay();
+          countsByDay[day]++;
+        }
+      });
+
+    return countsByDay.map((count, index) => ({
+      day: dayNames[index],
+      count,
+    }));
+  }, [rows]);
+
+  const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
+
   return (
     <>
-      <div className="section">
-        {sankeyData.links.length > 0 && (
-          <div className="stats-group">
-            <h3>Trip Summary</h3>
-            <ResponsiveContainer width="100%" height={700}>
-              <Sankey
-                data={sankeyData}
-                node={renderSankeyNode}
-                nodePadding={50}
-                margin={{
-                left: 200,
-                  right: 200,
-                  top: 100,
-                  bottom: 100
-                }}
-                link={{ stroke: '#77c878' }}
+      {currencies.length > 1 && (
+        <div className="stats-group mb-6 border-b border-slate-800">
+          <div className="flex items-center gap-2">
+            {currencies.map(currency => (
+              <button
+                key={currency}
+                onClick={() => setActiveCurrency(currency)}
+                className={`px-4 py-3 text-sm font-semibold transition-colors text-left border-b-2 ${
+                  activeCurrency === currency
+                    ? 'border-emerald-400 text-slate-100'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 active:bg-slate-800'
+                }`}
               >
-                <Tooltip />
-              </Sankey>
-            </ResponsiveContainer>
-          </div>
-        )}
-        <div className="stats-group">
-          <div className="stats-grid">
-            <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
-            <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
-            <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
-            <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />
-            {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
+                <div className="flex flex-col">
+                  <span className="text-xs font-normal">{currency}</span>
+                  <span className="font-bold text-base">
+                    {(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
-
+      )}
+      <div className="section">
         {currencies.length > 0 && activeCurrency &&(
           <div className="stats-group">
-            <h3>Fare</h3>
+            <h3>Fare Distribution</h3>
               <div className="flex gap-4">
                 {/* Redesigned vertical tab UI for Fare section */}
                 <div className="flex w-full min-h-[220px]">
-                  <div className="w-44 border-r border-gray-300 flex flex-col">
-                  {currencies.map((currency, idx) => (
-                    <button
-                      key={currency}
-                      onClick={() => setActiveCurrency(currency)}
-                        className={`flex items-center gap-2 py-4 px-3 border-none outline-none ${activeCurrency === currency ? 'bg-gray-100 text-gray-900 font-semibold' : 'bg-transparent text-gray-500 font-normal'} cursor-pointer ${idx !== currencies.length - 1 ? 'border-b border-gray-800' : ''} relative min-h-[72px]`}
-                    >
-                        <span className="w-8 h-8 bg-gray-200 rounded-md inline-block mr-2" />
-                        <span className="flex flex-col gap-0.5 items-start flex-1">
-                          <span className="text-lg font-semibold">{(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          <span className="text-xs text-gray-500">{currency}</span>
-                        </span>
-                        {activeCurrency === currency && <span className="absolute left-0 top-0 bottom-0 w-1 bg-gray-400 rounded-l-xl" />}
-                    </button>
-                  ))}
-                </div>
                   <div className="flex-1 p-8 flex flex-col items-start gap-6">
                     <div className="w-full">
                     {fareDistributionData.length > 0 && (
@@ -343,15 +467,6 @@ const Stats: React.FC<StatsProps> = ({
                       </ResponsiveContainer>
                     )}
                   </div>
-                    {currencies.length === 1 && (
-                      <div className="w-full">
-                      <Stat
-                        label="Total Fare"
-                        unit={activeCurrency}
-                        value={(totalFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      />
-                    </div>
-                  )}
                     <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full">
                       <Stat
                         label="Avg. Fare"
@@ -380,15 +495,120 @@ const Stats: React.FC<StatsProps> = ({
             </div>
           </div>
         )}
+      </div>
+      {activeCurrency && totalFareByYear[activeCurrency] && totalFareByYear[activeCurrency]!.length > 0 && (
+        <div className="stats-group">
+          <h3>Fare by Year</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart
+              data={totalFareByYear[activeCurrency]}
+              margin={{
+                top: 5,
+                right: 20,
+                left: 10,
+                bottom: 5,
+              }}
+            >
+              <defs>
+                <linearGradient id="colorTotalFare" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis />
+              <Tooltip formatter={(value: number) => [value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), `Total Fare (${activeCurrency})`]} />
+              <Legend />
+              <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {/* {activeCurrency && avgCostPerDistanceByYear[activeCurrency] && avgCostPerDistanceByYear[activeCurrency]!.length > 0 && (
+        <div className="stats-group">
+          <h3>Average Cost per {distanceUnit} by Year</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={avgCostPerDistanceByYear[activeCurrency]}
+              margin={{
+                top: 5,
+                right: 20,
+                left: 10,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis />
+              <Tooltip
+                formatter={(value: number) => [value.toFixed(2), `Avg. Cost / ${distanceUnit}`]}
+              />
+              <Legend />
+              <Line type="monotone" dataKey="cost" stroke="#8884d8" name={`Avg. Cost / ${distanceUnit} (${activeCurrency})`} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )} */}
+      <div className="section">
+        {sankeyData.links.length > 0 && (
+          <div className="stats-group mb-6">
+            <h3>Trip Summary</h3>
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={500}>
+                <Sankey
+                  data={sankeyData}
+                  node={renderSankeyNode}
+                  nodePadding={50}
+                  margin={{ left: 100, right: 100, top: 5, bottom: 5 }}
+                  link={{ stroke: '#77c878' }}
+                >
+                  <Tooltip />
+                </Sankey>
+              </ResponsiveContainer>
+            </div>
+            <div className="stats-grid five-col mt-4">
+            <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
+            <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
+            <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
+            <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />
+            {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
+          </div>
+        </div>
+        )}
+
+        {tripsByYear.length > 0 && (
+          <div className="stats-group">
+            <h3>Trips by Year</h3>
+            <p className="hint -mt-2 mb-4">Total completed trips each year.</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart
+                data={tripsByYear}
+                margin={{
+                  top: 5,
+                  right: 20,
+                  left: 10,
+                  bottom: 5,
+                }}
+              >
+                <defs>
+                  <linearGradient id="colorTrips" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="count" stroke="#8884d8" fillOpacity={1} fill="url(#colorTrips)" name="Trips" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
 
         <div className="stats-group">
           <h3>Ride Duration</h3>
-          <div className="stats-grid">
-            <Stat label="Total" value={formatDuration(totalTripDuration, true)} />
-            <Stat label="Average" value={formatDurationWithSeconds(avgTripDuration)} />
-            <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrip(longestTripRow)} />
-            <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrip(shortestTripRow)} />
-          </div>
           {durationDistributionData.length > 0 && (
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
@@ -402,43 +622,13 @@ const Stats: React.FC<StatsProps> = ({
               </ResponsiveContainer>
             </div>
           )}
-          <h3 className="mt-4">Waiting Time</h3>
-          <div className="stats-grid">
-            <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
-            <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
-            <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
-            <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Total" value={formatDuration(totalTripDuration, true)} />
+            <Stat label="Average" value={formatDurationWithSeconds(avgTripDuration)} />
+            <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrip(longestTripRow)} />
+            <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrip(shortestTripRow)} />
           </div>
-          {waitingTimeDistributionData.length > 0 && (
-            <div className="mt-4">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={waitingTimeDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#ffc658" name="Number of Trips" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-
-        <div className="stats-group">
-          <h3>Distance</h3>
-          <div className="stats-grid">
-            <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-            <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
-            <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
-            {Object.entries(costPerDistanceByCurrency).map(([currency, amount]) => (
-              <Stat
-                key={currency}
-                label={`Cost per ${distanceUnit}`}
-                unit={`${currency}/${distanceUnit}`}
-                value={amount.toFixed(2)}
-              />
-            ))}
-          </div>
+          <h3 className="mt-4">Distance</h3>
           {distanceDistributionData.length > 0 && (
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
@@ -452,22 +642,101 @@ const Stats: React.FC<StatsProps> = ({
               </ResponsiveContainer>
             </div>
           )}
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+            <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
+            <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
+            <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
+            {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
+              <Stat
+                label={`Cost per ${distanceUnit}`}
+                unit={`${activeCurrency}/${distanceUnit}`}
+                value={costPerDistanceByCurrency[activeCurrency]!.toFixed(2)}
+              />
+            )}
+          </div>
+          <h3 className="mt-4">Waiting Time</h3>
+          {waitingTimeDistributionData.length > 0 && (
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={waitingTimeDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#ffc658" name="Number of Trips" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
+            <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
+            <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
+            <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
+          </div>
         </div>
+        {totalWaitingTime > 0 && totalTripDuration > 0 && (
+          <div className="stats-group">
+            <h3>Waiting vs. Riding</h3>
+            <div className="flex flex-col gap-4 items-center">
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height={200}>
+                  <Treemap
+                    data={[
+                      { name: 'Total Waiting Time', size: totalWaitingTime },
+                      { name: 'Total Riding Time', size: totalTripDuration },
+                    ]}
+                    dataKey="size"
+                    stroke="#fff"
+                    content={(props) => renderWaitingTreemapContent(props, successfulTrips)}
+                    isAnimationActive={false}
+                  >
+                    <Tooltip formatter={(value: number) => [formatDuration(value, true), 'Duration']} />
+                  </Treemap>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+        {waitingLongerThanTripCount > 0 && (
+          <div className="stats-group">
+            <h3 className="flex items-center gap-2">
+              Waiting {'>'} Ride Duration <span className="inline-flex items-center justify-center rounded-full bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-100">{waitingLongerThanTripCount} Rides</span>
+            </h3>
+            <div className="flex flex-col gap-4 items-center">
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height={200}>
+                  <Treemap
+                    data={[
+                      { name: 'Waiting Time', size: totalWaitingTimeForLongerWaits },
+                      { name: 'Riding Time', size: totalRidingTimeForLongerWaits },
+                    ]}
+                    dataKey="size"
+                    stroke="#fff"
+                    content={(props) => renderWaitingTreemapContent(props, waitingLongerThanTripCount)}
+                    isAnimationActive={false}
+                  >
+                    <Tooltip
+                      formatter={(value: number) => [formatDuration(value, true), 'Duration']}
+                    />
+                  </Treemap>
+                </ResponsiveContainer>
+              </div>
+              {/* <div className="w-full">
+                <div className="stats-grid grid-cols-3">
+                  <Stat label="Count" value={waitingLongerThanTripCount} subValue="Trips where waiting time exceeded ride duration" />
+                  <Stat label="Total Waiting" value={formatDuration(totalWaitingTimeForLongerWaits, true)} />
+                  <Stat label="Total Riding" value={formatDuration(totalRidingTimeForLongerWaits, true)} />
+                </div>
+              </div> */}
+            </div>
+          </div>
+        )}
 
         <div className="stats-group">
           <h3>Speed</h3>
-          <div className="stats-grid">
-            <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
-            <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
-            <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
-            {Object.entries(costPerDurationByCurrency).map(([currency, amount]) =>
-              <Stat
-                key={currency}
-                label="Cost"
-                unit={currency}
-                value={amount.toFixed(2)}
-              />
-            )}
+          {speedDistributionData.length > 0 && (
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={speedDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -479,8 +748,112 @@ const Stats: React.FC<StatsProps> = ({
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          )}
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
+            <Stat label="Fastest" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
+            <Stat label="Slowest" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
+            {activeCurrency && costPerDurationByCurrency[activeCurrency] !== undefined && (
+              <Stat
+                label="Cost per Minute"
+                unit={activeCurrency}
+                value={costPerDurationByCurrency[activeCurrency]!.toFixed(2)}
+              />
+            )}
           </div>
         </div>
+
+        <div className="stats-group">
+          <div className="contribution-graph-header">
+            <h3>Trip Activity</h3>
+            <select
+              value={contributionView}
+              onChange={(e) => setContributionView(e.target.value === 'last-12-months' ? 'last-12-months' : Number(e.target.value))}
+            >
+              <option value="last-12-months">Last 12 months</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          {Object.keys(contributionData).length > 0 ? (
+            <div className="mt-4">
+              <ContributionGraph data={contributionData} view={contributionView} />
+            </div>
+          ) : <p className="text-slate-500 text-sm mt-2">No trip data with dates to display.</p>}
+        </div>
+
+        <div className="stats-group">
+          <h3>Streaks & Gaps</h3>
+          <div className="stats-grid">
+            <Stat
+              label="Longest Streak"
+              value={`${longestStreak.days} ${longestStreak.days === 1 ? 'day' : 'days'}`}
+              subValue={formatDateRange(longestStreak.startDate, longestStreak.endDate)} />
+            <Stat
+              label="Longest Gap"
+              value={`${longestGap.days} ${longestGap.days === 1 ? 'day' : 'days'}`}
+              subValue={formatDateRange(longestGap.startDate, longestGap.endDate)} />
+          </div>
+          <p className="hint mt-2">Based on days with at least one completed trip.</p>
+        </div>
+
+        {tripsByHourData.length > 0 && (
+          <div className="stats-group">
+            <h3>Trips by Hour of Day</h3>
+            <p className="hint -mt-2 mb-4">Number of completed trips for each hour of the day.</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                <CartesianGrid />
+                <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={24} />
+                <YAxis type="number" dataKey="count" name="Trips" />
+                <ZAxis type="number" range={[100, 101]} />
+                <Tooltip
+                  cursor={{ strokeDasharray: '3 3' }}
+                  formatter={(value: number, name: string) => (name === 'Hour' ? `${value}:00 - ${value}:59` : value)}
+                />
+                <Scatter name="Trips" data={tripsByHourData} fill="#8884d8" />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {(successfulTripsByDayOfWeekData.length > 0 || canceledTripsByDayOfWeekData.length > 0) && (
+          <div className="stats-group">
+            <h3>Trips by Day of Week</h3>
+            <p className="hint -mt-2 mb-4">Trip distribution across the week.</p>
+            <div className="grid md:grid-cols-2 gap-8">
+              {successfulTripsByDayOfWeekData.length > 0 && (
+                <div>
+                  <h4 className="text-center text-slate-400 mb-2">Completed Trips</h4>
+                  <ResponsiveContainer width="100%" height={500}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={successfulTripsByDayOfWeekData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="day" />
+                      <PolarRadiusAxis angle={70} domain={[0, 'dataMax']} />
+                      <Radar name="Completed Trips" dataKey="count" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+                      <Tooltip />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+              {canceledTripsByDayOfWeekData.length > 0 && (
+                <div>
+                  <h4 className="text-center text-slate-400 mb-2">Canceled Trips</h4>
+                  <ResponsiveContainer width="100%" height={500}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={canceledTripsByDayOfWeekData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="day" />
+                      <PolarRadiusAxis angle={70} domain={[0, 'dataMax']} />
+                      <Radar name="Canceled Trips" dataKey="count" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} />
+                      <Tooltip />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {productTypeData.length > 0 && (
           <div className="stats-group">

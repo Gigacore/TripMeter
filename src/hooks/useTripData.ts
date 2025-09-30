@@ -18,6 +18,9 @@ export interface TripStats {
   longestWaitingTime: number;
   shortestWaitingTimeRow: CSVRow | null;
   longestWaitingTimeRow: CSVRow | null;
+  waitingLongerThanTripCount: number;
+  totalWaitingTimeForLongerWaits: number;
+  totalRidingTimeForLongerWaits: number;
   fastestTripBySpeed: number;
   fastestTripBySpeedRow: CSVRow | null;
   slowestTripBySpeed: number;
@@ -28,10 +31,12 @@ export interface TripStats {
   avgTripDuration: number;
   totalTripDuration: number;
   totalCompletedDistance: number;
+  avgCompletedDistance: number;
   totalTrips: number;
   successfulTrips: number;
   riderCanceledTrips: number;
   driverCanceledTrips: number;
+  canceledTrips: number;
   unfulfilledTrips: number;
   avgFareByCurrency: { [key: string]: number };
   lowestFareByCurrency: { [key: string]: { amount: number; row: CSVRow } };
@@ -39,9 +44,23 @@ export interface TripStats {
   totalFareByCurrency: { [key: string]: number };
   costPerDistanceByCurrency: { [key: string]: number };
   costPerDurationByCurrency: { [key: string]: number };
+  avgCostPerDistanceByYear: { [currency: string]: { year: number; cost: number }[] };
+  totalFareByYear: { [currency: string]: { year: number; total: number }[] };
+  longestStreak: {
+    days: number;
+    startDate: number | null;
+    endDate: number | null;
+  };
+  longestGap: {
+    days: number;
+    startDate: number | null;
+    endDate: number | null;
+  };
+  tripsByYear: { year: number; count: number }[];
 }
 
-export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripStats => {
+export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripStats, boolean] => {
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [stats, setStats] = useState<TripStats>({
     beginCount: 0,
     dropoffCount: 0,
@@ -57,6 +76,9 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     longestWaitingTime: 0,
     shortestWaitingTimeRow: null,
     longestWaitingTimeRow: null,
+    waitingLongerThanTripCount: 0,
+    totalWaitingTimeForLongerWaits: 0,
+    totalRidingTimeForLongerWaits: 0,
     fastestTripBySpeed: 0,
     fastestTripBySpeedRow: null,
     slowestTripBySpeed: 0,
@@ -67,10 +89,12 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     avgTripDuration: 0,
     totalTripDuration: 0,
     totalCompletedDistance: 0,
+    avgCompletedDistance: 0,
     totalTrips: 0,
     successfulTrips: 0,
     riderCanceledTrips: 0,
     driverCanceledTrips: 0,
+    canceledTrips: 0,
     unfulfilledTrips: 0,
     avgFareByCurrency: {},
     lowestFareByCurrency: {},
@@ -78,6 +102,11 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     totalFareByCurrency: {},
     costPerDistanceByCurrency: {},
     costPerDurationByCurrency: {},
+    avgCostPerDistanceByYear: {},
+    totalFareByYear: {},
+    longestStreak: { days: 0, startDate: null, endDate: null },
+    longestGap: { days: 0, startDate: null, endDate: null },
+    tripsByYear: [],
   });
 
   const convertDistance = (miles: number) => {
@@ -86,6 +115,12 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
 
   useEffect(() => {
     if (rows.length > 0) {
+      setIsAnalyzing(true);
+      const timeoutId = setTimeout(() => {
+
+      
+
+
       let currentTotalDistance = 0;
       let totalDurationMinutes = 0;
       let totalDurationHours = 0;
@@ -97,27 +132,50 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
       let riderCanceledCount = 0;
       let driverCanceledCount = 0;
       const fareByCurrency: { [key: string]: number } = {};
+      let waitingLongerThanTripCount = 0;
+      let totalWaitingTimeForLongerWaits = 0;
+      let totalRidingTimeForLongerWaits = 0;
       const fareCountByCurrency: { [key: string]: number } = {};
       const localLowestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
       const localHighestFare: { [key: string]: { amount: number, row: CSVRow } } = {};
+      const completedTripDates: Date[] = [];
+      const yearlyDistanceByCurrency: { [currency: string]: { [year: number]: number } } = {};
+      const yearlyFareByCurrency: { [currency: string]: { [year: number]: number } } = {};
+      const tripsByYear: { [year: number]: number } = {};
 
       rows.forEach((r: CSVRow) => {
         const status = r.status?.toLowerCase();
         if (status === 'completed') {
           completedCount++;
+
           const distanceMiles = parseFloat(r.distance);
           const beginTime = new Date(r.begin_trip_time);
           const dropoffTime = new Date(r.dropoff_time);
           const requestTime = new Date(r.request_time);
+          const year = requestTime.getFullYear();
 
+          if (requestTime.getTime()) {
+            if (!isNaN(year)) {
+              if (!tripsByYear[year]) {
+                tripsByYear[year] = 0;
+              }
+              tripsByYear[year]++;
+            }
+            completedTripDates.push(requestTime);
+          }
+
+          let waitingMinutes: number | undefined;
           if (requestTime.getTime() && beginTime.getTime() && beginTime > requestTime) {
-            const waitingMinutes = (beginTime.getTime() - requestTime.getTime()) / (1000 * 60);
+            waitingMinutes = (beginTime.getTime() - requestTime.getTime()) / (1000 * 60);
             if (isFinite(waitingMinutes)) {
               tripsWithWaitingTime.push({ waitingTime: waitingMinutes, row: r });
             }
           }
+
+          let durationMinutes: number | undefined;
           if (!isNaN(distanceMiles) && beginTime.getTime() && dropoffTime.getTime() && dropoffTime > beginTime) {
             const durationHours = (dropoffTime.getTime() - beginTime.getTime()) / (1000 * 60 * 60);
+            durationMinutes = durationHours * 60;
             if (durationHours > 0) {
               if (distanceMiles > 0) {
                 totalDurationMinutes += durationHours * 60;
@@ -133,6 +191,12 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
             if (distanceMiles > 0) {
               tripsWithDistance.push({ distance: convertDistance(distanceMiles), row: r });
             }
+          }
+
+          if (waitingMinutes !== undefined && durationMinutes !== undefined && waitingMinutes > durationMinutes) {
+            waitingLongerThanTripCount++;
+            totalWaitingTimeForLongerWaits += waitingMinutes;
+            totalRidingTimeForLongerWaits += durationMinutes;
           }
 
           const fare = parseFloat(r.fare_amount);
@@ -152,6 +216,19 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
             }
             if (fare > localHighestFare[currency].amount) {
               localHighestFare[currency] = { amount: fare, row: r };
+            }
+
+            if (!isNaN(year) && !isNaN(distanceMiles) && distanceMiles > 0) {
+              if (!yearlyFareByCurrency[currency]) {
+                yearlyFareByCurrency[currency] = {};
+                yearlyDistanceByCurrency[currency] = {};
+              }
+              if (!yearlyFareByCurrency[currency][year]) {
+                yearlyFareByCurrency[currency][year] = 0;
+                yearlyDistanceByCurrency[currency][year] = 0;
+              }
+              yearlyFareByCurrency[currency][year] += fare;
+              yearlyDistanceByCurrency[currency][year] += convertDistance(distanceMiles);
             }
           }
         } else if (status === 'rider_canceled') {
@@ -183,12 +260,93 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         }
       }
 
+      const avgCostPerDistanceByYear: { [currency: string]: { year: number; cost: number }[] } = {};
+      for (const currency in yearlyFareByCurrency) {
+        avgCostPerDistanceByYear[currency] = [];
+        const yearlyData = yearlyFareByCurrency[currency];
+        const years = Object.keys(yearlyData).map(Number).sort((a, b) => a - b);
+
+        for (const year of years) {
+          const totalDistanceForYear = yearlyDistanceByCurrency[currency][year];
+          if (totalDistanceForYear > 0) {
+            avgCostPerDistanceByYear[currency].push({ year, cost: yearlyData[year] / totalDistanceForYear });
+          }
+        }
+      }
+
+      const totalFareByYear: { [currency: string]: { year: number; total: number }[] } = {};
+      for (const currency in yearlyFareByCurrency) {
+        totalFareByYear[currency] = [];
+        const yearlyData = yearlyFareByCurrency[currency];
+        const years = Object.keys(yearlyData).map(Number).sort((a, b) => a - b);
+
+        for (const year of years) {
+          totalFareByYear[currency].push({ year, total: yearlyData[year] });
+        }
+      }
+
+      let longestStreak = { days: 0, startDate: null as number | null, endDate: null as number | null };
+      let longestGap = { days: 0, startDate: null as number | null, endDate: null as number | null };
+
+      if (completedTripDates.length > 0) {
+        const uniqueDates = Array.from(new Set(
+          completedTripDates.map(d => {
+            const date = new Date(d);
+            date.setUTCHours(0, 0, 0, 0);
+            return date.getTime();
+          })
+        )).sort((a, b) => a - b);
+
+        if (uniqueDates.length === 1) {
+          longestStreak = { days: 1, startDate: uniqueDates[0], endDate: uniqueDates[0] };
+        } else if (uniqueDates.length > 1) {
+          let currentStreak = 1;
+          let currentStreakStartDate = uniqueDates[0];
+          longestStreak = { days: 1, startDate: uniqueDates[0], endDate: uniqueDates[0] };
+
+          const oneDay = 24 * 60 * 60 * 1000;
+
+          for (let i = 1; i < uniqueDates.length; i++) {
+            const diffDays = Math.round((uniqueDates[i] - uniqueDates[i - 1]) / oneDay);
+
+            if (diffDays === 1) {
+              currentStreak++;
+            } else {
+              if (currentStreak > longestStreak.days) {
+                longestStreak = { days: currentStreak, startDate: currentStreakStartDate, endDate: uniqueDates[i - 1] };
+              }
+              currentStreak = 1;
+              currentStreakStartDate = uniqueDates[i];
+
+              const gapDays = diffDays - 1;
+              if (gapDays > longestGap.days) {
+                longestGap = {
+                  days: gapDays,
+                  startDate: uniqueDates[i - 1] + oneDay,
+                  endDate: uniqueDates[i] - oneDay,
+                };
+              }
+            }
+          }
+
+          if (currentStreak > longestStreak.days) {
+            longestStreak = { days: currentStreak, startDate: currentStreakStartDate, endDate: uniqueDates[uniqueDates.length - 1] };
+          }
+        }
+      }
+
+      const formattedTripsByYear = Object.keys(tripsByYear)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .map(year => ({ year, count: tripsByYear[year] }));
+
       const newStats: TripStats = {
         ...stats,
         totalTrips: rows.length,
         successfulTrips: completedCount,
         riderCanceledTrips: riderCanceledCount,
         driverCanceledTrips: driverCanceledCount,
+        canceledTrips: canceledCount,
         unfulfilledTrips: unfulfilledCount,
         totalFareByCurrency: fareByCurrency,
         lowestFareByCurrency: localLowestFare,
@@ -196,9 +354,18 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         avgFareByCurrency: avgFares,
         costPerDistanceByCurrency: localCostPerDistance,
         costPerDurationByCurrency: localCostPerDuration,
+        avgCostPerDistanceByYear,
+        totalFareByYear,
         totalCompletedDistance: currentTotalDistance,
+        avgCompletedDistance: completedCount > 0 ? currentTotalDistance / completedCount : 0,
         avgSpeed: totalDurationHours > 0 ? currentTotalDistance / totalDurationHours : 0,
         totalTripDuration: totalDurationMinutes,
+        longestStreak,
+        longestGap,
+        waitingLongerThanTripCount,
+        totalWaitingTimeForLongerWaits,
+        totalRidingTimeForLongerWaits,
+        tripsByYear: formattedTripsByYear,
       };
 
       if (tripsWithDuration.length > 0) {
@@ -243,8 +410,15 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
       }
 
       setStats(newStats);
-    }
-  }, [rows, distanceUnit]);
+      setIsAnalyzing(false);
+    }, 10); // setTimeout to allow UI to update with spinner
 
-  return stats;
+    return () => {
+      clearTimeout(timeoutId);
+      setIsAnalyzing(false);
+    }
+    }
+  }, [rows, distanceUnit]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return [stats, isAnalyzing];
 };

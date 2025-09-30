@@ -44,9 +44,9 @@ header h1 { font-size: 18px; margin: 0 8px 0 0; }
 /* Map container for hero section */
 .map-hero {
   max-width: 1400px;
-  width: 90vw;
-  height: 70vh;
-  min-height: 500px; /* Ensure map is not too small on short screens */
+  width: 80vw;
+  height: 50vh;
+  min-height: 400px; /* Ensure map is not too small on short screens */
   margin: 24px auto;
   border-radius: 12px;
   overflow: hidden;
@@ -117,6 +117,13 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .stats-group h3 { font-size: 14px; color: var(--muted); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em; }
 .stats-grid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
 
+.stats-grid.four-col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.stats-grid.five-col {
+  grid-template-columns: repeat(5, 1fr);
+}
 .stat { background:#0b1220; border:1px solid #1f2937; border-radius:10px; padding:10px; }
 .stat.clickable { cursor: pointer; }
 .stat.clickable:hover { border-color: var(--accent); }
@@ -130,6 +137,8 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   gap: 4px;
 }
 .stat-unit { font-size: 12px; font-weight: 400; color: var(--muted); }
+.stat-subvalue { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
 
 #map { width: 100%; height: 100%; }
 .footer { color: var(--muted); font-size: 12px; margin-top: 8px; }
@@ -246,12 +255,61 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .leaflet-popup-tip { background: var(--panel); }
 .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
 .leaflet-container a.leaflet-popup-close-button:hover { color: var(--fg); }
-.map-hero {
-  max-width: 1400px;
-  width: 90vw;
-  height: 70vh;
-  min-height: 500px; /* Ensure map is not too small on short screens */
-  margin: 24px auto;
-  border-radius: 12px;
-  overflow: hidden;
+
+/* Contribution Graph */
+.contribution-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contribution-graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contribution-graph-header select {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.contribution-graph-body {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 16px; /* for scrollbar */
+}
+
+.contribution-graph-week {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contribution-graph-day {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background-color: #2d3748; /* level 0 */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.contribution-graph-day[data-level="1"] { background-color: #0369a1; } /* sky-700 */
+.contribution-graph-day[data-level="2"] { background-color: #0ea5e9; } /* sky-500 */
+.contribution-graph-day[data-level="3"] { background-color: #7dd3fc; } /* sky-300 */
+.contribution-graph-day[data-level="4"] { background-color: #e0f2fe; } /* sky-100 */
+
+.contribution-graph-months {
+  display: flex;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.contribution-graph-month {
+  flex-basis: 0;
+  flex-grow: 1;
 }

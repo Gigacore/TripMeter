@@ -2,7 +2,7 @@ import React, { useRef, DragEvent, ChangeEvent } from 'react';
 
 interface InitialViewProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
-  isProcessing: boolean;
+  isProcessing: boolean; // This now includes analysis time
   error: string;
   isDragging: boolean;
   onDragEvents: (event: DragEvent<HTMLDivElement>) => void;
