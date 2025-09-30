@@ -288,6 +288,37 @@ const Stats: React.FC<StatsProps> = ({
   const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
   const renderTreemapContent = React.useCallback((props: any) => <CustomizedContent {...props} colors={treemapColors} />, [treemapColors]);
 
+  const renderWaitingTreemapContent = React.useCallback((props: any, totalTrips: number) => {
+    const { depth, x, y, width, height, index, name, value } = props;
+    const isSmall = width < 150 || height < 50;
+
+    return (
+      <g>
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          style={{
+            fill: treemapColors[index % treemapColors.length],
+            stroke: '#fff',
+            strokeWidth: 2 / (depth + 1e-10),
+            strokeOpacity: 1 / (depth + 1e-10),
+          }}
+        />
+        {depth === 1 && !isSmall ? (
+          <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={14}>
+            <tspan x={x + width / 2} dy="-0.5em" className="font-semibold">{name}</tspan>
+            <tspan x={x + width / 2} dy="1.2em">{formatDuration(value, true)}</tspan>
+          </text>
+        ) : null}
+        {depth === 1 && isSmall ? (
+          <text x={x + 4} y={y + 18} fill="#fff" fontSize={12} fillOpacity={0.9}>{name}</text>
+        ) : null}
+      </g>
+    );
+  }, [treemapColors]);
+
   const contributionData = React.useMemo(() => {
     if (!rows || rows.length === 0) return {};
     const dailyCounts: { [key: string]: number } = {};
@@ -582,34 +613,60 @@ const Stats: React.FC<StatsProps> = ({
             <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
           </div>
         </div>
+        {totalWaitingTime > 0 && totalTripDuration > 0 && (
+          <div className="stats-group">
+            <h3>Overall Time Split (Waiting vs. Riding)</h3>
+            <div className="flex flex-col gap-4 items-center">
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height={200}>
+                  <Treemap
+                    data={[
+                      { name: 'Total Waiting Time', size: totalWaitingTime },
+                      { name: 'Total Riding Time', size: totalTripDuration },
+                    ]}
+                    dataKey="size"
+                    stroke="#fff"
+                    content={(props) => renderWaitingTreemapContent(props, successfulTrips)}
+                    isAnimationActive={false}
+                  >
+                    <Tooltip formatter={(value: number) => [formatDuration(value, true), 'Duration']} />
+                  </Treemap>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
         {waitingLongerThanTripCount > 0 && (
           <div className="stats-group">
-            <h3>Trips with Wait {'>'} Ride Duration</h3>
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="w-full md:w-1/2">
-                <div className="stats-grid">
+            <h3 className="flex items-center gap-2">
+              Trips with Wait {'>'} Ride Duration <span className="inline-flex items-center justify-center rounded-full bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-100">{waitingLongerThanTripCount}</span>
+            </h3>
+            <div className="flex flex-col gap-4 items-center">
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height={200}>
+                  <Treemap
+                    data={[
+                      { name: 'Waiting Time', size: totalWaitingTimeForLongerWaits },
+                      { name: 'Riding Time', size: totalRidingTimeForLongerWaits },
+                    ]}
+                    dataKey="size"
+                    stroke="#fff"
+                    content={(props) => renderWaitingTreemapContent(props, waitingLongerThanTripCount)}
+                    isAnimationActive={false}
+                  >
+                    <Tooltip
+                      formatter={(value: number) => [formatDuration(value, true), 'Duration']}
+                    />
+                  </Treemap>
+                </ResponsiveContainer>
+              </div>
+              {/* <div className="w-full">
+                <div className="stats-grid grid-cols-3">
                   <Stat label="Count" value={waitingLongerThanTripCount} subValue="Trips where waiting time exceeded ride duration" />
                   <Stat label="Total Waiting" value={formatDuration(totalWaitingTimeForLongerWaits, true)} />
                   <Stat label="Total Riding" value={formatDuration(totalRidingTimeForLongerWaits, true)} />
                 </div>
-              </div>
-              <div className="w-full md:w-1/2 h-64">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: 'Waiting Time', value: totalWaitingTimeForLongerWaits },
-                        { name: 'Riding Time', value: totalRidingTimeForLongerWaits },
-                      ]}
-                      dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                      <Cell key="cell-0" fill="#ffc658" />
-                      <Cell key="cell-1" fill="#82ca9d" />
-                    </Pie>
-                    <Tooltip formatter={(value: number) => formatDuration(value, true)} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
