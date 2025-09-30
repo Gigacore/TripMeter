@@ -10,6 +10,7 @@ import SpeedCharts from './charts/SpeedCharts';
 import WaitingTimeCharts from './charts/WaitingTimeCharts';
 import ActivityCharts from './charts/ActivityCharts';
 import { downloadKML } from '../../services/kmlService';
+import TopCities from './TopCities';
 
 interface StatsProps {
   data: TripStats;
@@ -49,6 +50,7 @@ const Stats: React.FC<StatsProps> = ({
 
   return (
     <>
+      <TopCities rows={rows} />
       <FareCharts
         data={data}
         rows={rows}
