@@ -117,6 +117,13 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .stats-group h3 { font-size: 14px; color: var(--muted); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em; }
 .stats-grid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
 
+.stats-grid.four-col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.stats-grid.five-col {
+  grid-template-columns: repeat(5, 1fr);
+}
 .stat { background:#0b1220; border:1px solid #1f2937; border-radius:10px; padding:10px; }
 .stat.clickable { cursor: pointer; }
 .stat.clickable:hover { border-color: var(--accent); }

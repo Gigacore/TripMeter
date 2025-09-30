@@ -137,7 +137,7 @@ function App() {
         title = `Successful Trips (${list.length})`;
         break;
       case 'canceled':
-        list = rows.filter(r => r.status?.toLowerCase() === 'rider_canceled' || r.status?.toLowerCase() === 'driver_canceled');
+        list = rows.filter(r => ['rider_canceled', 'driver_canceled'].includes(r.status?.toLowerCase() || ''));
         title = `Canceled Trips (${list.length})`;
         break;
       case 'rider_canceled':

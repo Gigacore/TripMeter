@@ -35,6 +35,7 @@ export interface TripStats {
   successfulTrips: number;
   riderCanceledTrips: number;
   driverCanceledTrips: number;
+  canceledTrips: number;
   unfulfilledTrips: number;
   avgFareByCurrency: { [key: string]: number };
   lowestFareByCurrency: { [key: string]: { amount: number; row: CSVRow } };
@@ -88,6 +89,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
     successfulTrips: 0,
     riderCanceledTrips: 0,
     driverCanceledTrips: 0,
+    canceledTrips: 0,
     unfulfilledTrips: 0,
     avgFareByCurrency: {},
     lowestFareByCurrency: {},
@@ -307,6 +309,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
         successfulTrips: completedCount,
         riderCanceledTrips: riderCanceledCount,
         driverCanceledTrips: driverCanceledCount,
+        canceledTrips: canceledCount,
         unfulfilledTrips: unfulfilledCount,
         totalFareByCurrency: fareByCurrency,
         lowestFareByCurrency: localLowestFare,

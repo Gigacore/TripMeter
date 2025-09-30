@@ -335,22 +335,48 @@ const Stats: React.FC<StatsProps> = ({
     return Object.entries(countsByHour).map(([hour, count]) => ({ hour: parseInt(hour, 10), count }));
   }, [rows]);
 
-  const tripsByDayOfWeekData = React.useMemo(() => {
+  const successfulTripsByDayOfWeekData = React.useMemo(() => {
     if (!rows || rows.length === 0) {
       return [];
     }
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const countsByDay: number[] = Array(7).fill(0);
 
-    rows.forEach(row => {
-      if (row.status?.toLowerCase() === 'completed' && row.request_time) {
+    rows
+      .filter(row => row.status?.toLowerCase() === 'completed' && row.request_time)
+      .forEach(row => {
         const date = new Date(row.request_time);
         if (!isNaN(date.getTime())) {
           const day = date.getDay(); // 0 for Sunday, 1 for Monday, etc.
           countsByDay[day]++;
         }
-      }
-    });
+      });
+
+    return countsByDay.map((count, index) => ({
+      day: dayNames[index],
+      count,
+    }));
+  }, [rows]);
+
+  const canceledTripsByDayOfWeekData = React.useMemo(() => {
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const countsByDay: number[] = Array(7).fill(0);
+
+    rows
+      .filter(row => {
+        const status = row.status?.toLowerCase();
+        return (status === 'rider_canceled' || status === 'driver_canceled') && row.request_time;
+      })
+      .forEach(row => {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const day = date.getDay();
+          countsByDay[day]++;
+        }
+      });
 
     return countsByDay.map((count, index) => ({
       day: dayNames[index],
@@ -463,28 +489,22 @@ const Stats: React.FC<StatsProps> = ({
       )}
       <div className="section">
         {sankeyData.links.length > 0 && (
-          <div className="stats-group">
+          <div className="stats-group mb-6">
             <h3>Trip Summary</h3>
-            <ResponsiveContainer width="100%" height={700}>
-              <Sankey
-                data={sankeyData}
-                node={renderSankeyNode}
-                nodePadding={50}
-                margin={{
-                left: 200,
-                  right: 200,
-                  top: 100,
-                  bottom: 100
-                }}
-                link={{ stroke: '#77c878' }}
-              >
-                <Tooltip />
-              </Sankey>
-            </ResponsiveContainer>
-          </div>
-        )}
-        <div className="stats-group">
-          <div className="stats-grid">
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={500}>
+                <Sankey
+                  data={sankeyData}
+                  node={renderSankeyNode}
+                  nodePadding={50}
+                  margin={{ left: 100, right: 100, top: 5, bottom: 5 }}
+                  link={{ stroke: '#77c878' }}
+                >
+                  <Tooltip />
+                </Sankey>
+              </ResponsiveContainer>
+            </div>
+            <div className="stats-grid five-col mt-4">
             <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
             <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
             <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
@@ -492,15 +512,10 @@ const Stats: React.FC<StatsProps> = ({
             {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
           </div>
         </div>
+        )}
 
         <div className="stats-group">
           <h3>Ride Duration</h3>
-          <div className="stats-grid">
-            <Stat label="Total" value={formatDuration(totalTripDuration, true)} />
-            <Stat label="Average" value={formatDurationWithSeconds(avgTripDuration)} />
-            <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrip(longestTripRow)} />
-            <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrip(shortestTripRow)} />
-          </div>
           {durationDistributionData.length > 0 && (
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
@@ -514,13 +529,39 @@ const Stats: React.FC<StatsProps> = ({
               </ResponsiveContainer>
             </div>
           )}
-          <h3 className="mt-4">Waiting Time</h3>
-          <div className="stats-grid">
-            <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
-            <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
-            <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
-            <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Total" value={formatDuration(totalTripDuration, true)} />
+            <Stat label="Average" value={formatDurationWithSeconds(avgTripDuration)} />
+            <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrip(longestTripRow)} />
+            <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrip(shortestTripRow)} />
           </div>
+          <h3 className="mt-4">Distance</h3>
+          {distanceDistributionData.length > 0 && (
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={distanceDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#ff8042" name="Number of Trips" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+            <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
+            <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
+            {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
+              <Stat
+                label={`Cost per ${distanceUnit}`}
+                unit={`${activeCurrency}/${distanceUnit}`}
+                value={costPerDistanceByCurrency[activeCurrency]!.toFixed(2)}
+              />
+            )}
+          </div>
+          <h3 className="mt-4">Waiting Time</h3>
           {waitingTimeDistributionData.length > 0 && (
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
@@ -534,6 +575,12 @@ const Stats: React.FC<StatsProps> = ({
               </ResponsiveContainer>
             </div>
           )}
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
+            <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
+            <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
+            <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
+          </div>
         </div>
         {waitingLongerThanTripCount > 0 && (
           <div className="stats-group">
@@ -568,47 +615,8 @@ const Stats: React.FC<StatsProps> = ({
         )}
 
         <div className="stats-group">
-          <h3>Distance</h3>
-          <div className="stats-grid">
-            <Stat label="Total" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-            <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
-            <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
-            {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
-              <Stat
-                label={`Cost per ${distanceUnit}`}
-                unit={`${activeCurrency}/${distanceUnit}`}
-                value={costPerDistanceByCurrency[activeCurrency]!.toFixed(2)}
-              />
-            )}
-          </div>
-          {distanceDistributionData.length > 0 && (
-            <div className="mt-4">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={distanceDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#ff8042" name="Number of Trips" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-
-        <div className="stats-group">
           <h3>Speed</h3>
-          <div className="stats-grid">
-            <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
-            <Stat label="Fastest Avg. Speed" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
-            <Stat label="Slowest Avg. Speed" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
-            {activeCurrency && costPerDurationByCurrency[activeCurrency] !== undefined && (
-              <Stat
-                label="Cost per Minute"
-                unit={activeCurrency}
-                value={costPerDurationByCurrency[activeCurrency]!.toFixed(2)}
-              />
-            )}
+          {speedDistributionData.length > 0 && (
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={speedDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -620,6 +628,18 @@ const Stats: React.FC<StatsProps> = ({
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          )}
+          <div className="stats-grid four-col mt-4">
+            <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
+            <Stat label="Fastest" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
+            <Stat label="Slowest" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
+            {activeCurrency && costPerDurationByCurrency[activeCurrency] !== undefined && (
+              <Stat
+                label="Cost per Minute"
+                unit={activeCurrency}
+                value={costPerDurationByCurrency[activeCurrency]!.toFixed(2)}
+              />
+            )}
           </div>
         </div>
 
@@ -678,19 +698,40 @@ const Stats: React.FC<StatsProps> = ({
           </div>
         )}
 
-        {tripsByDayOfWeekData.length > 0 && (
+        {(successfulTripsByDayOfWeekData.length > 0 || canceledTripsByDayOfWeekData.length > 0) && (
           <div className="stats-group">
             <h3>Trips by Day of Week</h3>
-            <p className="hint -mt-2 mb-4">Number of completed trips for each day of the week.</p>
-            <ResponsiveContainer width="100%" height={300}>
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={tripsByDayOfWeekData}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="day" />
-                <PolarRadiusAxis angle={30} domain={[0, 'dataMax']} />
-                <Radar name="Trips" dataKey="count" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
-                <Tooltip />
-              </RadarChart>
-            </ResponsiveContainer>
+            <p className="hint -mt-2 mb-4">Trip distribution across the week.</p>
+            <div className="grid md:grid-cols-2 gap-8">
+              {successfulTripsByDayOfWeekData.length > 0 && (
+                <div>
+                  <h4 className="text-center text-slate-400 mb-2">Successful Trips</h4>
+                  <ResponsiveContainer width="100%" height={500}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={successfulTripsByDayOfWeekData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="day" />
+                      <PolarRadiusAxis angle={70} domain={[0, 'dataMax']} />
+                      <Radar name="Successful Trips" dataKey="count" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+                      <Tooltip />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+              {canceledTripsByDayOfWeekData.length > 0 && (
+                <div>
+                  <h4 className="text-center text-slate-400 mb-2">Canceled Trips</h4>
+                  <ResponsiveContainer width="100%" height={500}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={canceledTripsByDayOfWeekData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="day" />
+                      <PolarRadiusAxis angle={70} domain={[0, 'dataMax']} />
+                      <Radar name="Canceled Trips" dataKey="count" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} />
+                      <Tooltip />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
