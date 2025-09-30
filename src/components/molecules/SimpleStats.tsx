@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Stats: React.FC = () => {
+const SimpleStats: React.FC = () => {
   // Placeholder stats
   return (
     <div>
@@ -11,4 +11,4 @@ const Stats: React.FC = () => {
   );
 }
 
-export default Stats;
+export default SimpleStats;

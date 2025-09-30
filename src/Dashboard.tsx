@@ -1,6 +1,6 @@
 import React from 'react';
 import Map from '/src/components/Map';
-import Stats from '/src/components/Stats';
+import SimpleStats from './components/molecules/SimpleStats';
 
 function Dashboard() {
   return (
@@ -10,7 +10,7 @@ function Dashboard() {
       </header>
   <section className="mb-6">
         <h2>High-Level Stats</h2>
-        <Stats />
+        <SimpleStats />
       </section>
   <section className="mb-6 map-hero">
         <Map />

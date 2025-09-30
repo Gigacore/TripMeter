@@ -1,45 +1,14 @@
 import React, { ChangeEvent } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer, Layer, Rectangle, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { Sankey, Tooltip, ResponsiveContainer, Treemap, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import Stat from '../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../utils/formatters';
 import { downloadKML } from '../../services/kmlService';
 import { CSVRow } from '../../services/csvParser';
 import { TripStats } from '../../hooks/useTripData';
-import ContributionGraph from '../../ContributionGraph';
+import ContributionGraph from './ContributionGraph';
 import { DistanceUnit } from '../../App';
-
-interface SankeyNodeProps {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  index: number;
-  payload: { name: string; value: number };
-  onShowTripList: (type: string) => void;
-}
-
-const SankeyNode: React.FC<SankeyNodeProps> = ({ x, y, width, height, index, payload, onShowTripList }) => {
-  const isClickable = payload.name !== 'Total Requests';
-  const handleClick = () => {
-    if (!isClickable) return;
-    const typeMap: { [key: string]: string } = {
-      'Successful': 'successful',
-      'Rider Canceled': 'rider_canceled',
-      'Driver Canceled': 'driver_canceled',
-      'Unfulfilled': 'unfulfilled',
-    };
-    onShowTripList(typeMap[payload.name]);
-  };
-
-  return (
-    <Layer key={`CustomNode${index}`}>
-      <Rectangle x={x} y={y} width={width} height={height} fill="#666" fillOpacity="1" onClick={handleClick} cursor={isClickable ? 'pointer' : 'default'} />
-      <text textAnchor="middle" x={x + width / 2} y={y + height / 2} fontSize="14" fill="#fff" strokeWidth="0">
-        {payload.name} ({payload.value})
-      </text>
-    </Layer>
-  );
-};
+import SankeyNode from '../atoms/SankeyNode';
+import CustomizedContent from '../atoms/CustomizedContent';
 
 interface StatsProps {
   data: TripStats;
@@ -889,37 +858,6 @@ const Stats: React.FC<StatsProps> = ({
         <div className="footer">Select a new CSV file to replace the current data.</div>
       </div>
     </>
-  );
-};
-
-interface CustomizedContentProps {
-  root: any;
-  depth: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  index: number;
-  colors: string[];
-  name: string;
-}
-
-const CustomizedContent: React.FC<CustomizedContentProps> = ({ root, depth, x, y, width, height, index, colors, name }) => {
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        style={{
-          fill: colors[index % colors.length],
-          stroke: '#fff',
-          strokeWidth: 2 / (depth + 1e-10),
-          strokeOpacity: 1 / (depth + 1e-10),
-        }} />
-      {depth === 1 ? <text x={x + width / 2} y={y + height / 2 + 7} textAnchor="middle" fill="#fff" fontSize={14}>{name}</text> : null}
-    </g>
   );
 };
 
