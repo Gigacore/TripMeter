@@ -18,7 +18,7 @@ interface SidebarProps {
   onFocusOnTrip: (tripRow: CSVRow) => void;
   onShowTripList: (type: string) => void;
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
-  isProcessing: boolean;
+  isProcessing: boolean; // This now includes analysis time
   rows: CSVRow[];
   tripList: CSVRow[];
   tripListTitle: string;

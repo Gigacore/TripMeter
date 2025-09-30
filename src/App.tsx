@@ -29,7 +29,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const tripData = useTripData(rows, distanceUnit);
+  const [tripData, isAnalyzing] = useTripData(rows, distanceUnit);
 
   const convertDistance = (miles: number): number => {
     return distanceUnit === 'km' ? miles * KM_PER_MILE : miles;
@@ -167,9 +167,11 @@ function App() {
     setIsSettingsOpen(!isSettingsOpen);
   };
 
+  const showSpinner = isProcessing || isAnalyzing;
+
   return (
     <>
-      {isProcessing && <Spinner />}
+      {showSpinner && <Spinner />}
       <Header
         onReset={resetMap}
         actionsEnabled={actionsEnabled}
@@ -187,7 +189,7 @@ function App() {
       {rows.length === 0 ? (
         <InitialView
           onFileSelect={handleFileSelect}
-          isProcessing={isProcessing}
+          isProcessing={showSpinner}
           error={error}
           isDragging={isDragging}
           onDragEvents={handleDragEvents}
@@ -216,7 +218,7 @@ function App() {
               onFocusOnTrip={handleFocusOnTrip}
               onShowTripList={handleShowTripList}
               onFileSelect={handleFileSelect}
-              isProcessing={isProcessing}
+              isProcessing={showSpinner}
               rows={rows}
               tripList={tripList}
               tripListTitle={tripListTitle}

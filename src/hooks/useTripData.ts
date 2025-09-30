@@ -59,7 +59,8 @@ export interface TripStats {
   tripsByYear: { year: number; count: number }[];
 }
 
-export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripStats => {
+export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripStats, boolean] => {
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [stats, setStats] = useState<TripStats>({
     beginCount: 0,
     dropoffCount: 0,
@@ -114,6 +115,12 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
 
   useEffect(() => {
     if (rows.length > 0) {
+      setIsAnalyzing(true);
+      const timeoutId = setTimeout(() => {
+
+      
+
+
       let currentTotalDistance = 0;
       let totalDurationMinutes = 0;
       let totalDurationHours = 0;
@@ -403,8 +410,15 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): TripSta
       }
 
       setStats(newStats);
-    }
-  }, [rows, distanceUnit]);
+      setIsAnalyzing(false);
+    }, 10); // setTimeout to allow UI to update with spinner
 
-  return stats;
+    return () => {
+      clearTimeout(timeoutId);
+      setIsAnalyzing(false);
+    }
+    }
+  }, [rows, distanceUnit]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return [stats, isAnalyzing];
 };
