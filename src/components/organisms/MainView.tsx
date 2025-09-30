@@ -43,15 +43,15 @@ const MainView: React.FC<MainViewProps> = ({
 }) => {
   return (
     <div className="main-content">
-      <div className="map-and-stats-container">
+      <div className="map-and-stats-container map-main">
         <Map
           rows={rows}
           focusedTrip={focusedTrip}
           distanceUnit={distanceUnit}
           convertDistance={convertDistance}
         />
-        <TopStats tripData={tripData} distanceUnit={distanceUnit} />
       </div>
+      <TopStats tripData={tripData} distanceUnit={distanceUnit} />
       <div className="container">
         <Sidebar
           focusedTrip={focusedTrip}
