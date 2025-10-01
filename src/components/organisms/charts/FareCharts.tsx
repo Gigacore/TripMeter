@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, AreaChart, Legend, Area } from 'recharts';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, AreaChart, Area, TooltipProps } from 'recharts';
 import { formatCurrency } from '../../../utils/currency';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
@@ -12,6 +12,31 @@ interface FareChartsProps {
   setActiveCurrency: (currency: string) => void;
   onFocusOnTrip: (tripRow: CSVRow) => void;
 }
+
+const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
+  if (active && payload && payload.length && activeCurrency) {
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label font-bold">{`Fare: ${label} ${activeCurrency}`}</p>
+        <p className="recharts-tooltip-item text-amber-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomAreaTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
+  if (active && payload && payload.length && activeCurrency) {
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label font-bold">{`Year: ${label}`}</p>
+        <p className="recharts-tooltip-item text-emerald-400">{`Total Fare: ${formatCurrency(payload[0].value as number, activeCurrency)}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 const FareCharts: React.FC<FareChartsProps> = ({
   data,
@@ -57,14 +82,14 @@ const FareCharts: React.FC<FareChartsProps> = ({
   return (
     <>
       {currencies.length > 1 && (
-        <div className="stats-group mb-6 border-b border-slate-800">
-          <div className="flex items-center gap-2">
+        <div className="mb-6 border-b border-slate-800">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {currencies.map(currency => (
               <button
                 key={currency}
                 onClick={() => setActiveCurrency(currency)}
-                className={`px-4 py-3 text-sm font-semibold transition-colors text-left border-b-2 ${
-                  activeCurrency === currency
+                className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
+                   activeCurrency === currency
                     ? 'border-emerald-400 text-slate-100'
                     : 'border-transparent text-slate-400 hover:text-slate-200 active:bg-slate-800'
                 }`}
@@ -80,64 +105,49 @@ const FareCharts: React.FC<FareChartsProps> = ({
           </div>
         </div>
       )}
-      <div className="section">
-        {currencies.length > 0 && activeCurrency && (
-          <div className="stats-group">
-            <h3>Fare Distribution</h3>
-            <div className="flex gap-4">
-              <div className="flex w-full min-h-[220px]">
-                <div className="flex-1 p-8 flex flex-col items-start gap-6">
-                  <div className="w-full">
-                    {fareDistributionData.length > 0 && (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={fareDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="count" fill="#8884d8" name="Number of Trips" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full">
-                    <Stat
-                      label="Avg. Fare"
-                      value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
-                    />
-                    {lowestFareByCurrency[activeCurrency] && (
-                      <Stat
-                        label="Lowest Fare"
-                        value={formatCurrency(lowestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
-                        onClick={() => lowestFareByCurrency[activeCurrency] && onFocusOnTrip(lowestFareByCurrency[activeCurrency]!.row)}
-                      />
-                    )}
-                    {highestFareByCurrency[activeCurrency] && (
-                      <Stat
-                        label="Highest Fare"
-                        value={formatCurrency(highestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
-                        onClick={() => highestFareByCurrency[activeCurrency] && onFocusOnTrip(highestFareByCurrency[activeCurrency]!.row)}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+      {currencies.length > 0 && activeCurrency && (
+        <div className="stats-group">
+          <h3>Fare Distribution ({activeCurrency})</h3>
+          {fareDistributionData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={fareDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip content={<CustomBarTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+                <Bar dataKey="count" fill="#f59e0b" name="Number of Trips" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : <p className="text-slate-500 text-sm mt-2">No fare data to display for this currency.</p>}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+            <Stat
+              label="Avg. Fare"
+              value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
+            />
+            {lowestFareByCurrency[activeCurrency] && (
+              <Stat
+                label="Lowest Fare"
+                value={formatCurrency(lowestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
+                onClick={() => lowestFareByCurrency[activeCurrency] && onFocusOnTrip(lowestFareByCurrency[activeCurrency]!.row)}
+              />
+            )}
+            {highestFareByCurrency[activeCurrency] && (
+              <Stat
+                label="Highest Fare"
+                value={formatCurrency(highestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
+                onClick={() => highestFareByCurrency[activeCurrency] && onFocusOnTrip(highestFareByCurrency[activeCurrency]!.row)}
+              />
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
       {activeCurrency && totalFareByYear[activeCurrency] && totalFareByYear[activeCurrency]!.length > 0 && (
         <div className="stats-group">
-          <h3>Fare by Year</h3>
+          <h3>Total Fare by Year ({activeCurrency})</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart
               data={totalFareByYear[activeCurrency]}
-              margin={{
-                top: 5,
-                right: 20,
-                left: 10,
-                bottom: 5,
-              }}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
               <defs>
                 <linearGradient id="colorTotalFare" x1="0" y1="0" x2="0" y2="1">
@@ -145,11 +155,10 @@ const FareCharts: React.FC<FareChartsProps> = ({
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis />
-              <Tooltip formatter={(value: number) => [formatCurrency(value, activeCurrency), `Total Fare (${activeCurrency})`]} />
-              <Legend />
+              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+              <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency, { notation: 'compact' })} />
+              <Tooltip content={<CustomAreaTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
               <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
             </AreaChart>
           </ResponsiveContainer>

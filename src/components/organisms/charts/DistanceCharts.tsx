@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from 'recharts';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps } from 'recharts';
 import Stat from '../../atoms/Stat';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
@@ -13,6 +13,19 @@ interface DistanceChartsProps {
   activeCurrency: string | null;
   onFocusOnTrip: (tripRow: CSVRow) => void;
 }
+
+const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label font-bold">{`Distance: ${label}`}</p>
+        <p className="recharts-tooltip-item text-orange-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 const DistanceCharts: React.FC<DistanceChartsProps> = ({
   data,
@@ -56,21 +69,19 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
 
   return (
     <div className="stats-group">
-      <h3>Distance</h3>
+      <h3>Ride Distance Distribution</h3>
       {distanceDistributionData.length > 0 && (
-        <div className="mt-4">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={distanceDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="#ff8042" name="Number of Trips" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={distanceDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+            <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+            <Bar dataKey="count" fill="#fb923c" name="Number of Trips" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       )}
-      <div className="stats-grid four-col mt-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
         <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
         <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
         <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />

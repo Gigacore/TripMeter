@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, Treemap } from 'recharts';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, Treemap, TooltipProps } from 'recharts';
 import Stat from '../../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
@@ -10,6 +10,32 @@ interface WaitingTimeChartsProps {
   rows: CSVRow[];
   onFocusOnTrip: (tripRow: CSVRow) => void;
 }
+
+const CustomBarTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label font-bold">{`Waiting Time: ${label}`}</p>
+        <p className="recharts-tooltip-item text-amber-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+const CustomTreemapTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const { name, value } = payload[0];
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label font-bold">{name}</p>
+        <p className="recharts-tooltip-item text-slate-300">{`Duration: ${formatDuration(value as number, true)}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
   data,
@@ -54,7 +80,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
     }));
   }, [rows]);
 
-  const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
+  const treemapColors = React.useMemo(() => ['#a78bfa', '#34d399'], []);
 
   const renderWaitingTreemapContent = React.useCallback((props: any, totalTrips: number) => {
     const { depth, x, y, width, height, index, name, value } = props;
@@ -90,21 +116,19 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
   return (
     <>
       <div className="stats-group">
-        <h3 className="mt-4">Waiting Time</h3>
+        <h3>Waiting Time Distribution</h3>
         {waitingTimeDistributionData.length > 0 && (
-          <div className="mt-4">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={waitingTimeDistributionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#ffc658" name="Number of Trips" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={waitingTimeDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+              <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Bar dataKey="count" fill="#facc15" name="Number of Trips" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         )}
-        <div className="stats-grid four-col mt-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
           <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
           <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
           <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
@@ -114,7 +138,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
       {totalWaitingTime > 0 && totalTripDuration > 0 && (
         <div className="stats-group">
           <h3>Waiting vs. Riding</h3>
-          <div className="flex flex-col gap-4 items-center">
+          <div className="flex flex-col items-center gap-4">
             <div className="w-full h-64">
               <ResponsiveContainer width="100%" height={200}>
                 <Treemap
@@ -127,7 +151,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
                   content={(props) => renderWaitingTreemapContent(props, successfulTrips)}
                   isAnimationActive={false}
                 >
-                  <Tooltip formatter={(value: number) => [formatDuration(value, true), 'Duration']} />
+                  <Tooltip content={<CustomTreemapTooltip />} />
                 </Treemap>
               </ResponsiveContainer>
             </div>
@@ -139,7 +163,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
           <h3 className="flex items-center gap-2">
             Waiting {'>'} Ride Duration <span className="inline-flex items-center justify-center rounded-full bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-100">{waitingLongerThanTripCount} Rides</span>
           </h3>
-          <div className="flex flex-col gap-4 items-center">
+          <div className="flex flex-col items-center gap-4">
             <div className="w-full h-64">
               <ResponsiveContainer width="100%" height={200}>
                 <Treemap
@@ -152,9 +176,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
                   content={(props) => renderWaitingTreemapContent(props, waitingLongerThanTripCount)}
                   isAnimationActive={false}
                 >
-                  <Tooltip
-                    formatter={(value: number) => [formatDuration(value, true), 'Duration']}
-                  />
+                  <Tooltip content={<CustomTreemapTooltip />} />
                 </Treemap>
               </ResponsiveContainer>
             </div>

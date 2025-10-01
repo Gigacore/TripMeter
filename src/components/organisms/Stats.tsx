@@ -1,4 +1,5 @@
-import React, { ChangeEvent } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { CSVRow } from '../../services/csvParser';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
@@ -8,19 +9,17 @@ import DistanceCharts from './charts/DistanceCharts';
 import SpeedCharts from './charts/SpeedCharts';
 import WaitingTimeCharts from './charts/WaitingTimeCharts';
 import ActivityCharts from './charts/ActivityCharts';
-import { downloadKML } from '../../services/kmlService';
 import TopCities from './TopCities';
 import TripSummaryChart from './charts/TripSummaryChart';
 import TripsByYearChart from './charts/TripsByYearChart';
 import ProductTypesChart from './charts/ProductTypesChart';
+import TopStats from './TopStats';
 
 interface StatsProps {
   data: TripStats;
   onFocusOnTrip: (tripRow: CSVRow) => void;
   onShowTripList: (type: string) => void;
   distanceUnit: DistanceUnit;
-  onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
-  isProcessing: boolean;
   rows: CSVRow[];
 }
 
@@ -29,8 +28,6 @@ const Stats: React.FC<StatsProps> = ({
   onFocusOnTrip,
   onShowTripList,
   distanceUnit,
-  onFileSelect,
-  isProcessing,
   rows,
 }) => {
   const { totalFareByCurrency } = data;
@@ -43,71 +40,125 @@ const Stats: React.FC<StatsProps> = ({
     }
   }, [currencies, activeCurrency]);
 
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const actionsEnabled = rows.length > 0 && !isProcessing;
-
-  const handleDownloadKML = (which: 'both' | 'begin' | 'drop') => {
-    downloadKML(rows, which);
-  };
-
   return (
-    <>
-      <TopCities rows={rows} />
-      <FareCharts
-        data={data}
-        rows={rows}
-        activeCurrency={activeCurrency}
-        setActiveCurrency={setActiveCurrency}
-        onFocusOnTrip={onFocusOnTrip}
-      />
-      <TripSummaryChart data={data} onShowTripList={onShowTripList} />
-      <TripsByYearChart data={data} />
-      <DurationCharts
-        data={data}
-        rows={rows}
-        onFocusOnTrip={onFocusOnTrip}
-      />
-      <DistanceCharts
-        data={data}
-        rows={rows}
-        distanceUnit={distanceUnit}
-        activeCurrency={activeCurrency}
-        onFocusOnTrip={onFocusOnTrip}
-      />
-      <SpeedCharts
-        data={data}
-        rows={rows}
-        distanceUnit={distanceUnit}
-        activeCurrency={activeCurrency}
-        onFocusOnTrip={onFocusOnTrip}
-      />
-      <WaitingTimeCharts
-        data={data}
-        rows={rows}
-        onFocusOnTrip={onFocusOnTrip}
-      />
-      <ActivityCharts
-        data={data}
-        rows={rows}
-      />
-      <ProductTypesChart
-        rows={rows}
-        distanceUnit={distanceUnit}
-        activeCurrency={activeCurrency}
-      />
-      <div className="mb-6">
-        <div className="row flex gap-1.5">
-          <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
-          <button onClick={() => handleDownloadKML('begin')} disabled={!actionsEnabled}>Begintrip KML</button>
-          <button onClick={() => handleDownloadKML('drop')} disabled={!actionsEnabled}>Dropoff KML</button>
-        </div>
-        <div className="footer">KML uses colored icons (green/red). Works in Google Earth / Maps.</div>
+    <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+      <TopStats tripData={data} distanceUnit={distanceUnit} />
+      <div className="grid grid-cols-1 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Trip Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TripSummaryChart data={data} onShowTripList={onShowTripList} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Trips by Year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TripsByYearChart data={data} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Fare Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FareCharts
+              data={data}
+              rows={rows}
+              activeCurrency={activeCurrency}
+              setActiveCurrency={setActiveCurrency}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Duration Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DurationCharts
+              data={data}
+              rows={rows}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Distance Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DistanceCharts
+              data={data}
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Speed Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SpeedCharts
+              data={data}
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Waiting Time Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WaitingTimeCharts
+              data={data}
+              rows={rows}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ActivityCharts
+              data={data}
+              rows={rows}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Product Types</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProductTypesChart
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Cities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TopCities rows={rows} />
+          </CardContent>
+        </Card>
       </div>
-      <div className="section">
-        <input ref={fileInputRef} type="file" accept=".csv" onChange={onFileSelect} disabled={isProcessing} className="block" />
-        <div className="footer">Select a new CSV file to replace the current data.</div>
-      </div>
-    </>
+    </div>
   );
 };
 

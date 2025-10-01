@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, Tooltip, Treemap } from 'recharts';
+import { ResponsiveContainer, Tooltip, Treemap, TooltipProps } from 'recharts';
 import { CSVRow } from '../../../services/csvParser';
 import { DistanceUnit } from '../../../App';
 import { formatCurrency } from '../../../utils/currency';
@@ -18,8 +18,12 @@ interface ProductTypeStats {
   topCityCount?: number;
 }
 
-const CustomTreemapContent = (props: any, metric: string, distanceUnit: DistanceUnit, activeCurrency: string | null, treemapColors: string[]) => {
-  const { depth, x, y, width, height, index, name, value, colors } = props;
+const isTripCompleted = (trip: CSVRow): boolean => {
+  return trip.status?.toLowerCase() === 'completed';
+};
+
+const CustomTreemapContent = (props: any) => {
+  const { depth, x, y, width, height, index, name, value, colors, metric, distanceUnit, activeCurrency } = props;
   const isSmall = width < 150 || height < 50;
 
   let formattedValue = `${value.toLocaleString()}`;
@@ -38,9 +42,9 @@ const CustomTreemapContent = (props: any, metric: string, distanceUnit: Distance
         x={x}
         y={y}
         width={width}
-        height={height}
+        height={height - 1} // Add a small gap
         style={{
-          fill: treemapColors[index % treemapColors.length],
+          fill: colors[index % colors.length],
           stroke: '#fff',
           strokeWidth: 2 / (depth + 1e-10),
           strokeOpacity: 1 / (depth + 1e-10),
@@ -48,8 +52,8 @@ const CustomTreemapContent = (props: any, metric: string, distanceUnit: Distance
       />
       {!isSmall && (
         <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={14}>
-          <tspan key="name" x={x + width / 2} dy="-0.5em" className="font-semibold">{name}</tspan>
-          <tspan key="value" x={x + width / 2} dy="1.2em">{formattedValue}</tspan>
+          <tspan key="name" x={x + width / 2} dy="-0.5em" className="font-bold text-base">{name}</tspan>
+          <tspan key="value" x={x + width / 2} dy="1.4em" className="text-sm opacity-80">{formattedValue}</tspan>
         </text>
       )}
     </g>
@@ -96,7 +100,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
       }
 
       acc[product].size += 1;
-      const status = trip.status?.toLowerCase();
+      const status = trip.status?.toLowerCase() ?? '';
 
       const city = trip.city;
       if (city) {
@@ -104,7 +108,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
       }
 
 
-      if (status === 'completed') {
+      if (isTripCompleted(trip)) {
         acc[product].successfulTrips += 1;
         const fare = parseFloat(trip.fare_amount);
         const currency = trip.fare_currency;
@@ -156,19 +160,19 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
     });
   }, [rows, distanceUnit, metric, activeCurrency]);
 
-  const treemapColors = React.useMemo(() => ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'], []);
+  const treemapColors = React.useMemo(() => ['#6366f1', '#34d399', '#f59e0b', '#38bdf8', '#fb923c', '#a78bfa', '#ef4444'], []);
 
   if (productTypeData.length === 0) return null;
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount } = payload[0].payload;
       return (
-        <div className="recharts-default-tooltip rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-          <p className="recharts-tooltip-label">{name}</p>
-          <ul className="recharts-tooltip-item-list">
-            <li className="recharts-tooltip-item">Successful Trips: {successfulTrips.toLocaleString()}</li>
-            <li className="recharts-tooltip-item">Cancellations: {canceledTrips.toLocaleString()}</li>
+        <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+          <p className="recharts-tooltip-label font-bold text-base mb-2">{name}</p>
+          <ul className="space-y-1">
+            <li className="recharts-tooltip-item">Successful Trips: <span className="font-medium">{successfulTrips.toLocaleString()}</span></li>
+            <li className="recharts-tooltip-item">Cancellations: <span className="font-medium">{canceledTrips.toLocaleString()}</span></li>
             <li className="recharts-tooltip-item">Total Distance: {totalDistance.toFixed(2)} {distanceUnit}</li>
             <li className="recharts-tooltip-item">Total Waiting: {formatDuration(totalWaitingTime, true)}</li>
             <li className="recharts-tooltip-item">Total Riding: {formatDuration(totalRidingTime, true)}</li>
@@ -187,14 +191,15 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
 
   return (
     <div className="stats-group">
-      <h3>Product Types</h3>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-slate-800 mb-4 -mt-2">
+      <div className="mb-6 border-b border-slate-800">
+        <h3>Product Types Breakdown</h3>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {metricOptions.map(option => (
           <button
             key={option.value}
             onClick={() => setMetric(option.value)}
             disabled={option.value === 'totalFare' && !activeCurrency}
-            className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 disabled:cursor-not-allowed disabled:text-slate-600 ${
+            className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 disabled:cursor-not-allowed disabled:opacity-50 ${
               metric === option.value
                 ? 'border-emerald-400 text-slate-100'
                 : 'border-transparent text-slate-400 hover:text-slate-200 active:bg-slate-800'
@@ -203,16 +208,23 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
             {option.label}
           </button>
         ))}
+        </div>
       </div>
       <ResponsiveContainer width="100%" height={700}>
         <Treemap
           data={productTypeData}
           dataKey="value"
-          ratio={4 / 3}
+          aspectRatio={4 / 3}
           stroke="#fff"
           fill="#8884d8"
           isAnimationActive={false}
-          content={(props) => CustomTreemapContent(props, metric, distanceUnit, activeCurrency, treemapColors)}
+          content={<CustomTreemapContent
+            metric={metric}
+            distanceUnit={distanceUnit}
+            activeCurrency={activeCurrency}
+            colors={treemapColors}
+          />}
+          colors={treemapColors}
         >
           <Tooltip content={<CustomTooltip />} />
         </Treemap>

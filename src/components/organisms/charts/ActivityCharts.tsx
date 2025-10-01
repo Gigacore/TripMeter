@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, ZAxis, Tooltip, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, ZAxis, Tooltip, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, TooltipProps } from 'recharts';
 import Stat from '../../atoms/Stat';
 import ContributionGraph from '../ContributionGraph';
 import { CSVRow } from '../../../services/csvParser';
@@ -9,6 +9,42 @@ interface ActivityChartsProps {
   data: TripStats;
   rows: CSVRow[];
 }
+
+const CustomScatterTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const { hour, count } = payload[0].payload;
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label font-bold">{`Hour: ${hour}:00 - ${hour}:59`}</p>
+        <p className="recharts-tooltip-item text-indigo-400">{`Trips: ${count.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomRadarTooltip = ({ active, payload, label, colorClass, seriesName }: TooltipProps<number, string> & { colorClass: string, seriesName: string }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label font-bold">{`Day: ${label}`}</p>
+        <p className={`recharts-tooltip-item ${colorClass}`}>{`${seriesName}: ${payload[0].value?.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const renderPolarAngleAxis = ({ payload, x, y, cx, cy, ...rest }: any) => {
+  return (
+    <text
+      {...rest}
+      y={y + (y - cy) / 10}
+      x={x + (x - cx) / 20}
+      className="fill-slate-400 text-xs"
+    >{payload.value}</text>
+  );
+};
 
 const formatDateRange = (start: number | null, end: number | null): string | null => {
   if (!start || !end) return null;
@@ -128,18 +164,24 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
   return (
     <>
       <div className="stats-group">
-        <div className="contribution-graph-header">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h3>Trip Activity</h3>
-          <select
-            value={contributionView}
-            onChange={(e) => setContributionView(e.target.value === 'last-12-months' ? 'last-12-months' : Number(e.target.value))}
-          >
-            <option value="last-12-months">Last 12 months</option>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <button onClick={() => setContributionView('last-12-months')} className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${contributionView === 'last-12-months' ? 'bg-emerald-500 text-white' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
+              Last 12 months
+            </button>
             {availableYears.map(year => (
-              <option key={year} value={year}>{year}</option>
+              <button
+                key={year}
+                onClick={() => setContributionView(year)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${contributionView === year ? 'bg-emerald-500 text-white' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}
+              >
+                {year}
+              </button>
             ))}
-          </select>
+          </div>
         </div>
+
         {Object.keys(contributionData).length > 0 ? (
           <div className="mt-4">
             <ContributionGraph data={contributionData} view={contributionView} />
@@ -149,7 +191,7 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
       <div className="stats-group">
         <h3>Streaks & Gaps</h3>
-        <div className="stats-grid">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
           <Stat
             label="Longest Streak"
             value={`${longestStreak.days} ${longestStreak.days === 1 ? 'day' : 'days'}`}
@@ -167,16 +209,13 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           <h3>Trips by Hour of Day</h3>
           <p className="hint -mt-2 mb-4">Number of completed trips for each hour of the day.</p>
           <ResponsiveContainer width="100%" height={300}>
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-              <CartesianGrid />
-              <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={24} />
-              <YAxis type="number" dataKey="count" name="Trips" />
-              <ZAxis type="number" range={[100, 101]} />
-              <Tooltip
-                cursor={{ strokeDasharray: '3 3' }}
-                formatter={(value: number, name: string) => (name === 'Hour' ? `${value}:00 - ${value}:59` : value)}
-              />
-              <Scatter name="Trips" data={tripsByHourData} fill="#8884d8" />
+            <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+              <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis type="number" dataKey="count" name="Trips" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <ZAxis type="number" range={[60, 60]} />
+              <Tooltip cursor={{ strokeDasharray: '3 3', fill: 'rgba(100, 116, 139, 0.1)' }} content={<CustomScatterTooltip />} />
+              <Scatter name="Trips" data={tripsByHourData} fill="#818cf8" />
             </ScatterChart>
           </ResponsiveContainer>
         </div>
@@ -191,12 +230,12 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
               <div>
                 <h4 className="text-center text-slate-400 mb-2">Completed Trips</h4>
                 <ResponsiveContainer width="100%" height={500}>
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={successfulTripsByDayOfWeekData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="day" />
-                    <PolarRadiusAxis angle={70} domain={[0, 'dataMax']} />
-                    <Radar name="Completed Trips" dataKey="count" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
-                    <Tooltip />
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={successfulTripsByDayOfWeekData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <PolarGrid strokeOpacity={0.3} />
+                    <PolarAngleAxis dataKey="day" tick={renderPolarAngleAxis} />
+                    <PolarRadiusAxis angle={30} domain={[0, 'dataMax']} tick={false} axisLine={false} />
+                    <Radar name="Completed Trips" dataKey="count" stroke="#34d399" fill="#34d399" fillOpacity={0.6} />
+                    <Tooltip content={<CustomRadarTooltip colorClass="text-emerald-400" seriesName="Completed" />} />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
@@ -205,12 +244,12 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
               <div>
                 <h4 className="text-center text-slate-400 mb-2">Canceled Trips</h4>
                 <ResponsiveContainer width="100%" height={500}>
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={canceledTripsByDayOfWeekData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="day" />
-                    <PolarRadiusAxis angle={70} domain={[0, 'dataMax']} />
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={canceledTripsByDayOfWeekData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <PolarGrid strokeOpacity={0.3} />
+                    <PolarAngleAxis dataKey="day" tick={renderPolarAngleAxis} />
+                    <PolarRadiusAxis angle={30} domain={[0, 'dataMax']} tick={false} axisLine={false} />
                     <Radar name="Canceled Trips" dataKey="count" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} />
-                    <Tooltip />
+                    <Tooltip content={<CustomRadarTooltip colorClass="text-red-500" seriesName="Canceled" />} />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>

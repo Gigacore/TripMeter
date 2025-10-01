@@ -1,27 +1,43 @@
 import currency from 'currency.js';
+import { getCurrencyCode as getCode } from '../components/organisms/charts/currency';
 
 export const formatCurrency = (
   amount: number | null | undefined,
-  currencyCode: string,
+  currencyIdentifier: string,
   locale: string = 'en-US'
 ): string => {
   if (amount === null || amount === undefined) {
     return 'N/A';
   }
 
-  return currency(amount, { symbol: getCurrencySymbol(currencyCode, locale) }).format();
+  const currencyCode = getCode(currencyIdentifier);
+
+  try {
+    // Use Intl.NumberFormat for robust currency formatting
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currencyCode,
+      currencyDisplay: 'symbol',
+    }).format(amount);
+  } catch (error) {
+    console.error(`Error formatting currency for locale "${locale}" and currency "${currencyCode}":`, error);
+    // Fallback for invalid currency codes or other errors, using currency.js
+    return currency(amount, { symbol: getCurrencySymbol(currencyCode, locale) }).format();
+  }
 };
 
 export const getCurrencySymbol = (currencyCode: string, locale: string = 'en-US'): string => {
-  const symbols: { [key: string]: string } = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    INR: '₹',
-  };
-
-  return symbols[currencyCode] || currencyCode;
+  try {
+    // Use a dummy value `0` to format and extract the symbol.
+    const parts = new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currencyCode,
+      currencyDisplay: 'symbol',
+    }).formatToParts(0);
+    return parts.find(part => part.type === 'currency')?.value || currencyCode;
+  } catch (e) {
+    return currencyCode; // Fallback to code if Intl fails
+  }
 };
 
 export const add = (a: number, b: number): number => {

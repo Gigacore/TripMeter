@@ -1,8 +1,12 @@
 import React, { useRef, DragEvent, ChangeEvent } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { UploadCloud } from 'lucide-react';
 
 interface InitialViewProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
-  isProcessing: boolean; // This now includes analysis time
+  isProcessing: boolean;
   error: string;
   isDragging: boolean;
   onDragEvents: (event: DragEvent<HTMLDivElement>) => void;
@@ -13,35 +17,47 @@ const InitialView: React.FC<InitialViewProps> = ({ onFileSelect, isProcessing, e
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="initial-view">
-      <div
-        className={`mb-6 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer text-gray-400 flex flex-col ${isDragging ? 'bg-slate-800' : 'bg-slate-900'}`}
-        onClick={() => fileInputRef.current?.click()}
-        onDrop={onDrop}
-        onDragEnter={onDragEvents}
-        onDragOver={onDragEvents}
-        onDragLeave={onDragEvents}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="17 8 12 3 7 8"></polyline>
-          <line x1="12" y1="3" x2="12" y2="15"></line>
-        </svg>
-        <p>Drag & drop CSV here, or click to select file</p>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv"
-          onChange={onFileSelect}
-          disabled={isProcessing}
-          className="visually-hidden"
-        />
-      </div>
-      {error && (
-  <div className="mb-6 error mt-5 w-full max-w-[600px]">
-          {error}
+    <div className="flex items-center justify-center h-full p-4">
+      <Card className="w-full max-w-lg border-slate-800 bg-slate-900/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle>Upload your CSV file</CardTitle>
+          <CardDescription>Drag and drop your file here or click the button below to select a file.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div
+            className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors duration-200 ease-in-out ${isDragging ? 'border-emerald-500 bg-slate-800/50' : 'border-slate-700 hover:border-slate-600'}`}
+            onClick={() => fileInputRef.current?.click()}
+            onDrop={onDrop}
+            onDragEnter={onDragEvents}
+            onDragOver={onDragEvents}
+            onDragLeave={onDragEvents}
+          >
+            <UploadCloud className="mx-auto mb-4 h-12 w-12 text-slate-400" />
+            <p className="text-slate-400">Drag & drop your CSV file here</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={onFileSelect}
+              disabled={isProcessing}
+              className="hidden"
+            />
+          </div>
+        </CardContent>
+        <div className="p-6 pt-0">
+            <Button onClick={() => fileInputRef.current?.click()} disabled={isProcessing} className="w-full">
+            {isProcessing ? 'Processing...' : 'Select File'}
+            </Button>
         </div>
-      )}
+        {error && (
+          <div className="p-6 pt-0">
+            <Alert variant="destructive">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

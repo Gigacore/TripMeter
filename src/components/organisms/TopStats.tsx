@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React,
+{ useState, useRef, useCallback } from 'react';
 import Stat from '../atoms/Stat';
 import { formatDuration } from '../../utils/formatters';
 import { formatCurrency } from '../../utils/currency';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface TopStatsProps {
   tripData: TripStats;
@@ -24,21 +26,21 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
 
-  const handlePrevCurrency = () => {
+  const handlePrevCurrency = useCallback(() => {
     setActiveCurrencyIndex((prevIndex) => (prevIndex - 1 + currencies.length) % currencies.length);
-  };
+  }, [currencies.length]);
 
-  const handleNextCurrency = () => {
+  const handleNextCurrency = useCallback(() => {
     setActiveCurrencyIndex((prevIndex) => (prevIndex + 1) % currencies.length);
-  };
+  }, [currencies.length]);
 
-  const handleSwipeStart = (clientX: number) => {
+  const handleSwipeStart = useCallback((clientX: number) => {
     if (currencies.length <= 1) return;
     setIsDragging(true);
     setStartX(clientX);
-  };
+  }, [currencies.length]);
 
-  const handleSwipeMove = (clientX: number) => {
+  const handleSwipeMove = useCallback((clientX: number) => {
     if (!isDragging || currencies.length <= 1) return;
     const diff = startX - clientX;
     if (Math.abs(diff) > 50) { // Swipe threshold
@@ -49,24 +51,24 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
       }
       setIsDragging(false); // End swipe after one move
     }
-  };
+  }, [isDragging, currencies.length, startX, handleNextCurrency, handlePrevCurrency]);
 
-  const handleSwipeEnd = () => {
+  const handleSwipeEnd = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => handleSwipeStart(e.touches[0].clientX);
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => handleSwipeMove(e.touches[0].clientX);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => handleSwipeStart(e.clientX);
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => handleSwipeMove(e.clientX);
-  const handleMouseUp = () => handleSwipeEnd();
+
   const handleMouseLeave = () => {
     if (isDragging) handleSwipeEnd();
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4 rounded-b-2xl border-x border-b border-slate-800 bg-slate-900/70 p-4 backdrop-blur-sm md:gap-6">
+    <div className="flex flex-wrap items-center justify-center gap-4 p-4 md:gap-6">
       <Stat label="Completed Rides" value={successfulTrips} />
       {currencies.length > 0 && (
         <>
@@ -78,27 +80,34 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
             />
           )}
           {currencies.length > 1 && (
-            <div className="flex flex-col items-center gap-2">
+            <div className="relative flex flex-col items-center gap-2">
+              <button onClick={handlePrevCurrency} className="absolute -left-6 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white" aria-label="Previous currency">
+                <ChevronLeft size={16} />
+              </button>
               <div
                 ref={swipeRef}
-                className="cursor-grab active:cursor-grabbing"
+                className="min-w-[180px] cursor-grab text-center active:cursor-grabbing"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleSwipeEnd}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
+                onMouseUp={handleSwipeEnd}
                 onMouseLeave={handleMouseLeave}
               >
-                <Stat
-                  key={currencies[activeCurrencyIndex][0]}
-                  label="Total Fare"
-                  value={formatCurrency(currencies[activeCurrencyIndex][1], currencies[activeCurrencyIndex][0])}
-                />
+                <div className="overflow-hidden">
+                  <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${activeCurrencyIndex * 100}%)` }}>
+                    {currencies.map(([currency, fare]) => (
+                      <div key={currency} className="w-full flex-shrink-0">
+                        <Stat label="Total Fare" value={formatCurrency(fare, currency)} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="flex items-center justify-center gap-2">
                 {currencies.map((_, index) => (
-                  <button key={index} onClick={() => setActiveCurrencyIndex(index)} className={`h-2 w-2 rounded-full transition-colors ${activeCurrencyIndex === index ? 'bg-white' : 'bg-slate-600 hover:bg-slate-500'}`} aria-label={`Go to currency ${index + 1}`} />
+                  <button key={index} onClick={() => setActiveCurrencyIndex(index)} className={`h-2 w-2 rounded-full transition-all duration-300 ${activeCurrencyIndex === index ? 'w-4 bg-emerald-500' : 'bg-slate-600 hover:bg-slate-500'}`} aria-label={`Go to currency ${index + 1}`} />
                 ))}
               </div>
             </div>

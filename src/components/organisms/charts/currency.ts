@@ -19,6 +19,10 @@ function generateCurrencyMap(): { [key: string]: string } {
       map[name] = code;
     }
   }
+
+  // Add manual overrides for common variations
+  map['British Pound Sterling'] = 'GBP';
+
   currencyNameToCodeMap = map;
   return currencyNameToCodeMap;
 }

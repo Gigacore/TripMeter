@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
+import { ResponsiveContainer, Sankey, Tooltip, TooltipProps } from 'recharts';
 import Stat from '../../atoms/Stat';
 import SankeyNode from '../../atoms/SankeyNode';
 import { TripStats } from '../../../hooks/useTripData';
@@ -8,6 +8,26 @@ interface TripSummaryChartProps {
   data: TripStats;
   onShowTripList: (type: string) => void;
 }
+
+const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const { source, target, value } = payload[0].payload || {};
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <p className="recharts-tooltip-label">{`${source.name} → ${target.name}`}</p>
+        <p className="recharts-tooltip-item">{`Trips: ${value.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const statusColors: { [key: string]: string } = {
+  'Successful': '#22c55e', // green-500
+  'Rider Canceled': '#f97316', // orange-500
+  'Driver Canceled': '#ef4444', // red-500
+  'Unfulfilled': '#64748b', // slate-500
+};
 
 const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripList }) => {
   const { totalTrips, successfulTrips, riderCanceledTrips, driverCanceledTrips } = data;
@@ -23,10 +43,10 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
       { name: 'Unfulfilled' },
     ],
     links: [
-      { source: 0, target: 1, value: successfulTrips },
-      { source: 0, target: 2, value: riderCanceledTrips },
-      { source:0, target: 3, value: driverCanceledTrips },
-      { source: 0, target: 4, value: unfulfilledTrips },
+      { source: 0, target: 1, value: successfulTrips, color: statusColors['Successful'] },
+      { source: 0, target: 2, value: riderCanceledTrips, color: statusColors['Rider Canceled'] },
+      { source: 0, target: 3, value: driverCanceledTrips, color: statusColors['Driver Canceled'] },
+      { source: 0, target: 4, value: unfulfilledTrips, color: statusColors['Unfulfilled'] },
     ].filter(link => link.value > 0),
   };
 
@@ -38,8 +58,8 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
   if (sankeyData.links.length === 0) return null;
 
   return (
-    <div className="stats-group mb-6">
-      <h3>Trip Summary</h3>
+    <div className="stats-group">
+      <p className="text-sm text-slate-400 -mt-2 mb-4">A breakdown of all trip requests by their final status.</p>
       <div className="mt-4">
         <ResponsiveContainer width="100%" height={500}>
           <Sankey
@@ -53,7 +73,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
           </Sankey>
         </ResponsiveContainer>
       </div>
-      <div className="stats-grid five-col mt-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
         <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
         <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
         <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
