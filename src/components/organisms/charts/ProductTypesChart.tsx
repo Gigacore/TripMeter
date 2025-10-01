@@ -191,7 +191,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
 
   return (
     <div className="stats-group">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+      <div className="mb-6 border-b border-slate-800">
         <h3>Product Types Breakdown</h3>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {metricOptions.map(option => (
@@ -199,10 +199,10 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
             key={option.value}
             onClick={() => setMetric(option.value)}
             disabled={option.value === 'totalFare' && !activeCurrency}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 disabled:cursor-not-allowed disabled:opacity-50 ${
               metric === option.value
-                ? 'bg-emerald-500 text-white'
-                : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                ? 'border-emerald-400 text-slate-100'
+                : 'border-transparent text-slate-400 hover:text-slate-200 active:bg-slate-800'
             }`}
           >
             {option.label}

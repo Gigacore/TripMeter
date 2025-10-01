@@ -68,7 +68,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4 rounded-b-2xl border-x border-b border-slate-800 bg-slate-900/70 p-4 backdrop-blur-sm md:gap-6">
+    <div className="flex flex-wrap items-center justify-center gap-4 p-4 md:gap-6">
       <Stat label="Completed Rides" value={successfulTrips} />
       {currencies.length > 0 && (
         <>
