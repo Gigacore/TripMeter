@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { useState } from 'react';
 import './App.css';
 import 'leaflet/dist/leaflet.css';
@@ -5,10 +6,10 @@ import { useTripData } from './hooks/useTripData';
 import { CSVRow } from './services/csvParser';
 import { downloadKML } from './services/kmlService';
 import { KM_PER_MILE } from './constants';
-import Header from './components/organisms/Header';
 import InitialView from './components/organisms/InitialView';
 import Spinner from './components/atoms/Spinner';
-import Settings from './components/organisms/Settings';
+import Header from './components/organisms/Header';
+import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
 import MainView from './components/organisms/MainView';
 
@@ -102,18 +103,18 @@ function App() {
   const showSpinner = isProcessing || isAnalyzing;
 
   return (
-    <>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       {showSpinner && <Spinner />}
       <Header
         onReset={resetMap}
         actionsEnabled={actionsEnabled}
         error={error}
         toggleSettings={toggleSettings}
+        rows={rows}
       />
-      <Settings
+      <SettingsSheet
         unit={distanceUnit}
         setUnit={setDistanceUnit}
-        downloadKml={() => downloadKML(rows)}
         isMenuOpen={isSettingsOpen}
         toggleMenu={toggleSettings}
       />
@@ -146,7 +147,7 @@ function App() {
           onBackToStats={() => setSidebarView('stats')}
         />
       )}
-    </>
+    </ThemeProvider>
   );
 }
 
