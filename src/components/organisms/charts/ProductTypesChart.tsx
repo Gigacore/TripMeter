@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, Tooltip, Treemap, TooltipProps } from 'recharts';
-import { CSVRow, isTripCompleted } from '../../../services/csvParser';
+import { CSVRow } from '../../../services/csvParser';
 import { DistanceUnit } from '../../../App';
 import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
@@ -18,8 +18,12 @@ interface ProductTypeStats {
   topCityCount?: number;
 }
 
-const CustomTreemapContent = (props: any, metric: string, distanceUnit: DistanceUnit, activeCurrency: string | null) => {
-  const { depth, x, y, width, height, index, name, value, colors } = props;
+const isTripCompleted = (trip: CSVRow): boolean => {
+  return trip.status?.toLowerCase() === 'completed';
+};
+
+const CustomTreemapContent = (props: any) => {
+  const { depth, x, y, width, height, index, name, value, colors, metric, distanceUnit, activeCurrency } = props;
   const isSmall = width < 150 || height < 50;
 
   let formattedValue = `${value.toLocaleString()}`;
@@ -214,7 +218,12 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
           stroke="#fff"
           fill="#8884d8"
           isAnimationActive={false}
-          content={<CustomTreemapContent metric={metric} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />}
+          content={<CustomTreemapContent
+            metric={metric}
+            distanceUnit={distanceUnit}
+            activeCurrency={activeCurrency}
+            colors={treemapColors}
+          />}
           colors={treemapColors}
         >
           <Tooltip content={<CustomTooltip />} />

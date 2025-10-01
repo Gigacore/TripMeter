@@ -42,7 +42,7 @@ const MainView: React.FC<MainViewProps> = ({
   onBackToStats,
 }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4 p-4">
+    <div className="main-content grid gap-4 p-4">
       <Map
           rows={rows}
           focusedTrip={focusedTrip}
@@ -50,6 +50,19 @@ const MainView: React.FC<MainViewProps> = ({
           convertDistance={convertDistance}
         />
       <Stats data={tripData} onFocusOnTrip={onFocusOnTrip} onShowTripList={onShowTripList} distanceUnit={distanceUnit} rows={rows} />
+      <div className="md:col-span-1 flex flex-col gap-4">
+        {/* <Sidebar
+          focusedTrip={focusedTrip}
+          onShowAll={onShowAll}
+          sidebarView={sidebarView}
+          onFocusOnTrip={onFocusOnTrip}
+          onShowTripList={onShowTripList}
+          tripList={tripList}
+          tripListTitle={tripListTitle}
+          onBackToStats={onBackToStats}
+        /> */}
+       
+      </div>
     </div>
   );
 };
