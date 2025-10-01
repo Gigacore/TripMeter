@@ -141,7 +141,11 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
             {week.map((day) => (
               <div
                 key={day.key}
-                className={`contribution-graph-day${day.isPlaceholder ? ' contribution-graph-day--placeholder' : ''}`}
+                className={`contribution-graph-day ${
+                  day.isPlaceholder
+                    ? 'contribution-graph-day--placeholder'
+                    : 'transition-transform duration-100 ease-in-out hover:scale-150 hover:shadow-lg hover:z-10'
+                }`}
                 data-level={day.level}
                 title={day.isPlaceholder || !day.date ? undefined : getTooltipText(day.count ?? 0, day.date)}
               />
