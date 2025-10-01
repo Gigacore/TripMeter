@@ -6,6 +6,7 @@ import { toNumber } from '../../utils/formatters';
 import { CSVRow } from '../../services/csvParser';
 import { DistanceUnit } from '../../App';
 
+let mapIdCounter = 0;
 interface MapProps {
     rows: CSVRow[];
     focusedTrip: CSVRow | null;
@@ -18,6 +19,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
     const mapRef = useRef<L.Map | null>(null);
     const beginLayerRef = useRef<L.FeatureGroup | null>(null);
     const dropLayerRef = useRef<L.FeatureGroup | null>(null);
+    const mapIdRef = useRef(`map-${mapIdCounter++}`);
     const heatLayerRef = useRef<any>(null); // Using any because leaflet.heat types are not available
 
     const fitToLayers = () => {
@@ -38,7 +40,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
 
     useEffect(() => {
         if (rows.length > 0 && !mapRef.current) {
-            const map = L.map('map');
+            const map = L.map(mapIdRef.current);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
@@ -74,7 +76,11 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
         heatLayerRef.current?.setLatLngs([]);
 
         const heatPoints: LatLngExpression[] = [];
-        const tripsToRender = focusedTrip ? [focusedTrip] : rows;
+        const tripsToRender = focusedTrip
+            ? [focusedTrip]
+            : rows.filter(r =>
+                r.status?.toLowerCase() === 'completed'
+            );
 
         const createPopupContent = (pointType: 'begin' | 'drop', data: CSVRow): string => {
             const {
@@ -134,18 +140,17 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             const dlt = toNumber(r.dropoff_lat);
             const dln = toNumber(r.dropoff_lng);
 
-            if (blt != null && bln != null) {
+            if (blt != null && bln != null && dlt != null && dln != null) {
                 heatPoints.push([blt, bln]);
+                heatPoints.push([dlt, dln]);
+
                 const m = L.marker([blt, bln], { icon: greenIcon });
                 m.bindPopup(createPopupContent('begin', r));
                 beginLayerRef.current?.addLayer(m);
 
-                if (dlt != null && dln != null) {
-                    heatPoints.push([dlt, dln]);
-                    const m = L.marker([dlt, dln], { icon: redIcon });
-                    m.bindPopup(createPopupContent('drop', r));
-                    dropLayerRef.current?.addLayer(m);
-                }
+                const m2 = L.marker([dlt, dln], { icon: redIcon });
+                m2.bindPopup(createPopupContent('drop', r));
+                dropLayerRef.current?.addLayer(m2);
             }
         });
 
@@ -158,7 +163,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
 
     return (
     <div className="flex-shrink-0 map-hero">
-            <main id="map"></main>
+            <main id={mapIdRef.current} style={{ width: '100%', height: '100%' }}></main>
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import RidesList from '/src/components/RidesList';
+import RidesList from './components/molecules/RidesList';
 import Map from '/src/components/Map';
 
 function Rides() {

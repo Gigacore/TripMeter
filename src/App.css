@@ -44,12 +44,16 @@ header h1 { font-size: 18px; margin: 0 8px 0 0; }
 /* Map container for hero section */
 .map-hero {
   max-width: 1400px;
-  width: 80vw;
-  height: 50vh;
+  width: 100%;
+  height: 100%;
   min-height: 400px; /* Ensure map is not too small on short screens */
   margin: 24px auto;
   border-radius: 12px;
   overflow: hidden;
+}
+
+.map-main { width: 100%;
+    height: 400px;
 }
 
 .settings-menu { position: relative; }
@@ -261,6 +265,8 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  --contribution-gap: clamp(2px, 0.6vw, 6px);
 }
 
 .contribution-graph-header {
@@ -278,22 +284,24 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 .contribution-graph-body {
-  display: flex;
-  gap: 4px;
+  display: grid;
+  column-gap: var(--contribution-gap);
   overflow-x: auto;
   padding-bottom: 16px; /* for scrollbar */
+  width: 100%;
 }
 
 .contribution-graph-week {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  row-gap: var(--contribution-gap);
+  align-items: stretch;
 }
 
 .contribution-graph-day {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 25px;
   background-color: #2d3748; /* level 0 */
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -304,12 +312,37 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .contribution-graph-day[data-level="4"] { background-color: #e0f2fe; } /* sky-100 */
 
 .contribution-graph-months {
-  display: flex;
+  display: grid;
+  column-gap: var(--contribution-gap);
   font-size: 10px;
   color: var(--muted);
+  width: 100%;
 }
 
 .contribution-graph-month {
-  flex-basis: 0;
-  flex-grow: 1;
+  white-space: nowrap;
+  justify-self: start;
+}
+
+.contribution-graph-month--spacer {
+  visibility: hidden;
+}
+
+.contribution-graph-week-labels .contribution-graph-day {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 10px;
+  line-height: 12px;
+  padding-right: 4px;
+  aspect-ratio: auto;
+  height: auto;
+}
+
+.contribution-graph-day--placeholder {
+  visibility: hidden;
+  pointer-events: none;
 }

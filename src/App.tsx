@@ -1,33 +1,37 @@
-import { useState, useRef, ChangeEvent, DragEvent } from 'react';
+import { useState } from 'react';
 import './App.css';
 import 'leaflet/dist/leaflet.css';
 import { useTripData } from './hooks/useTripData';
-import { parseCSV, CSVRow } from './services/csvParser';
+import { CSVRow } from './services/csvParser';
 import { downloadKML } from './services/kmlService';
-import { normalizeHeaders } from './utils/csv';
 import { KM_PER_MILE } from './constants';
 import Header from './components/organisms/Header';
 import InitialView from './components/organisms/InitialView';
-import Sidebar from './components/organisms/Sidebar';
-import Map from './components/organisms/Map';
 import Spinner from './components/atoms/Spinner';
-import TopStats from './components/organisms/TopStats';
 import Settings from './components/organisms/Settings';
+import { useFileHandler } from './hooks/useFileHandler';
+import MainView from './components/organisms/MainView';
 
 export type DistanceUnit = 'miles' | 'km';
 
 function App() {
-  const [rows, setRows] = useState<CSVRow[]>([]);
-  const [error, setError] = useState<string>('');
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const {
+    rows,
+    error,
+    isProcessing,
+    isDragging,
+    handleFileSelect,
+    handleDrop,
+    handleDragEvents,
+    resetState: resetFileHandlerState,
+  } = useFileHandler();
+
   const [focusedTrip, setFocusedTrip] = useState<CSVRow | null>(null);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>('miles');
   const [sidebarView, setSidebarView] = useState<'stats' | 'tripList'>('stats');
   const [tripList, setTripList] = useState<CSVRow[]>([]);
   const [tripListTitle, setTripListTitle] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [tripData, isAnalyzing] = useTripData(rows, distanceUnit);
 
@@ -35,82 +39,10 @@ function App() {
     return distanceUnit === 'km' ? miles * KM_PER_MILE : miles;
   };
 
-  const showError = (msg: string) => setError(msg);
-  const clearError = () => setError('');
-
   const resetMap = () => {
-    setRows([]);
-    setError('');
+    resetFileHandlerState();
     setFocusedTrip(null);
     setSidebarView('stats');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleFile = async (file?: File) => {
-    resetMap();
-    if (!file) return;
-
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      showError('Please select a .csv file.');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      const result = await parseCSV(file);
-      if (!result || !result.meta || !result.data) {
-        throw new Error('Failed to parse CSV.');
-      }
-
-      const idxMap = normalizeHeaders(result.meta.fields || []);
-      if (!idxMap) {
-        showError('Missing required headers. Expected: begintrip_lat, begintrip_lng, dropoff_lat, dropoff_lng (case-insensitive).');
-        setIsProcessing(false);
-        return;
-      }
-
-      const normalizedRows = result.data.map(obj => {
-        const out: CSVRow = {};
-        for (const k in obj) {
-          if (Object.hasOwn(obj, k)) {
-            out[k.trim().toLowerCase()] = obj[k];
-          }
-        }
-        return out;
-      });
-
-      setRows(normalizedRows);
-      clearError();
-    } catch (e) {
-      console.error(e);
-      showError('Unable to read this CSV. Please check formatting.');
-      setRows([]);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    handleFile(f);
-  };
-
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const f = e.dataTransfer.files?.[0];
-    handleFile(f);
-  };
-
-  const handleDragEvents = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setIsDragging(true);
-    } else if (e.type === 'dragleave') {
-      setIsDragging(false);
-    }
   };
 
   const handleFocusOnTrip = (tripRow: CSVRow) => {
@@ -196,36 +128,23 @@ function App() {
           onDrop={handleDrop}
         />
       ) : (
-        <div className="main-content">
-          <div className="map-and-stats-container">
-            <Map
-              rows={rows}
-              focusedTrip={focusedTrip}
-              distanceUnit={distanceUnit}
-              convertDistance={convertDistance}
-            />
-            <TopStats tripData={tripData} distanceUnit={distanceUnit} />
-          </div>
-          <div className="container">
-            <Sidebar
-              focusedTrip={focusedTrip}
-              onShowAll={handleShowAll}
-              convertDistance={convertDistance}
-              distanceUnit={distanceUnit}
-              sidebarView={sidebarView}
-              error={error}
-              tripData={tripData}
-              onFocusOnTrip={handleFocusOnTrip}
-              onShowTripList={handleShowTripList}
-              onFileSelect={handleFileSelect}
-              isProcessing={showSpinner}
-              rows={rows}
-              tripList={tripList}
-              tripListTitle={tripListTitle}
-              onBackToStats={() => setSidebarView('stats')}
-            />
-          </div>
-        </div>
+        <MainView
+          rows={rows}
+          focusedTrip={focusedTrip}
+          distanceUnit={distanceUnit}
+          convertDistance={convertDistance}
+          tripData={tripData}
+          sidebarView={sidebarView}
+          error={error}
+          isProcessing={showSpinner}
+          tripList={tripList}
+          tripListTitle={tripListTitle}
+          onShowAll={handleShowAll}
+          onFocusOnTrip={handleFocusOnTrip}
+          onShowTripList={handleShowTripList}
+          onFileSelect={handleFileSelect}
+          onBackToStats={() => setSidebarView('stats')}
+        />
       )}
     </>
   );
