@@ -41,122 +41,124 @@ const Stats: React.FC<StatsProps> = ({
   }, [currencies, activeCurrency]);
 
   return (
-    <>
+    <div className="flex flex-col gap-4 overflow-y-auto pr-2">
       <TopStats tripData={data} distanceUnit={distanceUnit} />
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Cities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TopCities rows={rows} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Fare Charts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FareCharts
-            data={data}
-            rows={rows}
-            activeCurrency={activeCurrency}
-            setActiveCurrency={setActiveCurrency}
-            onFocusOnTrip={onFocusOnTrip}
-          />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Trip Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TripSummaryChart data={data} onShowTripList={onShowTripList} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Trips by Year</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TripsByYearChart data={data} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Duration Charts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DurationCharts
-            data={data}
-            rows={rows}
-            onFocusOnTrip={onFocusOnTrip}
-          />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Distance Charts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DistanceCharts
-            data={data}
-            rows={rows}
-            distanceUnit={distanceUnit}
-            activeCurrency={activeCurrency}
-            onFocusOnTrip={onFocusOnTrip}
-          />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Speed Charts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SpeedCharts
-            data={data}
-            rows={rows}
-            distanceUnit={distanceUnit}
-            activeCurrency={activeCurrency}
-            onFocusOnTrip={onFocusOnTrip}
-          />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Waiting Time Charts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <WaitingTimeCharts
-            data={data}
-            rows={rows}
-            onFocusOnTrip={onFocusOnTrip}
-          />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Activity Charts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ActivityCharts
-            data={data}
-            rows={rows}
-          />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Product Types</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProductTypesChart
-            rows={rows}
-            distanceUnit={distanceUnit}
-            activeCurrency={activeCurrency}
-          />
-        </CardContent>
-      </Card>
-    </>
+      <div className="grid grid-cols-1 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Trip Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TripSummaryChart data={data} onShowTripList={onShowTripList} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Trips by Year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TripsByYearChart data={data} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Fare Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FareCharts
+              data={data}
+              rows={rows}
+              activeCurrency={activeCurrency}
+              setActiveCurrency={setActiveCurrency}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Duration Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DurationCharts
+              data={data}
+              rows={rows}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Distance Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DistanceCharts
+              data={data}
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Speed Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SpeedCharts
+              data={data}
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Waiting Time Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WaitingTimeCharts
+              data={data}
+              rows={rows}
+              onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity Charts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ActivityCharts
+              data={data}
+              rows={rows}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Product Types</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProductTypesChart
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Cities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TopCities rows={rows} />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
