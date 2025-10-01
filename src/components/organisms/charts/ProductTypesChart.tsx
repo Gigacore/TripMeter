@@ -2,7 +2,7 @@ import React from 'react';
 import { ResponsiveContainer, Tooltip, Treemap } from 'recharts';
 import { CSVRow } from '../../../services/csvParser';
 import { DistanceUnit } from '../../../App';
-import { getCurrencyCode } from './currency';
+import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
 
 interface ProductTypeStats {
@@ -23,7 +23,7 @@ const CustomTreemapContent = (props: any, metric: string, distanceUnit: Distance
   const isSmall = width < 150 || height < 50;
 
   let formattedValue = `${value.toLocaleString()}`;
-  if (metric === 'totalFare' && activeCurrency) formattedValue = value.toLocaleString(undefined, { style: 'currency', currency: getCurrencyCode(activeCurrency) });
+  if (metric === 'totalFare' && activeCurrency) formattedValue = formatCurrency(value, activeCurrency);
   else if (metric === 'totalDistance') formattedValue = `${value.toFixed(2)} ${distanceUnit}`;
   else if (metric === 'totalWaitingTime' || metric === 'totalRidingTime') formattedValue = formatDuration(value, true);
   else if (metric === 'topCity') {
@@ -175,7 +175,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
             <li className="recharts-tooltip-item">Top City: {topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0} trips)</li>
             {Object.entries(totalFare).map(([currency, amount]) => (
               <li key={currency} className="recharts-tooltip-item">
-                Total Fare ({currency}): {(amount as number).toLocaleString(undefined, { style: 'currency', currency: getCurrencyCode(currency), minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                Total Fare ({currency}): {formatCurrency(amount as number, currency)}
               </li>
             ))}
           </ul>

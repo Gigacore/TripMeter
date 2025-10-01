@@ -3,6 +3,7 @@ import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Ba
 import Stat from '../../atoms/Stat';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
+import { formatCurrency } from '../../../utils/currency';
 import { DistanceUnit } from '../../../App';
 
 interface SpeedChartsProps {
@@ -80,8 +81,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
         {activeCurrency && costPerDurationByCurrency[activeCurrency] !== undefined && (
           <Stat
             label="Cost per Minute"
-            unit={activeCurrency}
-            value={costPerDurationByCurrency[activeCurrency]!.toFixed(2)}
+            value={formatCurrency(costPerDurationByCurrency[activeCurrency]!, activeCurrency)}
           />
         )}
       </div>

@@ -103,13 +103,11 @@ const FareCharts: React.FC<FareChartsProps> = ({
                   <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full">
                     <Stat
                       label="Avg. Fare"
-                      unit={activeCurrency}
                       value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
                     />
                     {lowestFareByCurrency[activeCurrency] && (
                       <Stat
                         label="Lowest Fare"
-                        unit={activeCurrency}
                         value={formatCurrency(lowestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
                         onClick={() => lowestFareByCurrency[activeCurrency] && onFocusOnTrip(lowestFareByCurrency[activeCurrency]!.row)}
                       />
@@ -117,7 +115,6 @@ const FareCharts: React.FC<FareChartsProps> = ({
                     {highestFareByCurrency[activeCurrency] && (
                       <Stat
                         label="Highest Fare"
-                        unit={activeCurrency}
                         value={formatCurrency(highestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
                         onClick={() => highestFareByCurrency[activeCurrency] && onFocusOnTrip(highestFareByCurrency[activeCurrency]!.row)}
                       />
