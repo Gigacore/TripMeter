@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { add, multiply, divide } from '../utils/currency';
 import { KM_PER_MILE } from '../constants';
 import { CSVRow } from '../services/csvParser';
 import { DistanceUnit } from '../App';
@@ -208,7 +209,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
               localLowestFare[currency] = { amount: fare, row: r };
               localHighestFare[currency] = { amount: fare, row: r };
             }
-            fareByCurrency[currency] += fare;
+            fareByCurrency[currency] = add(fareByCurrency[currency], fare);
             fareCountByCurrency[currency]++;
 
             if (fare < localLowestFare[currency].amount) {
@@ -227,7 +228,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
                 yearlyFareByCurrency[currency][year] = 0;
                 yearlyDistanceByCurrency[currency][year] = 0;
               }
-              yearlyFareByCurrency[currency][year] += fare;
+              yearlyFareByCurrency[currency][year] = add(yearlyFareByCurrency[currency][year], fare);
               yearlyDistanceByCurrency[currency][year] += convertDistance(distanceMiles);
             }
           }
@@ -244,7 +245,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
       const avgFares: { [key: string]: number } = {};
       for (const currency in fareByCurrency) {
         if (fareCountByCurrency[currency] > 0) {
-          avgFares[currency] = fareByCurrency[currency] / fareCountByCurrency[currency];
+          avgFares[currency] = divide(fareByCurrency[currency], fareCountByCurrency[currency]);
         }
       }
 
@@ -253,10 +254,10 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
 
       for (const currency in fareByCurrency) {
         if (currentTotalDistance > 0) {
-          localCostPerDistance[currency] = fareByCurrency[currency] / currentTotalDistance;
+          localCostPerDistance[currency] = divide(fareByCurrency[currency], currentTotalDistance);
         }
         if (totalDurationMinutes > 0) {
-          localCostPerDuration[currency] = fareByCurrency[currency] / totalDurationMinutes;
+          localCostPerDuration[currency] = divide(fareByCurrency[currency], totalDurationMinutes);
         }
       }
 
@@ -269,7 +270,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
         for (const year of years) {
           const totalDistanceForYear = yearlyDistanceByCurrency[currency][year];
           if (totalDistanceForYear > 0) {
-            avgCostPerDistanceByYear[currency].push({ year, cost: yearlyData[year] / totalDistanceForYear });
+            avgCostPerDistanceByYear[currency].push({ year, cost: divide(yearlyData[year], totalDistanceForYear) });
           }
         }
       }

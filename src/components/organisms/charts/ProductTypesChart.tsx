@@ -48,8 +48,8 @@ const CustomTreemapContent = (props: any, metric: string, distanceUnit: Distance
       />
       {!isSmall && (
         <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={14}>
-          <tspan x={x + width / 2} dy="-0.5em" className="font-semibold">{name}</tspan>
-          <tspan x={x + width / 2} dy="1.2em">{formattedValue}</tspan>
+          <tspan key="name" x={x + width / 2} dy="-0.5em" className="font-semibold">{name}</tspan>
+          <tspan key="value" x={x + width / 2} dy="1.2em">{formattedValue}</tspan>
         </text>
       )}
     </g>

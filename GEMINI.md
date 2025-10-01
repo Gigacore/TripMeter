@@ -3,3 +3,4 @@ We are building a data visualization application to display data of Uber rides f
 Always adhere and decompose and structure components to atomic design pattern
 Always adhere and use tailwindcss for styling
 Always use Typescript
+For fare, amount, cost or any monetary related data, use the currency.js package to handle the data
