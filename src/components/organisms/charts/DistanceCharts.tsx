@@ -3,6 +3,7 @@ import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Ba
 import Stat from '../../atoms/Stat';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
+import { formatCurrency } from '../../../utils/currency';
 import { DistanceUnit } from '../../../App';
 
 interface DistanceChartsProps {
@@ -77,8 +78,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
         {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
           <Stat
             label={`Cost per ${distanceUnit}`}
-            unit={`${activeCurrency}/${distanceUnit}`}
-            value={costPerDistanceByCurrency[activeCurrency]!.toFixed(2)}
+            value={`${formatCurrency(costPerDistanceByCurrency[activeCurrency]!, activeCurrency)}/${distanceUnit}`}
           />
         )}
       </div>

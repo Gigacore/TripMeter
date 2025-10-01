@@ -1,8 +1,9 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, AreaChart, Legend, Area } from 'recharts';
-import Stat from '../../atoms/Stat';
+import { formatCurrency } from '../../../utils/currency';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
+import Stat from '../../atoms/Stat';
 
 interface FareChartsProps {
   data: TripStats;
@@ -71,7 +72,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
                 <div className="flex flex-col">
                   <span className="text-xs font-normal">{currency}</span>
                   <span className="font-bold text-base">
-                    {(totalFareByCurrency[currency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {formatCurrency(totalFareByCurrency[currency], currency)}
                   </span>
                 </div>
               </button>
@@ -102,22 +103,19 @@ const FareCharts: React.FC<FareChartsProps> = ({
                   <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full">
                     <Stat
                       label="Avg. Fare"
-                      unit={activeCurrency}
-                      value={(avgFareByCurrency[activeCurrency] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
                     />
                     {lowestFareByCurrency[activeCurrency] && (
                       <Stat
                         label="Lowest Fare"
-                        unit={activeCurrency}
-                        value={lowestFareByCurrency[activeCurrency]!.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        value={formatCurrency(lowestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
                         onClick={() => lowestFareByCurrency[activeCurrency] && onFocusOnTrip(lowestFareByCurrency[activeCurrency]!.row)}
                       />
                     )}
                     {highestFareByCurrency[activeCurrency] && (
                       <Stat
                         label="Highest Fare"
-                        unit={activeCurrency}
-                        value={highestFareByCurrency[activeCurrency]!.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        value={formatCurrency(highestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
                         onClick={() => highestFareByCurrency[activeCurrency] && onFocusOnTrip(highestFareByCurrency[activeCurrency]!.row)}
                       />
                     )}
@@ -150,7 +148,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis />
-              <Tooltip formatter={(value: number) => [value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), `Total Fare (${activeCurrency})`]} />
+              <Tooltip formatter={(value: number) => [formatCurrency(value, activeCurrency), `Total Fare (${activeCurrency})`]} />
               <Legend />
               <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
             </AreaChart>

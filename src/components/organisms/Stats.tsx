@@ -90,7 +90,11 @@ const Stats: React.FC<StatsProps> = ({
         data={data}
         rows={rows}
       />
-      <ProductTypesChart rows={rows} />
+      <ProductTypesChart
+        rows={rows}
+        distanceUnit={distanceUnit}
+        activeCurrency={activeCurrency}
+      />
       <div className="mb-6">
         <div className="row flex gap-1.5">
           <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>

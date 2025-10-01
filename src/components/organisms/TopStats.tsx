@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Stat from '../atoms/Stat';
 import { formatDuration } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/currency';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
 
@@ -73,8 +74,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
             <Stat
               key={currencies[0][0]}
               label="Total Fare"
-              value={currencies[0][1].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              unit={currencies[0][0]}
+              value={formatCurrency(currencies[0][1], currencies[0][0])}
             />
           )}
           {currencies.length > 1 && (
@@ -93,8 +93,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
                 <Stat
                   key={currencies[activeCurrencyIndex][0]}
                   label="Total Fare"
-                  value={currencies[activeCurrencyIndex][1].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  unit={currencies[activeCurrencyIndex][0]}
+                  value={formatCurrency(currencies[activeCurrencyIndex][1], currencies[activeCurrencyIndex][0])}
                 />
               </div>
               <div className="flex items-center justify-center gap-2">

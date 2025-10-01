@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import L, { LatLngExpression } from 'leaflet';
 import 'leaflet.heat';
 import { greenIcon, redIcon } from '../../constants';
+import { formatCurrency } from '../../utils/currency';
 import { toNumber } from '../../utils/formatters';
 import { CSVRow } from '../../services/csvParser';
 import { DistanceUnit } from '../../App';
@@ -129,7 +130,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
                 <b>Address:</b> ${address || 'N/A'}<br>
                 <b>Distance:</b> ${!isNaN(displayDistance) ? `${displayDistance.toFixed(2)} ${distanceUnit}` : 'N/A'}<br>
                 ${speedContent}
-                <b>Fare:</b> ${fare_amount || 'N/A'} ${fare_currency || ''}<br>
+                <b>Fare:</b> ${formatCurrency(toNumber(fare_amount), fare_currency)}<br>
                 <b>Coordinates:</b> ${lat}, ${lng}<br>
             `;
         };
