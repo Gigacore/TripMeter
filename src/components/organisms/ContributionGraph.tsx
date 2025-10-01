@@ -5,8 +5,7 @@ interface ContributionGraphProps {
   view: 'last-12-months' | number;
 }
 
-const CELL_SIZE = 12;
-const LABEL_COLUMN_WIDTH = 32;
+const LABEL_COLUMN_WIDTH = 'clamp(36px, 4vw, 64px)';
 const WEEKDAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
 const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => {
@@ -113,14 +112,14 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
     <div className="contribution-graph">
       <div
         className="contribution-graph-months"
-        style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px repeat(${weeks.length}, ${CELL_SIZE}px)` }}
+        style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH} repeat(${weeks.length}, minmax(0, 1fr))` }}
       >
         <div className="contribution-graph-month contribution-graph-month--spacer" aria-hidden />
         {monthLabels.map((label) => (
           <div
             key={label.name + label.weekIndex}
             className="contribution-graph-month"
-            style={{ gridColumn: label.weekIndex + 2 }}
+            style={{ gridColumn: `${label.weekIndex + 2}` }}
           >
             {label.name}
           </div>
@@ -128,7 +127,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
       </div>
       <div
         className="contribution-graph-body"
-        style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px repeat(${weeks.length}, ${CELL_SIZE}px)` }}
+        style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH} repeat(${weeks.length}, minmax(0, 1fr))` }}
       >
         <div className="contribution-graph-week contribution-graph-week-labels text-xs text-slate-500">
           {WEEKDAY_LABELS.map((label, index) => (

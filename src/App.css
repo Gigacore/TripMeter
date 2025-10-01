@@ -265,6 +265,8 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  --contribution-gap: clamp(2px, 0.6vw, 6px);
 }
 
 .contribution-graph-header {
@@ -283,21 +285,23 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 
 .contribution-graph-body {
   display: grid;
-  column-gap: 4px;
+  column-gap: var(--contribution-gap);
   overflow-x: auto;
   padding-bottom: 16px; /* for scrollbar */
+  width: 100%;
 }
 
 .contribution-graph-week {
   display: grid;
-  grid-template-rows: repeat(7, 12px);
-  row-gap: 4px;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  row-gap: var(--contribution-gap);
+  align-items: stretch;
 }
 
 .contribution-graph-day {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 25px;
   background-color: #2d3748; /* level 0 */
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -309,9 +313,10 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 
 .contribution-graph-months {
   display: grid;
-  column-gap: 4px;
+  column-gap: var(--contribution-gap);
   font-size: 10px;
   color: var(--muted);
+  width: 100%;
 }
 
 .contribution-graph-month {
@@ -324,7 +329,6 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 .contribution-graph-week-labels .contribution-graph-day {
-  width: 100%;
   background: transparent;
   border: none;
   color: var(--muted);
@@ -334,8 +338,11 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   font-size: 10px;
   line-height: 12px;
   padding-right: 4px;
+  aspect-ratio: auto;
+  height: auto;
 }
 
 .contribution-graph-day--placeholder {
   visibility: hidden;
+  pointer-events: none;
 }

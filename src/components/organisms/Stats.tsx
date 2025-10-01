@@ -3,7 +3,6 @@ import { CSVRow } from '../../services/csvParser';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
 import FareCharts from './charts/FareCharts';
-import TripCharts from './charts/TripCharts';
 import DurationCharts from './charts/DurationCharts';
 import DistanceCharts from './charts/DistanceCharts';
 import SpeedCharts from './charts/SpeedCharts';
@@ -11,6 +10,9 @@ import WaitingTimeCharts from './charts/WaitingTimeCharts';
 import ActivityCharts from './charts/ActivityCharts';
 import { downloadKML } from '../../services/kmlService';
 import TopCities from './TopCities';
+import TripSummaryChart from './charts/TripSummaryChart';
+import TripsByYearChart from './charts/TripsByYearChart';
+import ProductTypesChart from './charts/ProductTypesChart';
 
 interface StatsProps {
   data: TripStats;
@@ -58,11 +60,8 @@ const Stats: React.FC<StatsProps> = ({
         setActiveCurrency={setActiveCurrency}
         onFocusOnTrip={onFocusOnTrip}
       />
-      <TripCharts
-        data={data}
-        rows={rows}
-        onShowTripList={onShowTripList}
-      />
+      <TripSummaryChart data={data} onShowTripList={onShowTripList} />
+      <TripsByYearChart data={data} />
       <DurationCharts
         data={data}
         rows={rows}
@@ -91,6 +90,7 @@ const Stats: React.FC<StatsProps> = ({
         data={data}
         rows={rows}
       />
+      <ProductTypesChart rows={rows} />
       <div className="mb-6">
         <div className="row flex gap-1.5">
           <button onClick={() => handleDownloadKML('both')} disabled={!actionsEnabled}>Download KML (both)</button>
