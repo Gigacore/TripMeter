@@ -16,6 +16,12 @@ interface InitialViewProps {
 const InitialView: React.FC<InitialViewProps> = ({ onFileSelect, isProcessing, error, isDragging, onDragEvents, onDrop }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      fileInputRef.current?.click();
+    }
+  };
+
   return (
     <div className="flex items-center justify-center h-full p-4">
       <Card className="w-full max-w-lg border-slate-800 bg-slate-900/80 backdrop-blur-sm">
@@ -31,6 +37,10 @@ const InitialView: React.FC<InitialViewProps> = ({ onFileSelect, isProcessing, e
             onDragEnter={onDragEvents}
             onDragOver={onDragEvents}
             onDragLeave={onDragEvents}
+            onKeyDown={handleKeyDown}
+            role="button"
+            tabIndex={0}
+            aria-label="Upload CSV file"
           >
             <UploadCloud className="mx-auto mb-4 h-12 w-12 text-slate-400" />
             <p className="text-slate-400">Drag & drop your CSV file here</p>

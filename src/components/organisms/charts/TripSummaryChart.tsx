@@ -65,13 +65,18 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
       <div className="mt-4">
         <ResponsiveContainer width="100%" height={500}>
           <Sankey
+            aria-label="Trip status summary chart"
             data={sankeyData}
             node={renderSankeyNode}
             nodePadding={50}
             margin={{ left: 100, right: 100, top: 5, bottom: 5 }}
             link={{ stroke: '#77c878' }}
           >
-            <Tooltip />
+            <title id="trip-summary-chart-title">Trip Summary</title>
+            <desc id="trip-summary-chart-desc">
+              A Sankey chart showing the flow of trips from total requests to successful, canceled, and unfulfilled outcomes.
+            </desc>
+            <Tooltip content={<CustomTooltip />} />
           </Sankey>
         </ResponsiveContainer>
       </div>
