@@ -16,9 +16,12 @@ interface FareChartsProps {
 const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
   if (active && payload && payload.length && activeCurrency) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Fare: ${label} ${activeCurrency}`}</p>
-        <p className="recharts-tooltip-item text-amber-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Fare: ${label} ${activeCurrency}`}</p>
+        </div>
+        <div className="text-slate-400">Trips</div>
+        <div className="font-medium text-amber-400 text-lg">{payload[0].value?.toLocaleString()}</div>
       </div>
     );
   }
@@ -28,12 +31,14 @@ const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipPro
 const CustomAreaTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
   if (active && payload && payload.length && activeCurrency) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Year: ${label}`}</p>
-        <ul className="mt-2 space-y-1">
-          <li className="recharts-tooltip-item text-emerald-400">{`Total Fare: ${formatCurrency(payload[0].value as number, activeCurrency)}`}</li>
-          <li className="recharts-tooltip-item">{`Trips: ${payload[0].payload.count.toLocaleString()}`}</li>
-        </ul>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Year: ${label}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400 text-emerald-400">Total Fare</div><div className="font-medium text-right text-emerald-400">{formatCurrency(payload[0].value as number, activeCurrency)}</div>
+          <div className="text-slate-400">Trips</div><div className="font-medium text-right">{payload[0].payload.count.toLocaleString()}</div>
+        </div>
       </div>
     );
   }

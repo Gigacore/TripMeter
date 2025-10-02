@@ -19,19 +19,21 @@ const CustomScatterTooltip = ({ active, payload }: TooltipProps<number, string>)
   if (active && payload && payload.length) {
     const { hour, count, totalDistance, totalRidingTime, totalWaitingTime, totalFare, distanceUnit } = payload[0].payload;
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Hour: ${hour}:00 - ${hour}:59`}</p>
-        <ul className="space-y-1 mt-2">
-          <li className="recharts-tooltip-item text-indigo-400">{`Trips: ${count.toLocaleString()}`}</li>
-          <li className="recharts-tooltip-item">Total Distance: {totalDistance.toFixed(2)} {distanceUnit}</li>
-          <li className="recharts-tooltip-item">Total Riding: {formatDuration(totalRidingTime, true)}</li>
-          <li className="recharts-tooltip-item">Total Waiting: {formatDuration(totalWaitingTime, true)}</li>
+      <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Hour: ${hour}:00 - ${hour}:59`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400">Trips</div><div className="font-medium text-right text-indigo-400">{count.toLocaleString()}</div>
+          <div className="text-slate-400">Total Distance</div><div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
+          <div className="text-slate-400">Total Riding</div><div className="font-medium text-right">{formatDuration(totalRidingTime, true)}</div>
+          <div className="text-slate-400">Total Waiting</div><div className="font-medium text-right">{formatDuration(totalWaitingTime, true)}</div>
           {Object.entries(totalFare).map(([currency, amount]) => (
-            <li key={currency} className="recharts-tooltip-item">
-              Total Fare ({currency}): {formatCurrency(amount as number, currency)}
-            </li>
+            <React.Fragment key={currency}>
+              <div className="text-slate-400">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
+            </React.Fragment>
           ))}
-        </ul>
+        </div>
       </div>
     );
   }
@@ -42,23 +44,25 @@ const CustomRadarTooltip = ({ active, payload, label, colorClass, seriesName, di
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Day: ${label}`}</p>
-        <ul className="space-y-1 mt-2">
-          <li className={`recharts-tooltip-item ${colorClass}`}>{`${seriesName}: ${payload[0].value?.toLocaleString()}${seriesName === 'Avg. Speed' ? ` ${distanceUnit === 'miles' ? 'mph' : 'km/h'}` : ''}`}</li>
+      <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Day: ${label}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className={`text-slate-400 ${colorClass}`}>{seriesName}</div><div className={`font-medium text-right ${colorClass}`}>{`${payload[0].value?.toLocaleString()}${seriesName === 'Avg. Speed' ? ` ${distanceUnit === 'miles' ? 'mph' : 'km/h'}` : ''}`}</div>
           {seriesName === 'Completed' && (
             <>
-              <li className="recharts-tooltip-item">Total Distance: {data.totalDistance.toFixed(2)} {distanceUnit}</li>
-              <li className="recharts-tooltip-item">Total Riding: {formatDuration(data.totalRidingTime, true)}</li>
-              <li className="recharts-tooltip-item">Total Waiting: {formatDuration(data.totalWaitingTime, true)}</li>
+              <div className="text-slate-400">Total Distance</div><div className="font-medium text-right">{data.totalDistance.toFixed(2)} {distanceUnit}</div>
+              <div className="text-slate-400">Total Riding</div><div className="font-medium text-right">{formatDuration(data.totalRidingTime, true)}</div>
+              <div className="text-slate-400">Total Waiting</div><div className="font-medium text-right">{formatDuration(data.totalWaitingTime, true)}</div>
               {Object.entries(data.totalFare).map(([currency, amount]) => (
-                <li key={currency} className="recharts-tooltip-item">
-                  Total Fare ({currency}): {formatCurrency(amount as number, currency)}
-                </li>
+                <React.Fragment key={currency}>
+                  <div className="text-slate-400">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
+                </React.Fragment>
               ))}
             </>
           )}
-        </ul>
+        </div>
       </div>
     );
   }

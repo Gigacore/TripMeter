@@ -17,9 +17,12 @@ interface DistanceChartsProps {
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Distance: ${label}`}</p>
-        <p className="recharts-tooltip-item text-orange-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Distance: ${label}`}</p>
+        </div>
+        <div className="text-slate-400">Trips</div>
+        <div className="font-medium text-orange-400 text-lg">{payload[0].value?.toLocaleString()}</div>
       </div>
     );
   }

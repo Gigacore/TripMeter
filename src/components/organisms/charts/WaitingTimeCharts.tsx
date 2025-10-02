@@ -14,9 +14,12 @@ interface WaitingTimeChartsProps {
 const CustomBarTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Waiting Time: ${label}`}</p>
-        <p className="recharts-tooltip-item text-amber-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Waiting Time: ${label}`}</p>
+        </div>
+        <div className="text-slate-400">Trips</div>
+        <div className="font-medium text-amber-400 text-lg">{payload[0].value?.toLocaleString()}</div>
       </div>
     );
   }
@@ -28,9 +31,12 @@ const CustomTreemapTooltip = ({ active, payload }: TooltipProps<number, string>)
   if (active && payload && payload.length) {
     const { name, value } = payload[0];
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{name}</p>
-        <p className="recharts-tooltip-item text-slate-300">{`Duration: ${formatDuration(value as number, true)}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{name}</p>
+        </div>
+        <div className="text-slate-400">Duration</div>
+        <div className="font-medium text-slate-300 text-lg">{formatDuration(value as number, true)}</div>
       </div>
     );
   }

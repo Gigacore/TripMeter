@@ -168,21 +168,23 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
     if (active && payload && payload.length) {
       const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount } = payload[0].payload;
       return (
-        <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-          <p className="recharts-tooltip-label font-bold text-base mb-2">{name}</p>
-          <ul className="space-y-1">
-            <li className="recharts-tooltip-item">Successful Trips: <span className="font-medium">{successfulTrips.toLocaleString()}</span></li>
-            <li className="recharts-tooltip-item">Cancellations: <span className="font-medium">{canceledTrips.toLocaleString()}</span></li>
-            <li className="recharts-tooltip-item">Total Distance: {totalDistance.toFixed(2)} {distanceUnit}</li>
-            <li className="recharts-tooltip-item">Total Waiting: {formatDuration(totalWaitingTime, true)}</li>
-            <li className="recharts-tooltip-item">Total Riding: {formatDuration(totalRidingTime, true)}</li>
-            <li className="recharts-tooltip-item">Top City: {topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0} trips)</li>
+        <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+          <div className="mb-2 border-b border-slate-700 pb-2">
+            <p className="recharts-tooltip-label font-bold text-base">{name}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <div className="text-slate-400">Successful Trips</div><div className="font-medium text-right">{successfulTrips.toLocaleString()}</div>
+            <div className="text-slate-400">Cancellations</div><div className="font-medium text-right">{canceledTrips.toLocaleString()}</div>
+            <div className="text-slate-400">Total Distance</div><div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
+            <div className="text-slate-400">Total Waiting</div><div className="font-medium text-right">{formatDuration(totalWaitingTime, true)}</div>
+            <div className="text-slate-400">Total Riding</div><div className="font-medium text-right">{formatDuration(totalRidingTime, true)}</div>
+            <div className="text-slate-400">Top City</div><div className="font-medium text-right">{topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0})</div>
             {Object.entries(totalFare).map(([currency, amount]) => (
-              <li key={currency} className="recharts-tooltip-item">
-                Total Fare ({currency}): {formatCurrency(amount as number, currency)}
-              </li>
+              <React.Fragment key={currency}>
+                <div className="text-slate-400">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
+              </React.Fragment>
             ))}
-          </ul>
+          </div>
         </div>
       );
     }

@@ -27,19 +27,21 @@ const CustomTooltip = ({ active, payload, label, distanceUnit, activeCurrency }:
     } = data;
 
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Year: ${label}`}</p>
-        <ul className="mt-2 space-y-1">
-          <li className="recharts-tooltip-item text-emerald-400">{`Trips: ${count.toLocaleString()}`}</li>
-          <li className="recharts-tooltip-item">Distance Traveled: {totalDistance.toFixed(2)} {distanceUnit}</li>
-          {activeCurrency && totalFare[activeCurrency] && <li className="recharts-tooltip-item">Total Fare: {formatCurrency(totalFare[activeCurrency], activeCurrency)}</li>}
-          <li className="recharts-tooltip-item">Riding Time: {formatDuration(totalRidingTime, true)}</li>
-          <li className="recharts-tooltip-item">Waiting Time: {formatDuration(totalWaitingTime, true)}</li>
-          <li className="recharts-tooltip-item">Farthest Trip: {farthestTrip.toFixed(2)} {distanceUnit}</li>
-          {isFinite(shortestTrip) && <li className="recharts-tooltip-item">Shortest Trip: {shortestTrip.toFixed(2)} {distanceUnit}</li>}
-          {activeCurrency && highestFare[activeCurrency] !== undefined && <li className="recharts-tooltip-item">Highest Fare: {formatCurrency(highestFare[activeCurrency], activeCurrency)}</li>}
-          {activeCurrency && lowestFare[activeCurrency] !== undefined && <li className="recharts-tooltip-item">Lowest Fare: {formatCurrency(lowestFare[activeCurrency], activeCurrency)}</li>}
-        </ul>
+      <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Year: ${label}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400 text-emerald-400">Trips</div><div className="font-medium text-right text-emerald-400">{count.toLocaleString()}</div>
+          <div className="text-slate-400">Distance Traveled</div><div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
+          {activeCurrency && totalFare[activeCurrency] && <><div className="text-slate-400">Total Fare</div><div className="font-medium text-right">{formatCurrency(totalFare[activeCurrency], activeCurrency)}</div></>}
+          <div className="text-slate-400">Riding Time</div><div className="font-medium text-right">{formatDuration(totalRidingTime, true)}</div>
+          <div className="text-slate-400">Waiting Time</div><div className="font-medium text-right">{formatDuration(totalWaitingTime, true)}</div>
+          <div className="text-slate-400">Farthest Trip</div><div className="font-medium text-right">{farthestTrip.toFixed(2)} {distanceUnit}</div>
+          {isFinite(shortestTrip) && <><div className="text-slate-400">Shortest Trip</div><div className="font-medium text-right">{shortestTrip.toFixed(2)} {distanceUnit}</div></>}
+          {activeCurrency && highestFare[activeCurrency] !== undefined && <><div className="text-slate-400">Highest Fare</div><div className="font-medium text-right">{formatCurrency(highestFare[activeCurrency], activeCurrency)}</div></>}
+          {activeCurrency && lowestFare[activeCurrency] !== undefined && <><div className="text-slate-400">Lowest Fare</div><div className="font-medium text-right">{formatCurrency(lowestFare[activeCurrency], activeCurrency)}</div></>}
+        </div>
       </div>
     );
   }
