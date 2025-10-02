@@ -73,6 +73,7 @@ export interface TripStats {
   };
   tripsByYear: YearlyStat[];
   avgSpeedByDayOfWeek: { day: string; avgSpeed: number }[];
+  convertDistance: (miles: number) => number;
 }
 
 // Helper function to safely parse float
@@ -144,6 +145,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
     longestGap: { days: 0, startDate: null, endDate: null },
     tripsByYear: [],
     avgSpeedByDayOfWeek: [],
+    convertDistance: (miles: number) => miles,
   });
 
   const convertDistance = (miles: number): number => {
@@ -519,6 +521,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           totalRidingTimeForLongerWaits,
           tripsByYear: formattedTripsByYear,
           avgSpeedByDayOfWeek,
+          convertDistance,
           // Initialize fields that will be set below
           avgTripDuration: 0,
           longestTrip: 0,

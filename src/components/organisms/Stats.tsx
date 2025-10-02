@@ -166,7 +166,7 @@ const Stats: React.FC<StatsProps> = ({
             <CardDescription>Discover which cities you travel in the most.</CardDescription>
           </CardHeader>
           <CardContent>
-            <TopCities rows={rows} />
+            <TopCities rows={rows} distanceUnit={distanceUnit} convertDistance={data.convertDistance} />
           </CardContent>
         </Card>
       </div>
