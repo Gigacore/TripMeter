@@ -269,19 +269,19 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
   const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
 
   return (
-    <>
-      <div className="stats-group">
+    <div className="stats-group grid grid-cols-1 gap-8">
+      <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3>Trip Activity</h3>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <button onClick={() => setContributionView('last-12-months')} className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${contributionView === 'last-12-months' ? 'bg-emerald-500 text-white' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
+            <button onClick={() => setContributionView('last-12-months')} className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${contributionView === 'last-12-months' ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>
               Last 12 months
             </button>
             {availableYears.map(year => (
               <button
                 key={year}
                 onClick={() => setContributionView(year)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${contributionView === year ? 'bg-emerald-500 text-white' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${contributionView === year ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
               >
                 {year}
               </button>
@@ -296,8 +296,8 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
         ) : <p className="text-slate-500 text-sm mt-2">No trip data with dates to display.</p>}
       </div>
 
-      <div className="stats-group">
-        <h3>Streaks & Gaps</h3>
+      <div>
+        <h3 className="mb-4">Streaks & Gaps</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
           <div className="flex items-start gap-4 rounded-lg bg-slate-800/50 p-4">
             <div className="rounded-full bg-emerald-500/20 p-2 text-emerald-400">
@@ -324,8 +324,8 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
       </div>
 
       {tripsByHourData.length > 0 && (
-        <div className="stats-group">
-          <h3>Trips by Hour of Day</h3>
+        <div>
+          <h3 className="mb-2">Trips by Hour of Day</h3>
           <p className="hint -mt-2 mb-4">Shows your trip patterns throughout the day.</p>
           <ResponsiveContainer width="100%" height={300}>
             <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -341,8 +341,8 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
       )}
 
       {(successfulTripsByDayOfWeekData.length > 0 || canceledTripsByDayOfWeekData.length > 0) && (
-        <div className="stats-group">
-          <h3>Trips by Day of Week</h3>
+        <div>
+          <h3 className="mb-2">Trips by Day of Week</h3>
           <p className="hint -mt-2 mb-4">See which days of the week you are most active.</p>
           <div className="grid md:grid-cols-2 gap-8">
             {successfulTripsByDayOfWeekData.length > 0 && (
@@ -376,7 +376,7 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

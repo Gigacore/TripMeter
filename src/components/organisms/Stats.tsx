@@ -135,7 +135,7 @@ const Stats: React.FC<StatsProps> = ({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Activity Charts</CardTitle>
+            <CardTitle>Ride Activity</CardTitle>
             <CardDescription>Patterns in your trip activity over time, by day, and by hour.</CardDescription>
           </CardHeader>
           <CardContent>
