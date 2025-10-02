@@ -64,7 +64,7 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
 
   return (
     <div className="stats-group">
-      <h3>Ride Duration Distribution</h3>
+      <h3 className="mb-2">Ride Duration Distribution</h3>
       {durationDistributionData.length > 0 && (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={durationDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

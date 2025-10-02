@@ -59,7 +59,6 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
 
   return (
     <div className="stats-group">
-      <p className="text-sm text-slate-400 -mt-2 mb-4">A breakdown of all trip requests by their final status.</p>
       <div className="mt-4">
         <ResponsiveContainer width="100%" height={500}>
           <Sankey

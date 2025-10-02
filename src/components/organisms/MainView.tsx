@@ -42,7 +42,7 @@ const MainView: React.FC<MainViewProps> = ({
   onBackToStats,
 }) => {
   return (
-    <div className="main-content grid gap-4 p-4">
+    <div className="main-content grid gap-4 p-4 container mx-auto">
       <Map
           rows={rows}
           focusedTrip={focusedTrip}

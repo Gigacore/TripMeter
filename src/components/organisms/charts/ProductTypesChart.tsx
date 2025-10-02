@@ -192,7 +192,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
   return (
     <div className="stats-group">
       <div className="mb-6 border-b border-slate-800">
-        <h3>Product Types Breakdown</h3>
+        <h3 className="mb-2">Breakdown by:</h3>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {metricOptions.map(option => (
           <button

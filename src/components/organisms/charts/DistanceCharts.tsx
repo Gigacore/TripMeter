@@ -69,7 +69,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
 
   return (
     <div className="stats-group">
-      <h3>Ride Distance Distribution</h3>
+      <h3 className="mb-2">Ride Distance Distribution</h3>
       {distanceDistributionData.length > 0 && (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={distanceDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

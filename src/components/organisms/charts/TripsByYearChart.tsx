@@ -1,25 +1,52 @@
 import React from 'react';
 import { ResponsiveContainer, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, TooltipProps } from 'recharts';
 import { TripStats } from '../../../hooks/useTripData';
+import { DistanceUnit } from '../../../App';
+import { formatCurrency } from '../../../utils/currency';
+import { formatDuration } from '../../../utils/formatters';
 
 interface TripsByYearChartProps {
   data: TripStats;
+  distanceUnit: DistanceUnit;
+  activeCurrency: string | null;
 }
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload, label, distanceUnit, activeCurrency }: TooltipProps<number, string> & { distanceUnit: DistanceUnit, activeCurrency: string | null }) => {
   if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const {
+      count,
+      totalDistance,
+      totalFare,
+      totalRidingTime,
+      totalWaitingTime,
+      farthestTrip,
+      shortestTrip,
+      highestFare,
+      lowestFare,
+    } = data;
+
     return (
       <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
         <p className="recharts-tooltip-label font-bold">{`Year: ${label}`}</p>
-        <p className="recharts-tooltip-item text-emerald-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+        <ul className="mt-2 space-y-1">
+          <li className="recharts-tooltip-item text-emerald-400">{`Trips: ${count.toLocaleString()}`}</li>
+          <li className="recharts-tooltip-item">Distance Traveled: {totalDistance.toFixed(2)} {distanceUnit}</li>
+          {activeCurrency && totalFare[activeCurrency] && <li className="recharts-tooltip-item">Total Fare: {formatCurrency(totalFare[activeCurrency], activeCurrency)}</li>}
+          <li className="recharts-tooltip-item">Riding Time: {formatDuration(totalRidingTime, true)}</li>
+          <li className="recharts-tooltip-item">Waiting Time: {formatDuration(totalWaitingTime, true)}</li>
+          <li className="recharts-tooltip-item">Farthest Trip: {farthestTrip.toFixed(2)} {distanceUnit}</li>
+          {isFinite(shortestTrip) && <li className="recharts-tooltip-item">Shortest Trip: {shortestTrip.toFixed(2)} {distanceUnit}</li>}
+          {activeCurrency && highestFare[activeCurrency] !== undefined && <li className="recharts-tooltip-item">Highest Fare: {formatCurrency(highestFare[activeCurrency], activeCurrency)}</li>}
+          {activeCurrency && lowestFare[activeCurrency] !== undefined && <li className="recharts-tooltip-item">Lowest Fare: {formatCurrency(lowestFare[activeCurrency], activeCurrency)}</li>}
+        </ul>
       </div>
     );
   }
-
   return null;
 };
 
-const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data }) => {
+const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit, activeCurrency }) => {
   const { tripsByYear } = data;
 
   if (tripsByYear.length === 0) return null;
@@ -46,7 +73,7 @@ const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data }) => {
             axisLine={false}
           />
           <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+          <Tooltip content={<CustomTooltip distanceUnit={distanceUnit} activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
           <Area type="monotone" dataKey="count" stroke="#34d399" fillOpacity={1} fill="url(#colorTrips)" name="Trips" />
         </AreaChart>
       </ResponsiveContainer>
