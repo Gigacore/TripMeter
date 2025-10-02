@@ -134,6 +134,8 @@ const Stats: React.FC<StatsProps> = ({
             <ActivityCharts
               data={data}
               rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
             />
           </CardContent>
         </Card>
