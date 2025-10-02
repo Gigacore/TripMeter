@@ -34,7 +34,7 @@ const Stats: React.FC<StatsProps> = ({
   distanceUnit,
   rows,
 }) => {
-  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak } = data;
+  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak, longestSuccessfulStreakBeforeDriverCancellation, longestDriverCancellationStreak } = data;
   const currencies = Object.keys(totalFareByCurrency);
   const [activeCurrency, setActiveCurrency] = React.useState<string | null>(currencies.length > 0 ? currencies[0] : null);
 
@@ -189,6 +189,8 @@ const Stats: React.FC<StatsProps> = ({
               longestGap={longestGap}
               longestSuccessfulStreakBeforeCancellation={longestSuccessfulStreakBeforeCancellation}
               longestCancellationStreak={longestCancellationStreak}
+              longestSuccessfulStreakBeforeDriverCancellation={longestSuccessfulStreakBeforeDriverCancellation}
+              longestDriverCancellationStreak={longestDriverCancellationStreak}
             />
           </CardContent>
         </Card>
