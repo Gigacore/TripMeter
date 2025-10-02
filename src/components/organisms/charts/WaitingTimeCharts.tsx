@@ -127,12 +127,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <XAxis type="number" hide domain={[0, 1]} />
               <YAxis type="category" dataKey="name" hide />
               <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" />
+              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }]} />
               <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
                 <LabelList dataKey="waiting" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
               </Bar>
               <Bar dataKey="riding" stackId="a" fill="#34d399" name="Riding Time">
-                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-slate-900 font-semibold" />
+                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -155,12 +155,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <XAxis type="number" hide domain={[0, 1]} />
               <YAxis type="category" dataKey="name" hide />
               <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" />
+              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }]} />
               <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
                 <LabelList dataKey="waiting" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
               </Bar>
               <Bar dataKey="riding" stackId="a" fill="#34d399" name="Riding Time">
-                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-slate-900 font-semibold" />
+                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

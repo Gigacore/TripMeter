@@ -89,7 +89,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
   );
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-4 md:gap-6">
+    <div className="grid grid-cols-2 gap-4 py-3 md:grid-cols-4 md:gap-6">
       <StatCard icon={<CheckCircle size={20} />} label="Completed Rides" value={successfulTrips} />
       {currencies.length > 0 && (
         <>

@@ -17,6 +17,7 @@ import TopStats from './TopStats';
 import FareDistanceScatterPlot from './FareDistanceScatterPlot';
 import CostEfficiencyChart from './CostEfficiencyChart';
 import CancellationBreakdownChart from './CancellationBreakdownChart';
+import StreaksAndPauses from './charts/StreaksAndPauses';
 
 interface StatsProps {
   data: TripStats;
@@ -33,7 +34,7 @@ const Stats: React.FC<StatsProps> = ({
   distanceUnit,
   rows,
 }) => {
-  const { totalFareByCurrency } = data;
+  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak, longestSuccessfulStreakBeforeDriverCancellation, longestDriverCancellationStreak } = data;
   const currencies = Object.keys(totalFareByCurrency);
   const [activeCurrency, setActiveCurrency] = React.useState<string | null>(currencies.length > 0 ? currencies[0] : null);
 
@@ -177,6 +178,23 @@ const Stats: React.FC<StatsProps> = ({
             />
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Streaks & Pauses</CardTitle>
+            <CardDescription>Consecutive days with trips (streak) versus consecutive days without (pause).</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <StreaksAndPauses
+              longestStreak={longestStreak}
+              longestGap={longestGap}
+              longestSuccessfulStreakBeforeCancellation={longestSuccessfulStreakBeforeCancellation}
+              longestCancellationStreak={longestCancellationStreak}
+              longestSuccessfulStreakBeforeDriverCancellation={longestSuccessfulStreakBeforeDriverCancellation}
+              longestDriverCancellationStreak={longestDriverCancellationStreak}
+            />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Product Types</CardTitle>

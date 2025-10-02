@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import L, { LatLngExpression } from 'leaflet';
 import 'leaflet.heat';
+import 'leaflet-fullscreen';
+import 'leaflet-fullscreen/dist/leaflet.fullscreen.css';
 import { greenIcon, redIcon } from '../../constants';
 import { formatCurrency } from '../../utils/currency';
 import { toNumber } from '../../utils/formatters';
@@ -57,6 +59,8 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
                 'Heatmap': heatLayerRef.current
             }).addTo(map);
 
+            // Add fullscreen control
+            (L.control as any).fullscreen().addTo(map);
         }
     }, [rows]);
 
