@@ -116,7 +116,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
   return (
     <>
       <div className="stats-group">
-        <h3>Waiting Time Distribution</h3>
+        <h3 className="mb-2">Waiting Time Distribution</h3>
         {waitingTimeDistributionData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={waitingTimeDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

@@ -294,7 +294,7 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
       <div className="stats-group">
         <h3>Streaks & Gaps</h3>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-2">
           <Stat
             label="Longest Streak"
             value={`${longestStreak.days} ${longestStreak.days === 1 ? 'day' : 'days'}`}
@@ -304,13 +304,13 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
             value={`${longestGap.days} ${longestGap.days === 1 ? 'day' : 'days'}`}
             subValue={formatDateRange(longestGap.startDate, longestGap.endDate)} />
         </div>
-        <p className="hint mt-2">Based on days with at least one completed trip.</p>
+        <p className="hint mt-2">Consecutive days with trips (streak) versus consecutive days without (gap).</p>
       </div>
 
       {tripsByHourData.length > 0 && (
         <div className="stats-group">
           <h3>Trips by Hour of Day</h3>
-          <p className="hint -mt-2 mb-4">Number of completed trips for each hour of the day.</p>
+          <p className="hint -mt-2 mb-4">Shows your trip patterns throughout the day.</p>
           <ResponsiveContainer width="100%" height={300}>
             <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
@@ -327,7 +327,7 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
       {(successfulTripsByDayOfWeekData.length > 0 || canceledTripsByDayOfWeekData.length > 0) && (
         <div className="stats-group">
           <h3>Trips by Day of Week</h3>
-          <p className="hint -mt-2 mb-4">Trip distribution across the week.</p>
+          <p className="hint -mt-2 mb-4">See which days of the week you are most active.</p>
           <div className="grid md:grid-cols-2 gap-8">
             {successfulTripsByDayOfWeekData.length > 0 && (
               <div>

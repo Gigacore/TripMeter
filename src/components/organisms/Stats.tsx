@@ -47,6 +47,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Trip Summary</CardTitle>
+            <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
           </CardHeader>
           <CardContent>
             <TripSummaryChart data={data} onShowTripList={onShowTripList} />
@@ -55,6 +56,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Completed Trips by Year</CardTitle>
+            <CardDescription>The trend of your completed trips over the years.</CardDescription>
           </CardHeader>
           <CardContent>
             <TripsByYearChart data={data} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
@@ -63,6 +65,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Fare Charts</CardTitle>
+            <CardDescription>Insights into your spending, including fare distribution and yearly totals.</CardDescription>
           </CardHeader>
           <CardContent>
             <FareCharts
@@ -77,6 +80,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Duration Charts</CardTitle>
+            <CardDescription>Analysis of how long your trips typically take.</CardDescription>
           </CardHeader>
           <CardContent>
             <DurationCharts
@@ -89,6 +93,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Distance Charts</CardTitle>
+            <CardDescription>A look at the distances of your trips and cost efficiency.</CardDescription>
           </CardHeader>
           <CardContent>
             <DistanceCharts
@@ -103,6 +108,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Speed Charts</CardTitle>
+            <CardDescription>Distribution and records of your average trip speeds.</CardDescription>
           </CardHeader>
           <CardContent>
             <SpeedCharts
@@ -117,6 +123,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Waiting Time Charts</CardTitle>
+            <CardDescription>Analysis of the time spent waiting for a driver to arrive.</CardDescription>
           </CardHeader>
           <CardContent>
             <WaitingTimeCharts
@@ -129,6 +136,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Activity Charts</CardTitle>
+            <CardDescription>Patterns in your trip activity over time, by day, and by hour.</CardDescription>
           </CardHeader>
           <CardContent>
             <ActivityCharts
@@ -142,6 +150,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Product Types</CardTitle>
+            <CardDescription>A breakdown of your trips by the type of service used.</CardDescription>
           </CardHeader>
           <CardContent>
             <ProductTypesChart
@@ -154,6 +163,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Top Cities</CardTitle>
+            <CardDescription>Discover which cities you travel in the most.</CardDescription>
           </CardHeader>
           <CardContent>
             <TopCities rows={rows} />

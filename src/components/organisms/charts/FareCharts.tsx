@@ -107,7 +107,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
       )}
       {currencies.length > 0 && activeCurrency && (
         <div className="stats-group">
-          <h3>Fare Distribution ({activeCurrency})</h3>
+          <h3 className="mb-2">Fare Distribution ({activeCurrency})</h3>
           {fareDistributionData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={fareDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

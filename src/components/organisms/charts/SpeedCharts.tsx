@@ -57,7 +57,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
   return (
     <>
       <div className="stats-group">
-        <h3>Average Ride Speed Distribution</h3>
+        <h3 className="mb-2">Average Ride Speed Distribution</h3>
         {speedDistribution.length > 0 && (
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
