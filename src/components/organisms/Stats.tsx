@@ -34,7 +34,7 @@ const Stats: React.FC<StatsProps> = ({
   distanceUnit,
   rows,
 }) => {
-  const { totalFareByCurrency, longestStreak, longestGap } = data;
+  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak } = data;
   const currencies = Object.keys(totalFareByCurrency);
   const [activeCurrency, setActiveCurrency] = React.useState<string | null>(currencies.length > 0 ? currencies[0] : null);
 
@@ -184,7 +184,12 @@ const Stats: React.FC<StatsProps> = ({
             <CardDescription>Consecutive days with trips (streak) versus consecutive days without (pause).</CardDescription>
           </CardHeader>
           <CardContent>
-            <StreaksAndPauses longestStreak={longestStreak} longestGap={longestGap} />
+            <StreaksAndPauses
+              longestStreak={longestStreak}
+              longestGap={longestGap}
+              longestSuccessfulStreakBeforeCancellation={longestSuccessfulStreakBeforeCancellation}
+              longestCancellationStreak={longestCancellationStreak}
+            />
           </CardContent>
         </Card>
 

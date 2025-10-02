@@ -71,6 +71,16 @@ export interface TripStats {
     startDate: number | null;
     endDate: number | null;
   };
+  longestSuccessfulStreakBeforeCancellation: {
+    count: number;
+    startDate: number | null;
+    endDate: number | null;
+  };
+  longestCancellationStreak: {
+    count: number;
+    startDate: number | null;
+    endDate: number | null;
+  };
   tripsByYear: YearlyStat[];
   avgSpeedByDayOfWeek: { day: string; avgSpeed: number }[];
   convertDistance: (miles: number) => number;
@@ -143,6 +153,8 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
     totalFareByYear: {},
     longestStreak: { days: 0, startDate: null, endDate: null },
     longestGap: { days: 0, startDate: null, endDate: null },
+    longestSuccessfulStreakBeforeCancellation: { count: 0, startDate: null, endDate: null },
+    longestCancellationStreak: { count: 0, startDate: null, endDate: null },
     tripsByYear: [],
     avgSpeedByDayOfWeek: [],
     convertDistance: (miles: number) => miles,
@@ -156,6 +168,11 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
     if (rows.length > 0) {
       setIsAnalyzing(true);
       const timeoutId = setTimeout(() => {
+        const sortedRows = [...rows].sort((a, b) => {
+          const timeA = safeParseDate(a.request_time)?.getTime() || 0;
+          const timeB = safeParseDate(b.request_time)?.getTime() || 0;
+          return timeA - timeB;
+        });
         // Accumulators
         let currentTotalDistance = 0;
         let totalDurationMinutes = 0;
@@ -169,6 +186,10 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
         let dropoffCount = 0;
         let riderCanceledCount = 0;
         let driverCanceledCount = 0;
+        let longestSuccessfulStreakBeforeCancellation = { count: 0, startDate: null as number | null, endDate: null as number | null };
+        let currentSuccessfulStreak = { count: 0, startDate: null as number | null, endDate: null as number | null };
+        let longestCancellationStreak = { count: 0, startDate: null as number | null, endDate: null as number | null };
+        let currentCancellationStreak = { count: 0, startDate: null as number | null, endDate: null as number | null };
         const fareByCurrency: { [key: string]: number } = {};
         let waitingLongerThanTripCount = 0;
         let totalWaitingTimeForLongerWaits = 0;
@@ -198,17 +219,27 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
         });
 
         // Main processing loop
-        rows.forEach((r: CSVRow) => {
+        sortedRows.forEach((r: CSVRow) => {
           const status = r.status?.toLowerCase().trim();
-          
+
           if (status === 'completed') {
+            const requestTime = safeParseDate(r.request_time);
+            if (currentSuccessfulStreak.count === 0 && requestTime) {
+              currentSuccessfulStreak.startDate = requestTime.getTime();
+            }
+            if(requestTime) currentSuccessfulStreak.endDate = requestTime.getTime();
+            currentSuccessfulStreak.count++;
+
+            if (currentCancellationStreak.count > longestCancellationStreak.count) {
+              longestCancellationStreak = { ...currentCancellationStreak };
+            }
+            currentCancellationStreak = { count: 0, startDate: null, endDate: null };
             completedCount++;
 
             // Parse and validate all fields upfront
             const distanceMiles = safeParseFloat(r.distance);
             const beginTime = safeParseDate(r.begin_trip_time);
             const dropoffTime = safeParseDate(r.dropoff_time);
-            const requestTime = safeParseDate(r.request_time);
             const fare = safeParseFloat(r.fare_amount);
             const currency = r.fare_currency?.trim();
 
@@ -351,12 +382,43 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
                 yearlyDistanceByCurrency[currency][year] += convertDistance(distanceMiles);
               }
             }
-          } else if (status === 'rider_canceled') {
-            riderCanceledCount++;
-          } else if (status === 'driver_canceled') {
-            driverCanceledCount++;
+          } else if (status === 'rider_canceled' || status === 'driver_canceled') {
+            const requestTime = safeParseDate(r.request_time);
+            if (currentSuccessfulStreak.count > longestSuccessfulStreakBeforeCancellation.count) {
+              longestSuccessfulStreakBeforeCancellation = { ...currentSuccessfulStreak };
+            }
+            currentSuccessfulStreak = { count: 0, startDate: null, endDate: null };
+
+            if (currentCancellationStreak.count === 0 && requestTime) {
+              currentCancellationStreak.startDate = requestTime.getTime();
+            }
+            if(requestTime) currentCancellationStreak.endDate = requestTime.getTime();
+            currentCancellationStreak.count++;
+
+            if (status === 'rider_canceled') {
+              riderCanceledCount++;
+            } else {
+              driverCanceledCount++;
+            }
+          } else {
+            if (currentSuccessfulStreak.count > longestSuccessfulStreakBeforeCancellation.count) {
+              longestSuccessfulStreakBeforeCancellation = { ...currentSuccessfulStreak };
+            }
+            if (currentCancellationStreak.count > longestCancellationStreak.count) {
+              longestCancellationStreak = { ...currentCancellationStreak };
+            }
+            currentSuccessfulStreak = { count: 0, startDate: null, endDate: null };
+            currentCancellationStreak = { count: 0, startDate: null, endDate: null };
           }
         });
+
+        // Final check for streaks at the end of the data
+        if (currentSuccessfulStreak.count > longestSuccessfulStreakBeforeCancellation.count) {
+          longestSuccessfulStreakBeforeCancellation = { ...currentSuccessfulStreak };
+        }
+        if (currentCancellationStreak.count > longestCancellationStreak.count) {
+          longestCancellationStreak = { ...currentCancellationStreak };
+        }
 
         // Calculate derived statistics
         const canceledCount = riderCanceledCount + driverCanceledCount;
@@ -516,6 +578,8 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           totalTripDuration: totalDurationMinutes,
           longestStreak,
           longestGap,
+          longestSuccessfulStreakBeforeCancellation,
+          longestCancellationStreak,
           waitingLongerThanTripCount,
           totalWaitingTimeForLongerWaits,
           totalRidingTimeForLongerWaits,
@@ -542,6 +606,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           slowestTripBySpeedRow: null,
           fastestTripBySpeed: 0,
           fastestTripBySpeedRow: null,
+          speedDistribution: [],
         };
 
         // Calculate duration statistics
