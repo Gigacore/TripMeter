@@ -14,6 +14,9 @@ import TripSummaryChart from './charts/TripSummaryChart';
 import TripsByYearChart from './charts/TripsByYearChart';
 import ProductTypesChart from './charts/ProductTypesChart';
 import TopStats from './TopStats';
+import FareDistanceScatterPlot from './FareDistanceScatterPlot';
+import CostEfficiencyChart from './CostEfficiencyChart';
+import CancellationBreakdownChart from './CancellationBreakdownChart';
 
 interface StatsProps {
   data: TripStats;
@@ -45,6 +48,7 @@ const Stats: React.FC<StatsProps> = ({
       <TopStats tripData={data} distanceUnit={distanceUnit} />
       <div className="grid grid-cols-1 gap-4">
                 <Card>
+          {/* Fare Insights */}
           <CardHeader>
             <CardTitle>Fare Insights</CardTitle>
             <CardDescription>Insights into your spending, including fare distribution and yearly totals.</CardDescription>
@@ -61,6 +65,22 @@ const Stats: React.FC<StatsProps> = ({
         </Card>
         <Card>
           <CardHeader>
+            <CardTitle>Fare vs. Distance</CardTitle>
+            <CardDescription>The relationship between trip cost and distance for the selected currency.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FareDistanceScatterPlot
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+              convertDistance={data.convertDistance}
+            />
+          </CardContent>
+        </Card>
+        
+
+        <Card>
+          <CardHeader>
             <CardTitle>Trip Summary</CardTitle>
             <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
           </CardHeader>
@@ -69,6 +89,15 @@ const Stats: React.FC<StatsProps> = ({
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>Cancellation Breakdown</CardTitle>
+            <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CancellationBreakdownChart rows={rows} />
+          </CardContent>
+        </Card>
                 <Card>
           <CardHeader>
             <CardTitle>Completed Trips by Year</CardTitle>
@@ -158,6 +187,20 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ride Efficiency by Product</CardTitle>
+            <CardDescription>A comparison of distance per unit of currency across different service types.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CostEfficiencyChart
+              rows={rows}
+              distanceUnit={distanceUnit}
+              activeCurrency={activeCurrency}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>

@@ -21,8 +21,10 @@ const CustomDistributionTooltip = ({ active, payload, label, unit }: TooltipProp
         <div className="mb-2 border-b border-slate-700 pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Avg. Speed: ${label} ${unit}`}</p>
         </div>
-        <div className="text-slate-400">Trips</div>
-        <div className="font-medium text-purple-400 text-lg">{payload[0].value?.toLocaleString()}</div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400">Trips</div>
+          <div className="font-medium text-right text-purple-400">{payload[0].value?.toLocaleString()}</div>
+        </div>
       </div>
     );
   }
