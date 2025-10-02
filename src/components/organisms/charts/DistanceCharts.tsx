@@ -75,12 +75,12 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
       <h3 className="mb-2">Ride Distance Distribution</h3>
       {distanceDistributionData.length > 0 && (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={distanceDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <BarChart layout="vertical" data={distanceDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-            <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis type="category" dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} width={120} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-            <Bar dataKey="count" fill="#fb923c" name="Number of Trips" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" fill="#fb923c" name="Number of Trips" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

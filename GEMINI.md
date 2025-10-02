@@ -9,3 +9,4 @@ Always adhere and use tailwindcss for styling
 Always use Typescript
 For fare, amount, cost or any monetary related data, use the currency.js package to handle the data
 Use Shadcn components for building UI, avoid building custom components, do it only if Shadcn does not have such components.
+Keep all toolip UI format and design consistent
