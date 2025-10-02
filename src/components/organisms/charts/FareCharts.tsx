@@ -30,7 +30,10 @@ const CustomAreaTooltip = ({ active, payload, label, activeCurrency }: TooltipPr
     return (
       <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
         <p className="recharts-tooltip-label font-bold">{`Year: ${label}`}</p>
-        <p className="recharts-tooltip-item text-emerald-400">{`Total Fare: ${formatCurrency(payload[0].value as number, activeCurrency)}`}</p>
+        <ul className="mt-2 space-y-1">
+          <li className="recharts-tooltip-item text-emerald-400">{`Total Fare: ${formatCurrency(payload[0].value as number, activeCurrency)}`}</li>
+          <li className="recharts-tooltip-item">{`Trips: ${payload[0].payload.count.toLocaleString()}`}</li>
+        </ul>
       </div>
     );
   }
@@ -50,7 +53,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
     avgFareByCurrency,
     lowestFareByCurrency,
     highestFareByCurrency,
-    totalFareByYear,
+    tripsByYear,
   } = data;
 
   const currencies = Object.keys(totalFareByCurrency);
@@ -141,12 +144,12 @@ const FareCharts: React.FC<FareChartsProps> = ({
           </div>
         </div>
       )}
-      {activeCurrency && totalFareByYear[activeCurrency] && totalFareByYear[activeCurrency]!.length > 0 && (
+      {activeCurrency && tripsByYear && tripsByYear.length > 0 && (
         <div className="stats-group">
           <h3>Total Fare by Year ({activeCurrency})</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart
-              data={totalFareByYear[activeCurrency]}
+              data={tripsByYear}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
               <defs>
@@ -159,7 +162,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
               <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency, { notation: 'compact' })} />
               <Tooltip content={<CustomAreaTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
+              <Area type="monotone" dataKey={(payload) => payload.totalFare[activeCurrency] || 0} stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

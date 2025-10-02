@@ -64,7 +64,7 @@ const Stats: React.FC<StatsProps> = ({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Fare Charts</CardTitle>
+            <CardTitle>Fare Insights</CardTitle>
             <CardDescription>Insights into your spending, including fare distribution and yearly totals.</CardDescription>
           </CardHeader>
           <CardContent>
