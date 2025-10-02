@@ -89,12 +89,6 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
         <Stat label="Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
         <Stat label="Fastest" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
         <Stat label="Slowest" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
-        {activeCurrency && costPerDurationByCurrency[activeCurrency] !== undefined && (
-          <Stat
-            label="Cost per Minute"
-            value={formatCurrency(costPerDurationByCurrency[activeCurrency]!, activeCurrency)}
-          />
-        )}
       </div>
     </div>
   );

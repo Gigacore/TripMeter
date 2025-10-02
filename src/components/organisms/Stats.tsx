@@ -54,10 +54,10 @@ const Stats: React.FC<StatsProps> = ({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Trips by Year</CardTitle>
+            <CardTitle>Completed Trips by Year</CardTitle>
           </CardHeader>
           <CardContent>
-            <TripsByYearChart data={data} />
+            <TripsByYearChart data={data} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
           </CardContent>
         </Card>
         <Card>
