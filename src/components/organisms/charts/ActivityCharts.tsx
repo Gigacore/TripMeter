@@ -1,12 +1,12 @@
 import React from 'react';
 import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, ZAxis, Tooltip, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, TooltipProps } from 'recharts';
-import Stat from '../../atoms/Stat';
 import ContributionGraph from '../ContributionGraph';
 import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
 import { DistanceUnit } from '../../../App';
+import { Flame, Pause } from 'lucide-react';
 
 interface ActivityChartsProps {
   data: TripStats;
@@ -298,15 +298,27 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
       <div className="stats-group">
         <h3>Streaks & Gaps</h3>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-2">
-          <Stat
-            label="Longest Streak"
-            value={`${longestStreak.days} ${longestStreak.days === 1 ? 'day' : 'days'}`}
-            subValue={formatDateRange(longestStreak.startDate, longestStreak.endDate)} />
-          <Stat
-            label="Longest Gap"
-            value={`${longestGap.days} ${longestGap.days === 1 ? 'day' : 'days'}`}
-            subValue={formatDateRange(longestGap.startDate, longestGap.endDate)} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          <div className="flex items-start gap-4 rounded-lg bg-slate-800/50 p-4">
+            <div className="rounded-full bg-emerald-500/20 p-2 text-emerald-400">
+              <Flame size={24} />
+            </div>
+            <div>
+              <div className="text-slate-400">Longest Streak</div>
+              <div className="text-2xl font-bold text-slate-50">{longestStreak.days} {longestStreak.days === 1 ? 'day' : 'days'}</div>
+              <div className="text-xs text-slate-500">{formatDateRange(longestStreak.startDate, longestStreak.endDate)}</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-4 rounded-lg bg-slate-800/50 p-4">
+            <div className="rounded-full bg-red-500/20 p-2 text-red-400">
+              <Pause size={24} />
+            </div>
+            <div>
+              <div className="text-slate-400">Longest Gap</div>
+              <div className="text-2xl font-bold text-slate-50">{longestGap.days} {longestGap.days === 1 ? 'day' : 'days'}</div>
+              <div className="text-xs text-slate-500">{formatDateRange(longestGap.startDate, longestGap.endDate)}</div>
+            </div>
+          </div>
         </div>
         <p className="hint mt-2">Consecutive days with trips (streak) versus consecutive days without (gap).</p>
       </div>
