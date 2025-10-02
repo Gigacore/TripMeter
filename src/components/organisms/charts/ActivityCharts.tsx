@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis, CartesianGrid, ZAxis, ScatterChart, Scatter } from 'recharts';
-import ContributionGraph from '../ContributionGraph';
+import ContributionGraph, { DailyContribution } from '../ContributionGraph';
 import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
@@ -54,20 +54,44 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
   const contributionData = React.useMemo(() => {
     if (!rows || rows.length === 0) return {};
-    const dailyCounts: { [key: string]: number } = {};
+    const dailyStats: { [key: string]: DailyContribution } = {};
     rows
       .filter(row => row.status?.toLowerCase() === 'completed')
       .forEach(row => {
         if (row.request_time) {
           const date = new Date(row.request_time);
           if (!isNaN(date.getTime())) {
-            const day = date.toISOString().split('T')[0];
-            dailyCounts[day] = (dailyCounts[day] || 0) + 1;
+            const dayStr = date.toISOString().split('T')[0];
+            if (!dailyStats[dayStr]) {
+              dailyStats[dayStr] = { count: 0, totalFare: {}, totalDistance: 0, totalWaitingTime: 0, totalRidingTime: 0 };
+            }
+            const stats = dailyStats[dayStr];
+            stats.count++;
+
+            const fare = parseFloat(row.fare_amount);
+            const currency = row.fare_currency;
+            if (currency && !isNaN(fare)) {
+              stats.totalFare[currency] = (stats.totalFare[currency] || 0) + fare;
+            }
+
+            const distance = parseFloat(row.distance);
+            if (!isNaN(distance)) {
+              stats.totalDistance += distanceUnit === 'km' ? distance * 1.60934 : distance;
+            }
+
+            if (row.request_time && row.begin_trip_time) {
+              const waitingTime = (new Date(row.begin_trip_time).getTime() - new Date(row.request_time).getTime()) / (1000 * 60);
+              if (waitingTime > 0) stats.totalWaitingTime += waitingTime;
+            }
+            if (row.begin_trip_time && row.dropoff_time) {
+              const ridingTime = (new Date(row.dropoff_time).getTime() - new Date(row.begin_trip_time).getTime()) / (1000 * 60);
+              if (ridingTime > 0) stats.totalRidingTime += ridingTime;
+            }
           }
         }
       });
-    return dailyCounts;
-  }, [rows]);
+    return dailyStats;
+  }, [rows, distanceUnit]);
 
   const availableYears = React.useMemo(() => {
     const yearSet = new Set<number>();
