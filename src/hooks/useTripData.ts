@@ -17,7 +17,15 @@ export interface YearlyStat {
   lowestFare: { [key: string]: number };
 }
 
+export interface CityStat {
+  city: string;
+  currency: string;
+  avgFarePerDistance: number;
+  tripCount: number;
+}
+
 export interface TripStats {
+  cityStats: CityStat[];
   beginCount: number;
   dropoffCount: number;
   avgSpeed: number;
@@ -97,6 +105,7 @@ const isPositiveNumber = (value: number | null): value is number => {
 export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripStats, boolean] => {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [stats, setStats] = useState<TripStats>({
+    cityStats: [],
     beginCount: 0,
     dropoffCount: 0,
     avgSpeed: 0,
@@ -195,9 +204,14 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           lowestFare: {},
         });
 
+        const cityData: {
+          [key: string]: { totalFarePerDistance: number; tripCount: number; currency: string };
+        } = {};
+
         // Main processing loop
         rows.forEach((r: CSVRow) => {
           const status = r.status?.toLowerCase().trim();
+          r.fare_per_distance = null;
           
           if (status === 'completed') {
             completedCount++;
@@ -210,9 +224,29 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
             const fare = safeParseFloat(r.fare_amount);
             const currency = r.fare_currency?.trim();
 
+            if (isPositiveNumber(distanceMiles) && isPositiveNumber(fare)) {
+              r.fare_per_distance = divide(fare, convertDistance(distanceMiles));
+            }
+
             // Count trips with valid begin/dropoff times
             if (beginTime) beginCount++;
             if (dropoffTime) dropoffCount++;
+
+            if (r.city && isPositiveNumber(r.fare_per_distance) && currency) {
+              const cityKey = `${r.city}-${currency}`;
+              if (!cityData[cityKey]) {
+                cityData[cityKey] = {
+                  totalFarePerDistance: 0,
+                  tripCount: 0,
+                  currency: currency,
+                };
+              }
+              cityData[cityKey].totalFarePerDistance = add(
+                cityData[cityKey].totalFarePerDistance,
+                r.fare_per_distance
+              );
+              cityData[cityKey].tripCount++;
+            }
 
             // Get year for yearly stats
             let year: number | null = null;
@@ -490,8 +524,20 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           avgSpeed: data.count > 0 ? data.totalSpeed / data.count : 0,
         }));
 
+        const cityStats: CityStat[] = Object.keys(cityData).map(cityKey => {
+          const [city, currency] = cityKey.split('-');
+          const data = cityData[cityKey];
+          return {
+            city,
+            currency,
+            avgFarePerDistance: divide(data.totalFarePerDistance, data.tripCount),
+            tripCount: data.tripCount,
+          };
+        });
+
         // Build final stats object
         const newStats: TripStats = {
+          cityStats,
           totalTrips: rows.length,
           successfulTrips: completedCount,
           beginCount,

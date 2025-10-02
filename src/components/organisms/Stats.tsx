@@ -14,6 +14,7 @@ import TripSummaryChart from './charts/TripSummaryChart';
 import TripsByYearChart from './charts/TripsByYearChart';
 import ProductTypesChart from './charts/ProductTypesChart';
 import TopStats from './TopStats';
+import CityStatsTable from './CityStatsTable';
 
 interface StatsProps {
   data: TripStats;
@@ -169,6 +170,7 @@ const Stats: React.FC<StatsProps> = ({
             <TopCities rows={rows} />
           </CardContent>
         </Card>
+        <CityStatsTable cityStats={data.cityStats} />
       </div>
     </div>
   );
