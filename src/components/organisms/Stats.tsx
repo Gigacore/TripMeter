@@ -44,25 +44,7 @@ const Stats: React.FC<StatsProps> = ({
     <div className="flex flex-col gap-4 overflow-y-auto pr-2">
       <TopStats tripData={data} distanceUnit={distanceUnit} />
       <div className="grid grid-cols-1 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Trip Summary</CardTitle>
-            <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TripSummaryChart data={data} onShowTripList={onShowTripList} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Completed Trips by Year</CardTitle>
-            <CardDescription>The trend of your completed trips over the years.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TripsByYearChart data={data} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
-          </CardContent>
-        </Card>
-        <Card>
+                <Card>
           <CardHeader>
             <CardTitle>Fare Insights</CardTitle>
             <CardDescription>Insights into your spending, including fare distribution and yearly totals.</CardDescription>
@@ -75,6 +57,25 @@ const Stats: React.FC<StatsProps> = ({
               setActiveCurrency={setActiveCurrency}
               onFocusOnTrip={onFocusOnTrip}
             />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Trip Summary</CardTitle>
+            <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TripSummaryChart data={data} onShowTripList={onShowTripList} />
+          </CardContent>
+        </Card>
+
+                <Card>
+          <CardHeader>
+            <CardTitle>Completed Trips by Year</CardTitle>
+            <CardDescription>The trend of your completed trips over the years.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TripsByYearChart data={data} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
           </CardContent>
         </Card>
         <Card>

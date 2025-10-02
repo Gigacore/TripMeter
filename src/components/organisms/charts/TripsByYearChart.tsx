@@ -49,9 +49,25 @@ const CustomTooltip = ({ active, payload, label, distanceUnit, activeCurrency }:
 };
 
 const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit, activeCurrency }) => {
+  const [metric, setMetric] = React.useState<'count' | 'totalDistance'>('count');
   const { tripsByYear } = data;
 
   if (tripsByYear.length === 0) return null;
+
+  const metricOptions = [
+    { value: 'count', label: 'Total Trips' },
+    { value: 'totalDistance', label: 'Total Distance' },
+  ];
+
+  const chartColor = {
+    count: '#34d399', // emerald
+    totalDistance: '#fb923c', // orange
+  }[metric];
+
+  const dataKey = metric;
+
+  const yAxisTickFormatter = (value: number) =>
+    value.toLocaleString();
 
   return (
     <div className="stats-group">
@@ -61,24 +77,39 @@ const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit,
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
         >
           <defs>
-            <linearGradient id="colorTrips" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#34d399" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
+            <linearGradient id={`color-${metric}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={chartColor} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
           <XAxis
             dataKey="year"
             stroke="#888"
-            fontSize={12}
+            fontSize={11}
             tickLine={false}
             axisLine={false}
           />
-          <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
+          <YAxis stroke="#888" fontSize={11} tickLine={false} axisLine={false} tickFormatter={yAxisTickFormatter} />
           <Tooltip content={<CustomTooltip distanceUnit={distanceUnit} activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-          <Area type="monotone" dataKey="count" stroke="#34d399" fillOpacity={1} fill="url(#colorTrips)" name="Trips" />
+          <Area type="monotone" dataKey={dataKey} stroke={chartColor} fillOpacity={1} fill={`url(#color-${metric})`} name={metricOptions.find(m => m.value === metric)?.label} />
         </AreaChart>
       </ResponsiveContainer>
+      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-4">
+        {metricOptions.map(option => (
+          <button
+            key={option.value}
+            onClick={() => setMetric(option.value)}
+            className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md disabled:cursor-not-allowed disabled:opacity-50 ${
+              metric === option.value
+                ? 'bg-slate-700 text-slate-100'
+                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
