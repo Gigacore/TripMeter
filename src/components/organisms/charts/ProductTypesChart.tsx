@@ -183,11 +183,39 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
             <p className="recharts-tooltip-label font-bold text-base">{name}</p>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            <div className="text-slate-400">Successful Trips</div><div className="font-medium text-right">{successfulTrips.toLocaleString()}</div>
-            <div className="text-slate-400">Cancellations</div><div className="font-medium text-right">{canceledTrips.toLocaleString()}</div>
+            <div className="col-span-2">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-emerald-400">Successful: {successfulTrips.toLocaleString()}</span>
+                <span className="text-red-400">Canceled: {canceledTrips.toLocaleString()}</span>
+              </div>
+              <div className="flex h-2 w-full rounded-full overflow-hidden bg-slate-700">
+                <div
+                  className="bg-emerald-500"
+                  style={{ width: `${(successfulTrips / (successfulTrips + canceledTrips)) * 100}%` }}
+                />
+                <div
+                  className="bg-red-500"
+                  style={{ width: `${(canceledTrips / (successfulTrips + canceledTrips)) * 100}%` }}
+                />
+              </div>
+            </div>
+            <div className="col-span-2">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-violet-400">Waiting: {formatDuration(totalWaitingTime, true)}</span>
+                <span className="text-sky-400">Riding: {formatDuration(totalRidingTime, true)}</span>
+              </div>
+              <div className="flex h-2 w-full rounded-full overflow-hidden bg-slate-700">
+                <div
+                  className="bg-violet-500"
+                  style={{ width: `${(totalWaitingTime / (totalWaitingTime + totalRidingTime)) * 100}%` }}
+                />
+                <div
+                  className="bg-sky-500"
+                  style={{ width: `${(totalRidingTime / (totalWaitingTime + totalRidingTime)) * 100}%` }}
+                />
+              </div>
+            </div>
             <div className="text-slate-400">Total Distance</div><div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
-            <div className="text-slate-400">Total Waiting</div><div className="font-medium text-right">{formatDuration(totalWaitingTime, true)}</div>
-            <div className="text-slate-400">Total Riding</div><div className="font-medium text-right">{formatDuration(totalRidingTime, true)}</div>
             <div className="text-slate-400">Top City</div><div className="font-medium text-right">{topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0})</div>
             {lastRideTime > 0 && <><div className="text-slate-400">Last Ride</div><div className="font-medium text-right">{new Date(lastRideTime).toLocaleDateString()}</div></>}
             {Object.entries(totalFare).map(([currency, amount]) => (
