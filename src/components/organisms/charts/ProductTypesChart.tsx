@@ -16,6 +16,7 @@ interface ProductTypeStats {
   canceledTrips: number;
   topCity?: string;
   topCityCount?: number;
+  lastRideTime?: number;
 }
 
 const isTripCompleted = (trip: CSVRow): boolean => {
@@ -87,7 +88,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
     if (!rows || rows.length === 0) {
       return [];
     }
-    const statsByProduct = rows.reduce((acc: { [key: string]: Omit<ProductTypeStats, 'name'> & { cityCounts: { [key: string]: number } } }, trip) => {
+    const statsByProduct = rows.reduce((acc: { [key: string]: Omit<ProductTypeStats, 'name'> & { cityCounts: { [key: string]: number }, lastRideTime: number } }, trip) => {
       const product = trip.product_type || 'N/A';
       if (!acc[product]) {
         acc[product] = {
@@ -99,6 +100,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
           successfulTrips: 0,
           canceledTrips: 0,
           cityCounts: {},
+          lastRideTime: 0,
         };
       }
 
@@ -108,6 +110,11 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
       const city = trip.city;
       if (city) {
         acc[product].cityCounts[city] = (acc[product].cityCounts[city] || 0) + 1;
+      }
+
+      const requestTime = new Date(trip.request_time).getTime();
+      if (!isNaN(requestTime) && requestTime > acc[product].lastRideTime) {
+        acc[product].lastRideTime = requestTime;
       }
 
 
@@ -169,7 +176,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
 
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
-      const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount } = payload[0].payload;
+      const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount, lastRideTime } = payload[0].payload;
       return (
         <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
           <div className="mb-2 border-b border-slate-700 pb-2">
@@ -182,6 +189,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
             <div className="text-slate-400">Total Waiting</div><div className="font-medium text-right">{formatDuration(totalWaitingTime, true)}</div>
             <div className="text-slate-400">Total Riding</div><div className="font-medium text-right">{formatDuration(totalRidingTime, true)}</div>
             <div className="text-slate-400">Top City</div><div className="font-medium text-right">{topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0})</div>
+            {lastRideTime > 0 && <><div className="text-slate-400">Last Ride</div><div className="font-medium text-right">{new Date(lastRideTime).toLocaleDateString()}</div></>}
             {Object.entries(totalFare).map(([currency, amount]) => (
               <React.Fragment key={currency}>
                 <div className="text-slate-400">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
