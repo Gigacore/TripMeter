@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, TooltipProps, BarChart, Bar, LabelList, Legend } from 'recharts';
+import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, TooltipProps, BarChart, Bar, LabelList, Legend } from 'recharts';
 import Stat from '../../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
@@ -11,15 +11,17 @@ interface WaitingTimeChartsProps {
   onFocusOnTrip: (tripRow: CSVRow) => void;
 }
 
-const CustomAreaTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
       <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
         <div className="mb-2 border-b border-slate-700 pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Waiting Time: ${label}`}</p>
         </div>
-        <div className="text-slate-400">Trips</div>
-        <div className="font-medium text-red-400 text-lg">{payload[0].value?.toLocaleString()}</div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400">Trips</div>
+          <div className="font-medium text-right text-red-400">{payload[0].value?.toLocaleString()}</div>
+        </div>
       </div>
     );
   }
@@ -92,22 +94,16 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
   return (
     <>
       <div className="stats-group">
-        <h3 className="mb-2">Waiting Time Distribution</h3>
+        {/* <h3 className="mb-2">Waiting Time Distribution</h3> */}
         {waitingTimeDistributionData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={waitingTimeDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorWaiting" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
+            <BarChart data={waitingTimeDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip content={<CustomAreaTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Area type="monotone" dataKey="count" stroke="#ef4444" fillOpacity={1} fill="url(#colorWaiting)" name="Number of Trips" />
-            </AreaChart>
+              <Tooltip content={<CustomDistributionTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Bar dataKey="count" fill="#ef4444" name="Number of Trips" radius={[4, 4, 0, 0]} />
+            </BarChart>
           </ResponsiveContainer>
         )}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">

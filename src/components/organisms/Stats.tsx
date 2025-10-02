@@ -152,7 +152,7 @@ const Stats: React.FC<StatsProps> = ({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Waiting Time Charts</CardTitle>
+            <CardTitle>Waiting Time Distribution</CardTitle>
             <CardDescription>Analysis of the time spent waiting for a driver to arrive.</CardDescription>
           </CardHeader>
           <CardContent>
