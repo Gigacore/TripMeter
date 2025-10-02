@@ -17,9 +17,14 @@ interface SpeedChartsProps {
 const CustomDistributionTooltip = ({ active, payload, label, unit }: TooltipProps<number, string> & { unit: string }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Avg. Speed: ${label} ${unit}`}</p>
-        <p className="recharts-tooltip-item text-purple-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Avg. Speed: ${label} ${unit}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400">Trips</div>
+          <div className="font-medium text-right text-purple-400">{payload[0].value?.toLocaleString()}</div>
+        </div>
       </div>
     );
   }

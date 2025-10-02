@@ -13,9 +13,12 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     const { source, target, value } = payload[0].payload || {};
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label">{`${source.name} → ${target.name}`}</p>
-        <p className="recharts-tooltip-item">{`Trips: ${value.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`${source.name} → ${target.name}`}</p>
+        </div>
+        <div className="text-slate-400">Trips</div>
+        <div className="font-medium text-lg">{value.toLocaleString()}</div>
       </div>
     );
   }

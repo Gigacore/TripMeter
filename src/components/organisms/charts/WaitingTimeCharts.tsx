@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, Treemap, TooltipProps } from 'recharts';
+import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, TooltipProps, BarChart, Bar, LabelList, Legend } from 'recharts';
 import Stat from '../../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
@@ -11,12 +11,17 @@ interface WaitingTimeChartsProps {
   onFocusOnTrip: (tripRow: CSVRow) => void;
 }
 
-const CustomBarTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Waiting Time: ${label}`}</p>
-        <p className="recharts-tooltip-item text-amber-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Waiting Time: ${label}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400">Trips</div>
+          <div className="font-medium text-right text-red-400">{payload[0].value?.toLocaleString()}</div>
+        </div>
       </div>
     );
   }
@@ -24,13 +29,15 @@ const CustomBarTooltip = ({ active, payload, label }: TooltipProps<number, strin
   return null;
 };
 
-const CustomTreemapTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+const CustomBarTooltip = ({ active, payload, activeCurrency }: TooltipProps<number, string> & { activeCurrency?: string | null }) => {
   if (active && payload && payload.length) {
-    const { name, value } = payload[0];
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{name}</p>
-        <p className="recharts-tooltip-item text-slate-300">{`Duration: ${formatDuration(value as number, true)}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{payload[0].name}</p>
+        </div>
+        <div className="text-slate-400">Duration</div>
+        <div className="font-medium text-lg" style={{ color: payload[0].color }}>{formatDuration(payload[0].value as number, true)}</div>
       </div>
     );
   }
@@ -50,7 +57,6 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
     shortestWaitingTime,
     shortestWaitingTimeRow,
     totalTripDuration,
-    successfulTrips,
     waitingLongerThanTripCount,
     totalWaitingTimeForLongerWaits,
     totalRidingTimeForLongerWaits,
@@ -80,51 +86,23 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
     }));
   }, [rows]);
 
-  const treemapColors = React.useMemo(() => ['#a78bfa', '#34d399'], []);
-
-  const renderWaitingTreemapContent = React.useCallback((props: any, totalTrips: number) => {
-    const { depth, x, y, width, height, index, name, value } = props;
-    const isSmall = width < 150 || height < 50;
-
-    return (
-      <g>
-        <rect
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          style={{
-            fill: treemapColors[index % treemapColors.length],
-            stroke: '#fff',
-            strokeWidth: 2 / (depth + 1e-10),
-            strokeOpacity: 1 / (depth + 1e-10),
-          }}
-        />
-        {depth === 1 && !isSmall ? (
-          <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={14}>
-            <tspan x={x + width / 2} dy="-0.5em" className="font-semibold">{name}</tspan>
-            <tspan x={x + width / 2} dy="1.2em">{formatDuration(value, true)}</tspan>
-          </text>
-        ) : null}
-        {depth === 1 && isSmall ? (
-          <text x={x + 4} y={y + 18} fill="#fff" fontSize={12} fillOpacity={0.9}>{name}</text>
-        ) : null}
-      </g>
-    );
-  }, [treemapColors]);
+  const waitingVsRidingData = [
+    { name: 'Riding Time', value: totalTripDuration, fill: '#34d399' },
+    { name: 'Waiting Time', value: totalWaitingTime, fill: '#a78bfa' },
+  ];
 
   return (
     <>
       <div className="stats-group">
-        <h3 className="mb-2">Waiting Time Distribution</h3>
+        {/* <h3 className="mb-2">Waiting Time Distribution</h3> */}
         {waitingTimeDistributionData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={waitingTimeDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Bar dataKey="count" fill="#facc15" name="Number of Trips" radius={[4, 4, 0, 0]} />
+              <Tooltip content={<CustomDistributionTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Bar dataKey="count" fill="#ef4444" name="Number of Trips" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -136,51 +114,56 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         </div>
       </div>
       {totalWaitingTime > 0 && totalTripDuration > 0 && (
-        <div className="stats-group">
-          <h3>Waiting vs. Riding</h3>
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-full h-64">
-              <ResponsiveContainer width="100%" height={200}>
-                <Treemap
-                  data={[
-                    { name: 'Total Waiting Time', size: totalWaitingTime },
-                    { name: 'Total Riding Time', size: totalTripDuration },
-                  ]}
-                  dataKey="size"
-                  stroke="#fff"
-                  content={(props) => renderWaitingTreemapContent(props, successfulTrips)}
-                  isAnimationActive={false}
-                >
-                  <Tooltip content={<CustomTreemapTooltip />} />
-                </Treemap>
-              </ResponsiveContainer>
-            </div>
-          </div>
+        <div className="stats-group rounded-lg bg-slate-800/50 p-4">
+          <h3 className="mb-2">Total Waiting vs. Riding Time</h3>
+          <p className="text-xs text-slate-400 mt-1 mb-4">A comparison of total time spent waiting vs. total time spent riding across all trips.</p>
+          <ResponsiveContainer width="100%" height={100}>
+            <BarChart
+              layout="vertical"
+              data={[{ name: 'Total', waiting: totalWaitingTime, riding: totalTripDuration }]}
+              margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
+              stackOffset="expand"
+            >
+              <XAxis type="number" hide domain={[0, 1]} />
+              <YAxis type="category" dataKey="name" hide />
+              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" />
+              <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
+                <LabelList dataKey="waiting" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
+              </Bar>
+              <Bar dataKey="riding" stackId="a" fill="#34d399" name="Riding Time">
+                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-slate-900 font-semibold" />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
       {waitingLongerThanTripCount > 0 && (
-        <div className="stats-group">
-          <h3 className="flex items-center gap-2">
-            Waiting {'>'} Ride Duration <span className="inline-flex items-center justify-center rounded-full bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-100">{waitingLongerThanTripCount} Rides</span>
-          </h3>
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-full h-64">
-              <ResponsiveContainer width="100%" height={200}>
-                <Treemap
-                  data={[
-                    { name: 'Waiting Time', size: totalWaitingTimeForLongerWaits },
-                    { name: 'Riding Time', size: totalRidingTimeForLongerWaits },
-                  ]}
-                  dataKey="size"
-                  stroke="#fff"
-                  content={(props) => renderWaitingTreemapContent(props, waitingLongerThanTripCount)}
-                  isAnimationActive={false}
-                >
-                  <Tooltip content={<CustomTreemapTooltip />} />
-                </Treemap>
-              </ResponsiveContainer>
-            </div>
-          </div>
+        <div className="stats-group rounded-lg bg-slate-800/50 p-4 mt-4">
+          <h4 className="flex items-center gap-2 text-slate-300">
+            Waited Longer Than Rode
+            <span className="inline-flex items-center justify-center rounded-full bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-100">{waitingLongerThanTripCount} Rides</span>
+          </h4>
+          <p className="text-xs text-slate-400 mt-1 mb-3">For these trips, you spent more time waiting for your ride than riding in it.</p>
+          <ResponsiveContainer width="100%" height={100}>
+            <BarChart
+              layout="vertical"
+              data={[{ name: 'Long Waits', waiting: totalWaitingTimeForLongerWaits, riding: totalRidingTimeForLongerWaits }]}
+              margin={{ top: 20, right: 20, left: 20, bottom: 5 }}
+              stackOffset="expand"
+            >
+              <XAxis type="number" hide domain={[0, 1]} />
+              <YAxis type="category" dataKey="name" hide />
+              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" />
+              <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
+                <LabelList dataKey="waiting" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
+              </Bar>
+              <Bar dataKey="riding" stackId="a" fill="#34d399" name="Riding Time">
+                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-slate-900 font-semibold" />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </>

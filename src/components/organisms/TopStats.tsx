@@ -5,7 +5,7 @@ import { formatDuration } from '../../utils/formatters';
 import { formatCurrency } from '../../utils/currency';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle, Wallet, Route, Clock } from 'lucide-react';
 
 interface TopStatsProps {
   tripData: TripStats;
@@ -67,45 +67,74 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
     if (isDragging) handleSwipeEnd();
   };
 
+  const StatCard: React.FC<{
+    icon: React.ReactNode;
+    label: string;
+    value: string | number;
+    unit?: string;
+    children?: React.ReactNode;
+    className?: string;
+  }> = ({ icon, label, value, unit, children, className = '' }) => (
+    <div className={`flex flex-col rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/70 p-4 shadow-lg backdrop-blur-sm ${className}`}>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-slate-300">{label}</span>
+        <div className="text-emerald-500">{icon}</div>
+      </div>
+      <div className="mt-2 text-3xl font-bold text-white">
+        {value}
+        {unit && <span className="ml-1 text-xl font-medium text-slate-400">{unit}</span>}
+      </div>
+      {children}
+    </div>
+  );
+
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4 p-4 md:gap-6">
-      <Stat label="Completed Rides" value={successfulTrips} />
+    <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-4 md:gap-6">
+      <StatCard icon={<CheckCircle size={20} />} label="Completed Rides" value={successfulTrips} />
       {currencies.length > 0 && (
         <>
           {currencies.length === 1 && (
-            <Stat
-              key={currencies[0][0]}
+            <StatCard
+              icon={<Wallet size={20} />}
               label="Total Fare"
               value={formatCurrency(currencies[0][1], currencies[0][0])}
             />
           )}
           {currencies.length > 1 && (
-            <div className="relative flex flex-col items-center gap-2">
-              <button onClick={handlePrevCurrency} className="absolute -left-6 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white" aria-label="Previous currency">
-                <ChevronLeft size={16} />
-              </button>
-              <div
-                ref={swipeRef}
-                className="min-w-[180px] cursor-grab text-center active:cursor-grabbing"
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleSwipeEnd}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleSwipeEnd}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div className="overflow-hidden">
-                  <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${activeCurrencyIndex * 100}%)` }}>
-                    {currencies.map(([currency, fare]) => (
-                      <div key={currency} className="w-full flex-shrink-0">
-                        <Stat label="Total Fare" value={formatCurrency(fare, currency)} />
-                      </div>
-                    ))}
+            <div className="relative flex flex-col rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/70 p-4 shadow-lg backdrop-blur-sm">
+              <div className="flex-grow ">
+                <div
+                  ref={swipeRef}
+                  className="h-full cursor-grab active:cursor-grabbing"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleSwipeEnd}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleSwipeEnd}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <div className="overflow-hidden">
+                    <div
+                      className="flex transition-transform duration-300 ease-in-out"
+                      style={{ transform: `translateX(-${activeCurrencyIndex * 100}%)` }}
+                    >
+                      {currencies.map(([currency, fare]) => (
+                        <div key={currency} className="w-full flex-shrink-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-slate-300">Total Fare</span>
+                            <div className="text-emerald-500"><Wallet size={20} /></div>
+                          </div>
+                          <div className="mt-2 text-3xl font-bold text-white">
+                            {formatCurrency(fare, currency)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-2">
+              <div className="mt-auto flex items-center justify-center gap-2 pt-3">
                 {currencies.map((_, index) => (
                   <button key={index} onClick={() => setActiveCurrencyIndex(index)} className={`h-2 w-2 rounded-full transition-all duration-300 ${activeCurrencyIndex === index ? 'w-4 bg-emerald-500' : 'bg-slate-600 hover:bg-slate-500'}`} aria-label={`Go to currency ${index + 1}`} />
                 ))}
@@ -114,8 +143,8 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
           )}
         </>
       )}
-      <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-      <Stat label="Total Ride Time" value={formatDuration(totalTripDuration, true)} />
+      <StatCard icon={<Route size={20} />} label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+      <StatCard icon={<Clock size={20} />} label="Total Ride Time" value={formatDuration(totalTripDuration, true)} />
     </div>
   );
 };

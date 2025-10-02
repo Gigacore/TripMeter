@@ -17,9 +17,14 @@ interface DistanceChartsProps {
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Distance: ${label}`}</p>
-        <p className="recharts-tooltip-item text-orange-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Distance: ${label}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400">Trips</div>
+          <div className="font-medium text-right text-orange-400">{payload[0].value?.toLocaleString()}</div>
+        </div>
       </div>
     );
   }
@@ -72,12 +77,12 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
       <h3 className="mb-2">Ride Distance Distribution</h3>
       {distanceDistributionData.length > 0 && (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={distanceDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <BarChart layout="vertical" data={distanceDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-            <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis type="category" dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} width={120} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-            <Bar dataKey="count" fill="#fb923c" name="Number of Trips" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" fill="#fb923c" name="Number of Trips" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

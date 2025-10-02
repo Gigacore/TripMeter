@@ -1,20 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import Map from './Map';
 import { CSVRow } from '../../services/csvParser';
+import { DistanceUnit } from '@/App';
+import { formatCurrency } from '@/utils/currency';
+import { formatDuration } from '@/utils/formatters';
+
+interface CityStats {
+    totalFare: { [key: string]: number };
+    totalDistance: number;
+    totalRidingTime: number;
+    totalWaitingTime: number;
+}
 
 interface TopCitiesProps {
     rows: CSVRow[];
+    distanceUnit: DistanceUnit;
+    convertDistance: (miles: number) => number;
 }
 
-const TopCities: React.FC<TopCitiesProps> = ({ rows }) => {
+const TopCities: React.FC<TopCitiesProps> = ({ rows, distanceUnit, convertDistance }) => {
     const [topCities, setTopCities] = useState<{ city: string; count: number }[]>([]);
     const [selectedCity, setSelectedCity] = useState<string | null>(null);
     const [cityRides, setCityRides] = useState<CSVRow[]>([]);
+    const [cityStats, setCityStats] = useState<CityStats | null>(null);
 
     useEffect(() => {
         if (rows.length > 0) {
             const cityCounts: { [key: string]: number } = {};
-            rows.forEach((row) => {
+            rows
+                .filter(row => row.status?.toLowerCase() === 'completed')
+                .forEach((row) => {
                 const city = row.city;
                 if (city) {
                     cityCounts[city] = (cityCounts[city] || 0) + 1;
@@ -34,9 +49,48 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows }) => {
 
     useEffect(() => {
         if (selectedCity) {
-            setCityRides(rows.filter((row) => row.city === selectedCity));
+            setCityRides(
+                rows.filter((row) => row.city === selectedCity && row.status?.toLowerCase() === 'completed')
+            );
         }
     }, [selectedCity, rows]);
+
+    useEffect(() => {
+        if (cityRides.length > 0) {
+            const stats: CityStats = cityRides.reduce((acc, trip) => {
+                const fare = parseFloat(trip.fare_amount);
+                const currency = trip.fare_currency;
+                if (currency && !isNaN(fare)) {
+                    acc.totalFare[currency] = (acc.totalFare[currency] || 0) + fare;
+                }
+
+                const distance = parseFloat(trip.distance);
+                if (!isNaN(distance)) {
+                    acc.totalDistance += convertDistance(distance);
+                }
+
+                if (trip.begin_trip_time && trip.dropoff_time) {
+                    const ridingTime = (new Date(trip.dropoff_time).getTime() - new Date(trip.begin_trip_time).getTime()) / (1000 * 60);
+                    if (ridingTime > 0) acc.totalRidingTime += ridingTime;
+                }
+
+                if (trip.request_time && trip.begin_trip_time) {
+                    const waitingTime = (new Date(trip.begin_trip_time).getTime() - new Date(trip.request_time).getTime()) / (1000 * 60);
+                    if (waitingTime > 0) acc.totalWaitingTime += waitingTime;
+                }
+
+                return acc;
+            }, {
+                totalFare: {},
+                totalDistance: 0,
+                totalRidingTime: 0,
+                totalWaitingTime: 0,
+            });
+            setCityStats(stats);
+        } else {
+            setCityStats(null);
+        }
+    }, [cityRides, convertDistance]);
 
     const handleCityClick = (city: string) => {
         setSelectedCity(city);
@@ -44,14 +98,14 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows }) => {
 
     return (
         <div className="stats-group">
-            <h3>Top Cities by Trip Count</h3>
+            <h3>Top Cities by Completed Trip Count</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div className="flex flex-col gap-2">
                         {topCities.map((city, index) => (
                         <button
                             key={index}
                             onClick={() => handleCityClick(city.city)}
-                            className={`w-full text-left rounded-lg transition-all duration-200 border-2 ${selectedCity === city.city ? 'bg-slate-800 border-emerald-500/50' : 'bg-slate-800/50 border-transparent hover:bg-slate-800'}`}
+                            className={`w-full text-left rounded-lg transition-all duration-300 border-2 ${selectedCity === city.city ? 'bg-slate-800 border-emerald-500/50' : 'bg-slate-800/50 border-transparent hover:bg-slate-800'}`}
                         >
                             <div className="p-3">
                                 <div className="flex justify-between items-center text-sm">
@@ -64,6 +118,28 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows }) => {
                                         style={{ width: `${(city.count / (topCities[0]?.count || 1)) * 100}%` }}
                                     />
                                 </div>
+                                {selectedCity === city.city && cityStats && (
+                                    <div className="mt-4 pt-3 border-t border-slate-700/50 text-xs text-slate-400 grid grid-cols-2 gap-x-4 gap-y-2">
+                                        <div>
+                                            <div className="font-semibold text-slate-300">Total Fare</div>
+                                            {Object.entries(cityStats.totalFare).map(([currency, amount]) => (
+                                                <div key={currency}>{formatCurrency(amount, currency)}</div>
+                                            ))}
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-slate-300">Total Distance</div>
+                                            <div>{cityStats.totalDistance.toFixed(2)} {distanceUnit}</div>
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-slate-300">Riding Time</div>
+                                            <div>{formatDuration(cityStats.totalRidingTime, true)}</div>
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-slate-300">Waiting Time</div>
+                                            <div>{formatDuration(cityStats.totalWaitingTime, true)}</div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </button>
                         ))}
@@ -74,8 +150,8 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows }) => {
                             <Map
                                 rows={cityRides}
                                 focusedTrip={null}
-                                distanceUnit="miles"
-                                convertDistance={(miles) => miles}
+                                distanceUnit={distanceUnit}
+                                convertDistance={convertDistance}
                             />
                         </div>
                     )}

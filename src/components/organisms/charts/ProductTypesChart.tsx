@@ -22,43 +22,46 @@ const isTripCompleted = (trip: CSVRow): boolean => {
   return trip.status?.toLowerCase() === 'completed';
 };
 
-const CustomTreemapContent = (props: any) => {
-  const { depth, x, y, width, height, index, name, value, colors, metric, distanceUnit, activeCurrency } = props;
-  const isSmall = width < 150 || height < 50;
+const CustomTreemapContent = React.memo((props: any) => {
+  const { x, y, width, height, index, name, value, colors, metric, distanceUnit, activeCurrency, root } = props;
+  const isSmall = width < 80 || height < 40;
+  const color = colors[index % colors.length];
 
   let formattedValue = `${value.toLocaleString()}`;
   if (metric === 'totalFare' && activeCurrency) formattedValue = formatCurrency(value, activeCurrency);
   else if (metric === 'totalDistance') formattedValue = `${value.toFixed(2)} ${distanceUnit}`;
   else if (metric === 'totalWaitingTime' || metric === 'totalRidingTime') formattedValue = formatDuration(value, true);
   else if (metric === 'topCity') {
-    const { topCity, topCityCount } = props;
+    const { topCity, topCityCount } = root;
     formattedValue = `${topCity || 'N/A'}: ${topCityCount?.toLocaleString() || 0} trips`;
   }
   else if (metric === 'successfulTrips' || metric === 'canceledTrips' || metric === 'size') formattedValue = `${value.toLocaleString()} trips`;
 
   return (
     <g>
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height - 1} // Add a small gap
-        style={{
-          fill: colors[index % colors.length],
-          stroke: '#fff',
-          strokeWidth: 2 / (depth + 1e-10),
-          strokeOpacity: 1 / (depth + 1e-10),
-        }}
-      />
-      {!isSmall && (
-        <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={14}>
-          <tspan key="name" x={x + width / 2} dy="-0.5em" className="font-bold text-base">{name}</tspan>
-          <tspan key="value" x={x + width / 2} dy="1.4em" className="text-sm opacity-80">{formattedValue}</tspan>
-        </text>
-      )}
+      <defs>
+        <linearGradient id={`grad-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style={{ stopColor: color, stopOpacity: 0.6 }} />
+          <stop offset="100%" style={{ stopColor: color, stopOpacity: 0.9 }} />
+        </linearGradient>
+      </defs>
+      <rect x={x} y={y} width={width} height={height} rx={4} ry={4} fill={`url(#grad-${index})`} className="stroke-slate-900/50" strokeWidth={2} />
+      <foreignObject x={x} y={y} width={width} height={height}>
+        <div className="w-full h-full flex flex-col justify-center items-center p-2 text-white text-center overflow-hidden">
+          {!isSmall && (
+            <>
+              <div className="font-bold text-base truncate w-full">{name}</div>
+              <div className="text-sm opacity-80 truncate w-full">{formattedValue}</div>
+            </>
+          )}
+          {isSmall && width > 40 && height > 20 && (
+            <div className="font-semibold text-xs truncate w-full">{name}</div>
+          )}
+        </div>
+      </foreignObject>
     </g>
   );
-};
+});
 
 interface ProductTypesChartProps {
   rows: CSVRow[];
@@ -66,15 +69,15 @@ interface ProductTypesChartProps {
   activeCurrency: string | null;
 }
 
-const metricOptions = [
-  { value: 'size', label: 'Total Requests' },
-  { value: 'successfulTrips', label: 'Successful Trips' },
-  { value: 'canceledTrips', label: 'Canceled Trips' },
+type Metric = 'size' | 'successfulTrips' | 'canceledTrips' | 'totalFare' | 'totalDistance' | 'totalWaitingTime' | 'totalRidingTime' | 'topCity';
+
+const metricOptions: { value: Metric; label: string }[] = [
+  { value: 'size', label: 'Requests' },
+  { value: 'successfulTrips', label: 'Completed' },
   { value: 'totalFare', label: 'Total Fare' },
-  { value: 'totalDistance', label: 'Total Distance' },
-  { value: 'totalWaitingTime', label: 'Total Waiting Time' },
-  { value: 'totalRidingTime', label: 'Total Riding Time' },
-  { value: 'topCity', label: 'Top City' },
+  { value: 'totalDistance', label: 'Distance' },
+  { value: 'totalRidingTime', label: 'Riding Time' },
+  { value: 'totalWaitingTime', label: 'Waiting Time' },
 ];
 
 const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUnit, activeCurrency }) => {
@@ -168,21 +171,23 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
     if (active && payload && payload.length) {
       const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount } = payload[0].payload;
       return (
-        <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-          <p className="recharts-tooltip-label font-bold text-base mb-2">{name}</p>
-          <ul className="space-y-1">
-            <li className="recharts-tooltip-item">Successful Trips: <span className="font-medium">{successfulTrips.toLocaleString()}</span></li>
-            <li className="recharts-tooltip-item">Cancellations: <span className="font-medium">{canceledTrips.toLocaleString()}</span></li>
-            <li className="recharts-tooltip-item">Total Distance: {totalDistance.toFixed(2)} {distanceUnit}</li>
-            <li className="recharts-tooltip-item">Total Waiting: {formatDuration(totalWaitingTime, true)}</li>
-            <li className="recharts-tooltip-item">Total Riding: {formatDuration(totalRidingTime, true)}</li>
-            <li className="recharts-tooltip-item">Top City: {topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0} trips)</li>
+        <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+          <div className="mb-2 border-b border-slate-700 pb-2">
+            <p className="recharts-tooltip-label font-bold text-base">{name}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <div className="text-slate-400">Successful Trips</div><div className="font-medium text-right">{successfulTrips.toLocaleString()}</div>
+            <div className="text-slate-400">Cancellations</div><div className="font-medium text-right">{canceledTrips.toLocaleString()}</div>
+            <div className="text-slate-400">Total Distance</div><div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
+            <div className="text-slate-400">Total Waiting</div><div className="font-medium text-right">{formatDuration(totalWaitingTime, true)}</div>
+            <div className="text-slate-400">Total Riding</div><div className="font-medium text-right">{formatDuration(totalRidingTime, true)}</div>
+            <div className="text-slate-400">Top City</div><div className="font-medium text-right">{topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0})</div>
             {Object.entries(totalFare).map(([currency, amount]) => (
-              <li key={currency} className="recharts-tooltip-item">
-                Total Fare ({currency}): {formatCurrency(amount as number, currency)}
-              </li>
+              <React.Fragment key={currency}>
+                <div className="text-slate-400">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
+              </React.Fragment>
             ))}
-          </ul>
+          </div>
         </div>
       );
     }
@@ -191,18 +196,18 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
 
   return (
     <div className="stats-group">
-      <div className="mb-6 border-b border-slate-800">
-        <h3 className="mb-2">Breakdown by:</h3>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="mb-6">
+        <h3 className="mb-3 text-sm font-medium text-slate-400">Breakdown by:</h3>
+        <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-800/50 p-1.5">
         {metricOptions.map(option => (
           <button
             key={option.value}
             onClick={() => setMetric(option.value)}
             disabled={option.value === 'totalFare' && !activeCurrency}
-            className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
               metric === option.value
-                ? 'border-emerald-400 text-slate-100'
-                : 'border-transparent text-slate-400 hover:text-slate-200 active:bg-slate-800'
+                ? 'bg-emerald-500 text-white shadow-md'
+                : 'text-slate-300 hover:bg-slate-700/50'
             }`}
           >
             {option.label}
@@ -215,9 +220,9 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
           data={productTypeData}
           dataKey="value"
           aspectRatio={4 / 3}
-          stroke="#fff"
-          fill="#8884d8"
           isAnimationActive={false}
+          animationDuration={500}
+          animationEasing="ease-in-out"
           content={<CustomTreemapContent
             metric={metric}
             distanceUnit={distanceUnit}

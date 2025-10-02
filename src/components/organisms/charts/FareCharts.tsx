@@ -16,9 +16,14 @@ interface FareChartsProps {
 const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
   if (active && payload && payload.length && activeCurrency) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Fare: ${label} ${activeCurrency}`}</p>
-        <p className="recharts-tooltip-item text-amber-400">{`Trips: ${payload[0].value?.toLocaleString()}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Fare: ${label} ${activeCurrency}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400">Trips</div>
+          <div className="font-medium text-right text-amber-400">{payload[0].value?.toLocaleString()}</div>
+        </div>
       </div>
     );
   }
@@ -28,9 +33,14 @@ const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipPro
 const CustomAreaTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
   if (active && payload && payload.length && activeCurrency) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold">{`Year: ${label}`}</p>
-        <p className="recharts-tooltip-item text-emerald-400">{`Total Fare: ${formatCurrency(payload[0].value as number, activeCurrency)}`}</p>
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Year: ${label}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-400 text-emerald-400">Total Fare</div><div className="font-medium text-right text-emerald-400">{formatCurrency(payload[0].value as number, activeCurrency)}</div>
+          <div className="text-slate-400">Trips</div><div className="font-medium text-right">{payload[0].payload.count.toLocaleString()}</div>
+        </div>
       </div>
     );
   }
@@ -50,7 +60,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
     avgFareByCurrency,
     lowestFareByCurrency,
     highestFareByCurrency,
-    totalFareByYear,
+    tripsByYear,
   } = data;
 
   const currencies = Object.keys(totalFareByCurrency);
@@ -141,12 +151,12 @@ const FareCharts: React.FC<FareChartsProps> = ({
           </div>
         </div>
       )}
-      {activeCurrency && totalFareByYear[activeCurrency] && totalFareByYear[activeCurrency]!.length > 0 && (
+      {activeCurrency && tripsByYear && tripsByYear.length > 0 && (
         <div className="stats-group">
           <h3>Total Fare by Year ({activeCurrency})</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart
-              data={totalFareByYear[activeCurrency]}
+              data={tripsByYear}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
               <defs>
@@ -159,7 +169,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
               <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency, { notation: 'compact' })} />
               <Tooltip content={<CustomAreaTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
+              <Area type="monotone" dataKey={(payload) => payload.totalFare[activeCurrency] || 0} stroke="#10b981" fillOpacity={1} fill="url(#colorTotalFare)" name={`Fare (${activeCurrency})`} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
