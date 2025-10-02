@@ -45,7 +45,7 @@ const CustomRadarTooltip = ({ active, payload, label, colorClass, seriesName, di
       <div className="rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
         <p className="recharts-tooltip-label font-bold">{`Day: ${label}`}</p>
         <ul className="space-y-1 mt-2">
-          <li className={`recharts-tooltip-item ${colorClass}`}>{`${seriesName}: ${payload[0].value?.toLocaleString()}`}</li>
+          <li className={`recharts-tooltip-item ${colorClass}`}>{`${seriesName}: ${payload[0].value?.toLocaleString()}${seriesName === 'Avg. Speed' ? ` ${distanceUnit === 'miles' ? 'mph' : 'km/h'}` : ''}`}</li>
           {seriesName === 'Completed' && (
             <>
               <li className="recharts-tooltip-item">Total Distance: {data.totalDistance.toFixed(2)} {distanceUnit}</li>
@@ -358,6 +358,20 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
               </div>
             )}
           </div>
+          {data.avgSpeedByDayOfWeek.length > 0 && (
+              <div className="mt-8">
+                <h4 className="text-center text-slate-400 mb-2">Average Speed by Day of Week</h4>
+                <ResponsiveContainer width="100%" height={500}>
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data.avgSpeedByDayOfWeek} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <PolarGrid strokeOpacity={0.3} />
+                    <PolarAngleAxis dataKey="day" tick={renderPolarAngleAxis} />
+                    <PolarRadiusAxis angle={30} domain={[0, 'dataMax']} tick={false} axisLine={false} />
+                    <Radar name="Average Speed" dataKey="avgSpeed" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.6} />
+                    <Tooltip content={<CustomRadarTooltip colorClass="text-purple-400" seriesName="Avg. Speed" distanceUnit={distanceUnit} />} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
         </div>
       )}
     </>

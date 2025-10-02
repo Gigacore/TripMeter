@@ -37,6 +37,7 @@ export interface TripStats {
   totalRidingTimeForLongerWaits: number;
   fastestTripBySpeed: number;
   fastestTripBySpeedRow: CSVRow | null;
+  speedDistribution: { name: string; count: number }[];
   slowestTripBySpeed: number;
   slowestTripBySpeedRow: CSVRow | null;
   longestTripByDistRow: CSVRow | null;
@@ -115,6 +116,7 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
     totalRidingTimeForLongerWaits: 0,
     fastestTripBySpeed: 0,
     fastestTripBySpeedRow: null,
+    speedDistribution: [],
     slowestTripBySpeed: 0,
     slowestTripBySpeedRow: null,
     longestTripByDistRow: null,
@@ -582,6 +584,27 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           newStats.slowestTripBySpeedRow = tripsWithSpeed[0].row;
           newStats.fastestTripBySpeed = tripsWithSpeed[tripsWithSpeed.length - 1].speed;
           newStats.fastestTripBySpeedRow = tripsWithSpeed[tripsWithSpeed.length - 1].row;
+        }
+
+        // Calculate speed distribution
+        if (tripsWithSpeed.length > 0) {
+          const speeds = tripsWithSpeed.map(t => t.speed);
+          const maxSpeed = Math.max(...speeds);
+          const bucketCount = 10;
+          // Ensure bucketSize is at least 1 to avoid infinite loops or zero division
+          const bucketSize = Math.max(1, Math.ceil(maxSpeed / bucketCount));
+
+          const buckets = Array.from({ length: bucketCount }, () => 0);
+          speeds.forEach(speed => {
+            const bucketIndex = Math.min(Math.floor(speed / bucketSize), bucketCount - 1);
+            buckets[bucketIndex]++;
+          });
+
+          const unit = distanceUnit === 'miles' ? 'mph' : 'km/h';
+          newStats.speedDistribution = buckets.map((count, i) => ({
+            name: `${i * bucketSize}-${(i + 1) * bucketSize}`,
+            count,
+          }));
         }
 
         setStats(newStats);
