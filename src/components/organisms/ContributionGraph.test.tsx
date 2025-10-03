@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import ContributionGraph, { DailyContribution } from './ContributionGraph';
 
 // Mock utility functions
@@ -17,6 +17,11 @@ const mockData: { [key: string]: DailyContribution } = {
 };
 
 describe('ContributionGraph', () => {
+  afterEach(() => {
+    // Clean up tooltip from body if it's left over
+    document.body.innerHTML = '';
+  });
+
   it('should render the contribution graph with the correct number of cells', () => {
     // This is a simplified check. A real-world scenario would be more complex.
     const { container } = render(<ContributionGraph data={mockData} view={2023} />);
@@ -29,17 +34,18 @@ describe('ContributionGraph', () => {
     render(<ContributionGraph data={mockData} view={2023} />);
 
     // Find a cell to hover over
-    const cells = document.querySelectorAll('.aspect-square.rounded-sm');
-    const cellToHover = Array.from(cells).find(cell => !cell.classList.contains('bg-transparent'));
+    const cells = await screen.findAllByTestId('contribution-cell');
+    const cellToHover = cells.find(cell => !cell.classList.contains('bg-slate-100'));
 
     if (cellToHover) {
       fireEvent.mouseEnter(cellToHover);
-      const tooltip = await screen.findByText(/trip/); // "trip" or "trips"
+      const tooltip = await screen.findByTestId('contribution-tooltip');
       expect(tooltip).toBeInTheDocument();
-      expect(screen.getByText(/Distance/)).toBeInTheDocument();
+      expect(within(tooltip).getByText(/\d+ trip(s?)/)).toBeInTheDocument();
+      expect(within(tooltip).getByText(/Distance/)).toBeInTheDocument();
 
       fireEvent.mouseLeave(cellToHover);
-      expect(screen.queryByText(/trip/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contribution-tooltip')).not.toBeInTheDocument();
     }
   });
 

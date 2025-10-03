@@ -9,7 +9,7 @@ vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
   Sankey: ({ data, node }: { data: any, node: any }) => (
     <div data-testid="sankey-chart" data-data={JSON.stringify(data)}>
-      {data.nodes.map((n: any) => node({ key: n.name, payload: n }))}
+      {data.nodes.map(({ key, ...rest }: any) => node({ key, payload: rest }))}
     </div>
   ),
   Tooltip: () => <div />,
