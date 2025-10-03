@@ -133,6 +133,7 @@ const Stats: React.FC<StatsProps> = ({
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
               onFocusOnTrip={onFocusOnTrip}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>
@@ -148,6 +149,7 @@ const Stats: React.FC<StatsProps> = ({
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
               onFocusOnTrip={onFocusOnTrip}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>

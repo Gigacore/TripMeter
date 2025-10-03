@@ -11,6 +11,8 @@ vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
   BarChart: ({ children, data }: { children: React.ReactNode, data: any[] }) => <div data-testid="bar-chart" data-data={JSON.stringify(data)}>{children}</div>,
   CartesianGrid: () => <div />,
+  AreaChart: () => <div data-testid="area-chart" />,
+  Area: () => <div />,
   XAxis: () => <div />,
   YAxis: () => <div />,
   Tooltip: () => <div />,
@@ -71,6 +73,7 @@ const mockProps = {
   distanceUnit: 'miles' as DistanceUnit,
   activeCurrency: 'USD',
   onFocusOnTrip: vi.fn(),
+  convertDistance: (m: number) => m,
 };
 
 describe('DistanceCharts', () => {
