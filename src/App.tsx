@@ -12,6 +12,7 @@ import Header from './components/organisms/Header';
 import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
 import MainView from './components/organisms/MainView';
+import LandingPage from "./components/organisms/LandingPage";
 
 export type DistanceUnit = 'miles' | 'km';
 
@@ -120,7 +121,7 @@ function App() {
       />
 
       {rows.length === 0 ? (
-        <InitialView
+        <LandingPage
           onFileSelect={handleFileSelect}
           isProcessing={showSpinner}
           error={error}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Space+Grotesk%3Awght%40400%3B500%3B700" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#13a4ec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101c22",
+            },
+            fontFamily: {
+              "display": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<header class="sticky top-0 z-50 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex h-16 items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="h-8 w-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_319)">
+<path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="currentColor"></path>
+</g>
+<defs>
+<clipPath id="clip0_6_319"><rect fill="white" height="48" width="48"></rect></clipPath>
+</defs>
+</svg>
+</div>
+<h2 class="text-xl font-bold text-gray-900 dark:text-white">Trip Insights</h2>
+</div>
+<div class="flex items-center gap-8">
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors" href="#">Features</a>
+<a class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors" href="#">Pricing</a>
+<a class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors" href="#">Help</a>
+</nav>
+<div class="flex items-center gap-2">
+<button class="flex h-10 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold text-white transition-colors hover:bg-primary/90">
+<span class="truncate">Upload</span>
+</button>
+<button class="flex h-10 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 dark:bg-primary/30 px-4 text-sm font-bold text-primary transition-colors hover:bg-primary/30 dark:hover:bg-primary/40">
+<span class="truncate">Sign in</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow">
+<section class="py-20 sm:py-28 lg:py-32">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-4xl text-center">
+<h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+                Upload Your Data
+              </h1>
+<p class="mt-6 text-lg text-gray-600 dark:text-gray-400">
+                Drag and drop your file or click to browse. Get instant visualizations and insights from your data.
+              </p>
+<div class="mt-10">
+<div class="relative w-full rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 p-8 sm:p-12 lg:p-16 text-center transition-colors hover:border-primary dark:hover:border-primary bg-background-light/50 dark:bg-background-dark/50">
+<div class="flex flex-col items-center justify-center space-y-4">
+<div class="text-primary">
+<span class="material-symbols-outlined text-6xl">
+cloud_upload
+</span>
+</div>
+<p class="text-lg font-semibold text-gray-900 dark:text-white">Drag &amp; drop your file here</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">or</p>
+<button class="flex h-12 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-6 text-base font-bold text-white transition-transform hover:scale-105">
+<span class="truncate">Browse Files</span>
+</button>
+</div>
+<input class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="file"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-16 sm:py-24 lg:py-28">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-2xl text-center">
+<h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                Explore the Power of Trip Insights
+              </h2>
+<p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                Gain a deeper understanding of your travel behavior with our comprehensive suite of features.
+              </p>
+</div>
+<div class="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+<div class="flex flex-col gap-4 rounded-lg bg-background-light dark:bg-background-dark/50 p-6 shadow-lg transition-transform hover:scale-105">
+<div class="aspect-video w-full overflow-hidden rounded-lg">
+<img alt="Interactive Map Visualization" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBC5ZPu06dTz_rq7_V_JwaQlFb7zqH_53iYIlfoeHgJlaTogKPcYQqkieCnFoM6Vy5fnpAJS2TpAjJY2K6PdT_DImQdbOL8E2JJOdIHJiWV-9KRh-n0z-YJbAxR_9FeWpTFnjEcToAzQKTXejgV3Cnd-G53jZWQ2NiF9NqvL7Q6w5YBSLDM20FOweUnFCddVtew4fdYtW628tfVTh0u_w5ynp2rPt1GGZWKh-6brX3PTqBv69Y1gBMOYJXmYIumvHaafRiUm0fOfMT1"/>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white">Interactive Map Visualization</h3>
+<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Visualize your trips on an interactive map, allowing you to explore your routes and destinations with ease.
+                  </p>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-lg bg-background-light dark:bg-background-dark/50 p-6 shadow-lg transition-transform hover:scale-105">
+<div class="aspect-video w-full overflow-hidden rounded-lg">
+<img alt="In-Depth Analytics" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3Gpwj-K43NcWjg5EHn0skKStlOseTMXebcnbqXCJ6USl2m3tyMQJ0j7do930_rnp1BRBpqYd0cMKALaoRYgxV2aClbWcGkrqjXlhRY2A41BaQtVJfxk2Nv6v9OaAXQT_dfxuvaQUk8wFISDM5t6jHZ92gxNW2AotbBM4uQWIGzLOWv4T5vcSNIhJ44DE7tKyPzT4sszLG8kfhdTlKcuoqqi-ZSTHfrCfWlxUkTmBgWveF2vLBYiOpR92LXFt4dYQZsg9vUrmd8bLo"/>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white">In-Depth Analytics</h3>
+<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Dive into detailed analytics on fare, distance, duration, and speed, providing a comprehensive overview of your travel expenses and efficiency.
+                  </p>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-lg bg-background-light dark:bg-background-dark/50 p-6 shadow-lg transition-transform hover:scale-105">
+<div class="aspect-video w-full overflow-hidden rounded-lg">
+<img alt="Activity Pattern Analysis" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAceS7yeMbwD4YQORMs_cd5rcfOxFXqh8_Znm6uUgESt4TKl4NAAzhOfNCOB6A3GdiMd8KHip07te7AtfqsT-IBE-_ZazYBZkpzqn7v1XjV-RMXUwYisvEeF8c064C8XdGY2z78yzrtObBN0_cYHtmb0VI_2nU4bUKGOnjqznHAWp0toIokkq9XMaLDgklf3vx3mfgYOvMWPr78smcF98XZstfpgsHwdFw8WAYKoFOY1xsxM-wzhGQz6mmQ5D_mMi43f3pO-j6TSp_i"/>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white">Activity Pattern Analysis</h3>
+<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Analyze your ride activity patterns by time of day, week, and year, uncovering trends and peak travel periods.
+                  </p>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-lg bg-background-light dark:bg-background-dark/50 p-6 shadow-lg transition-transform hover:scale-105">
+<div class="aspect-video w-full overflow-hidden rounded-lg">
+<img alt="Cancellation Behavior Insights" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAAuxKGkC6jP5PC8pitM9monWqlc04h6XFgowCdQGQb_ZJGVg8fFxjHeuOg5BUXxL2MI0kacRA0j2f0PeCIvnBcdosthLhm9GsbmQyGkDLeZk-0jxcd2_7S7VlNpgJWRZX5YnkbyIEH9GmMw3wVSg5gNQAO_b8hTBt-x2_4hrSZzuMwMJfM4HQ41nfBNU-PwpT7DMyrCHuFqoE8C2f_QjNl2wVrQYAybvtDXMf6VJSJmVww5hg3Nequ_s-gA5pNkZSRG1sXtN42lE9"/>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white">Cancellation Behavior Insights</h3>
+<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Gain insights into your cancellation behavior, identifying patterns and potential cost savings.</p>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-lg bg-background-light dark:bg-background-dark/50 p-6 shadow-lg transition-transform hover:scale-105">
+<div class="aspect-video w-full overflow-hidden rounded-lg">
+<img alt="Cost-Efficiency Comparison" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDyS82jsu7HGm3aGFRzlyW4j46fcuION-zSYITE8yOWz11wy3Enb8rhcbUkFFhtyvyPOZdQ1gU4Kkjpru4MR4GGT9X9yXbZSDzV3Lz5Oh3xhJHbQJoO7Zr_gJ0HUplGlHboU6mttktB1QBZeREiF1vagRiKRidgY6kT5OFmMYR3gCkfUV1IHEEBoB0ImDkjkIoIYOMF-119g_7pkm8qNI0vuQE8bE5PRIE6f25Huu3IcSHFaXk-ZydNBVySI3creYY0EET9w14mFni"/>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white">Cost-Efficiency Comparison</h3>
+<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Compare the cost-efficiency of different service types, helping you make informed decisions about your future travel choices.
+                  </p>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-lg bg-background-light dark:bg-background-dark/50 p-6 shadow-lg transition-transform hover:scale-105">
+<div class="aspect-video w-full overflow-hidden rounded-lg">
+<img alt="Export to KML" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmn5jxH9P0r9six0gr4TRl_1nwr2F-RIPdfAW30QowGEzd1qz4_CoKs5tIZY1Az4gPxiVxoHjlQYsOB7FGMNGcIQtgDg3-wwjJQScKNFVKJQ2Vo3pZK35iCdZa7ly4AWGtsgtgL5VTTUz1Oa3hayjI6IZL-11WFgMVJ91Bj-nhKJGdDH6slvJR2c9hfvRnP4aHVY8ctxLt_jjCXanfcyyRFkJPlCqv0YuTwOE3o8orx-UAK99hTL9sy7GvlyfhylSekB-MuT1yBqqe"/>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white">Export to KML</h3>
+<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Export your trip data to KML format for use with Google Earth, enabling you to visualize your journeys in a 3D environment.
+                  </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-background-light/50 dark:bg-background-dark/50 py-16 sm:py-24 lg:py-28">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-3xl text-center">
+<h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">100% Private Processing</h2>
+<p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                Your data is processed entirely within your browser and never leaves your computer. We prioritize your privacy and ensure that your information remains secure and confidential.
+              </p>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-gray-800">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="flex flex-col items-center justify-between gap-6 md:flex-row">
+<div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+<a class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors" href="#">Contact Us</a>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400">© 2024 Trip Insights. All rights reserved.</p>
+</div>
+</div>
+</footer>
+</div>
+
+</body></html>

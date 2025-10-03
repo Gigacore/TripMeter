@@ -15,8 +15,8 @@ const mockProps = {
 describe('LandingPage', () => {
   it('should render the initial state correctly', () => {
     render(<LandingPage {...mockProps} />);
-    expect(screen.getByText('Visualize Your Journeys')).toBeInTheDocument();
-    expect(screen.getByText('Upload your ride history CSV to generate an interactive map and detailed analytics of your trips.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Visualize Your Journeys' })).toBeInTheDocument();
+    expect(screen.getByText('Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Select File' })).toBeInTheDocument();
   });
 
@@ -54,7 +54,7 @@ describe('LandingPage', () => {
   it('should call onDrop when a file is dropped', async () => {
     const user = userEvent.setup();
     render(<LandingPage {...mockProps} />);
-    const dropZone = screen.getByText('Drag and drop your file here').parentElement?.parentElement;
+    const dropZone = screen.getByText('Drag and drop your file here').parentElement;
     if (dropZone) {
       await user.click(dropZone);
       expect(mockProps.onDrop).toHaveBeenCalledTimes(0);
