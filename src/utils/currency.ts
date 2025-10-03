@@ -1,5 +1,5 @@
 import currency from 'currency.js';
-import { getCurrencyCode as getCode } from '../components/organisms/charts/currency';
+import { getCurrencyCode as getCode, generateCurrencyMap } from '../components/organisms/charts/currency';
 
 export const formatCurrency = (
   amount: number | null | undefined,
@@ -54,4 +54,13 @@ export const multiply = (a: number, b: number): number => {
 
 export const divide = (a: number, b: number): number => {
   return currency(a).divide(b).value;
+};
+
+export const getAllCurrencies = (): { code: string; symbol: string; name: string }[] => {
+  const currencyMap = generateCurrencyMap();
+  return Object.entries(currencyMap).map(([name, code]) => ({
+    code,
+    symbol: getCurrencySymbol(code),
+    name,
+  }));
 };

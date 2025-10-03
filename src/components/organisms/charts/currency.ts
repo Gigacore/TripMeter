@@ -1,6 +1,6 @@
 let currencyNameToCodeMap: { [key: string]: string } | null = null;
 
-function generateCurrencyMap(): { [key: string]: string } {
+export function generateCurrencyMap(): { [key: string]: string } {
   if (currencyNameToCodeMap) {
     return currencyNameToCodeMap;
   }
