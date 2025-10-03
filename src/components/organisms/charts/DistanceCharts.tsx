@@ -146,6 +146,20 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
           )}
         </div>
       </div>
+      {data.tripsByYear && data.tripsByYear.length > 0 && (
+        <div className="stats-group">
+          <h3>Total Distance by Year ({distanceUnit})</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data.tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+              <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
+              <Tooltip content={<CustomAreaTooltip distanceUnit={distanceUnit} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Bar dataKey="totalDistance" fill="#fb923c" name={`Distance (${distanceUnit})`} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       {cumulativeDistanceData && cumulativeDistanceData.length > 0 && (
         <div className="stats-group">
           <h3>Cumulative Distance Over Time ({distanceUnit})</h3>

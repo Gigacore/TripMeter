@@ -44,7 +44,7 @@ const mockTripData: TripStats = {
   shortestTripByDistRow: mockShortestTripRow,
   costPerDistanceByCurrency: { USD: 3.5 },
   totalFareByCurrency: {},
-  avgFareByCurrency: {},
+  avgFareByCurrency: { USD: 25 },
   lowestFareByCurrency: {},
   highestFareByCurrency: {},
   tripsByYear: [],
@@ -66,6 +66,15 @@ const mockTripData: TripStats = {
   longestSuccessfulStreakBeforeDriverCancellation: 0,
   longestDriverCancellationStreak: 0,
 };
+
+const mockTripDataWithYearly = {
+  ...mockTripData,
+  tripsByYear: [
+    { year: 2022, totalDistance: 100, count: 10, totalFare: { USD: 250 }, totalRidingTime: 120, totalWaitingTime: 30, farthestTrip: 20, shortestTrip: 1, highestFare: { USD: 50 }, lowestFare: { USD: 5 } },
+    { year: 2023, totalDistance: 200, count: 20, totalFare: { USD: 500 }, totalRidingTime: 240, totalWaitingTime: 60, farthestTrip: 25, shortestTrip: 2, highestFare: { USD: 60 }, lowestFare: { USD: 10 } },
+  ],
+};
+
 
 const mockProps = {
   data: mockTripData,
@@ -118,5 +127,11 @@ describe('DistanceCharts', () => {
       await user.click(shortestStat);
       expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockShortestTripRow);
     }
+  });
+
+  it('should render the distance by year chart when data is available', () => {
+    render(<DistanceCharts {...mockProps} data={mockTripDataWithYearly} />);
+    expect(screen.getByText(`Total Distance by Year (${mockProps.distanceUnit})`)).toBeInTheDocument();
+    expect(screen.getAllByTestId('bar-chart').length).toBeGreaterThan(1);
   });
 });
