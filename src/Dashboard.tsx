@@ -1,6 +1,6 @@
 import React from 'react';
-import Map from '/src/components/Map';
-import SimpleStats from './components/molecules/SimpleStats';
+import Map from '@/components/organisms/Map';
+import SimpleStats from '@/components/molecules/SimpleStats';
 
 function Dashboard() {
   return (
