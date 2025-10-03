@@ -1,27 +1,35 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Sidebar from './Sidebar';
 import { CSVRow } from '../../services/csvParser';
 
+// Mock child components
 vi.mock('./TripList', () => ({
-  default: (props: any) => <div data-testid="trip-list" {...props} />,
+  default: (props: any) => <div data-testid="trip-list" title={props.title} />,
 }));
 
 vi.mock('../molecules/FocusedTripInfo', () => ({
   default: (props: any) => <div data-testid="focused-trip-info" {...props} />,
 }));
 
-vi.mock('@/components/ui/tabs', () => ({
-  Tabs: ({ children, value, onValueChange }: { children: React.ReactNode, value: string, onValueChange: (value: string) => void }) => (
-    <div data-testid="tabs" data-value={value} onClick={() => onValueChange(value === 'stats' ? 'tripList' : 'stats')}>
-      {children}
-    </div>
-  ),
-  TabsList: ({ children }: { children: React.ReactNode }) => <div data-testid="tabs-list">{children}</div>,
-  TabsTrigger: ({ children, value }: { children: React.ReactNode, value: string }) => <button data-testid={`tab-${value}`}>{children}</button>,
-  TabsContent: ({ children, value }: { children: React.ReactNode, value: string }) => <div data-testid={`tab-content-${value}`}>{children}</div>,
-}));
+// A more robust mock for the Tabs components
+vi.mock('@/components/ui/tabs', async () => {
+  const actual = await vi.importActual('@/components/ui/tabs');
+  return {
+    ...actual,
+    Tabs: ({ children, onValueChange, value }: { children: React.ReactNode, onValueChange: (v: string) => void, value: string }) => (
+      <div data-testid="tabs" data-value={value} onClick={() => onValueChange(value === 'stats' ? 'tripList' : 'stats')}>
+        {children}
+      </div>
+    ),
+    TabsList: ({ children }: { children: React.ReactNode }) => <div data-testid="tabs-list">{children}</div>,
+    TabsTrigger: ({ children, value }: { children: React.ReactNode, value: string }) => <button data-testid={`tab-${value}`}>{children}</button>,
+    TabsContent: ({ children, value }: { children: React.ReactNode, value: string }) => (
+      <div data-testid={`tab-content-${value}`}>{children}</div>
+    ),
+  };
+});
 
 const mockProps = {
   focusedTrip: null,
@@ -35,6 +43,10 @@ const mockProps = {
 };
 
 describe('Sidebar', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should not render FocusedTripInfo when no trip is focused', () => {
     render(<Sidebar {...mockProps} />);
     expect(screen.queryByTestId('focused-trip-info')).not.toBeInTheDocument();
@@ -55,8 +67,11 @@ describe('Sidebar', () => {
   it('should call onBackToStats when the stats tab is clicked', async () => {
     const user = userEvent.setup();
     render(<Sidebar {...mockProps} sidebarView="tripList" />);
+
+    // The mock for Tabs will call onValueChange with 'stats' when clicked
     const tabs = screen.getByTestId('tabs');
     await user.click(tabs);
+
     expect(mockProps.onBackToStats).toHaveBeenCalledTimes(1);
   });
 });

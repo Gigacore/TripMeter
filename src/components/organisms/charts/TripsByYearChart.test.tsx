@@ -6,18 +6,19 @@ import { TripStats } from '../../../hooks/useTripData';
 import { DistanceUnit } from '../../../App';
 
 // Mock child components and dependencies
-vi.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
-  AreaChart: ({ children, data }: { children: React.ReactNode, data: any[] }) => <div data-testid="area-chart" data-data={JSON.stringify(data)}>{children}</div>,
-  CartesianGrid: () => <div />,
-  XAxis: () => <div />,
-  YAxis: () => <div />,
-  Tooltip: () => <div />,
-  Area: () => <div />,
-  defs: () => <div />,
-  linearGradient: () => <div />,
-  stop: () => <div />,
-}));
+vi.mock('recharts', async () => {
+  const originalModule = await vi.importActual('recharts');
+  return {
+    ...originalModule,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AreaChart: ({ data }: { data: any[] }) => <div data-testid="area-chart" data-data={JSON.stringify(data)} />,
+    CartesianGrid: () => <div />,
+    XAxis: () => <div />,
+    YAxis: () => <div />,
+    Tooltip: () => <div />,
+    Area: () => <div />,
+  };
+});
 
 const mockTripData: TripStats = {
   tripsByYear: [

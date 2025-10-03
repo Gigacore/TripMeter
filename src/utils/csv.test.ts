@@ -36,4 +36,22 @@ describe('normalizeHeaders', () => {
     const result = normalizeHeaders(headers);
     expect(result).toBeNull();
   });
+
+  it('should return null when required headers contain special characters', () => {
+    const headers = ['begintrip_lat!', 'begintrip_lng', 'dropoff_lat', 'dropoff_lng'];
+    const result = normalizeHeaders(headers);
+    expect(result).toBeNull();
+  });
+
+  it('should handle non-required headers with special characters', () => {
+    const headers = ['begintrip_lat', 'begintrip_lng', 'dropoff_lat', 'dropoff_lng', 'fare_amount%'];
+    const result = normalizeHeaders(headers);
+    expect(result).toEqual({
+      begintrip_lat: 0,
+      begintrip_lng: 1,
+      dropoff_lat: 2,
+      dropoff_lng: 3,
+      'fare_amount%': 4,
+    });
+  });
 });

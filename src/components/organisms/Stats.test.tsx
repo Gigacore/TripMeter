@@ -5,21 +5,25 @@ import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
 
 // Mock all child components
-vi.mock('./charts/FareCharts', () => ({ default: (props: any) => <div data-testid="fare-charts" {...props} /> }));
-vi.mock('./charts/DurationCharts', () => ({ default: (props: any) => <div data-testid="duration-charts" {...props} /> }));
-vi.mock('./charts/DistanceCharts', () => ({ default: (props: any) => <div data-testid="distance-charts" {...props} /> }));
-vi.mock('./charts/SpeedCharts', () => ({ default: (props: any) => <div data-testid="speed-charts" {...props} /> }));
-vi.mock('./charts/WaitingTimeCharts', () => ({ default: (props: any) => <div data-testid="waiting-time-charts" {...props} /> }));
-vi.mock('./charts/ActivityCharts', () => ({ default: (props: any) => <div data-testid="activity-charts" {...props} /> }));
-vi.mock('./TopCities', () => ({ default: (props: any) => <div data-testid="top-cities" {...props} /> }));
-vi.mock('./charts/TripSummaryChart', () => ({ default: (props: any) => <div data-testid="trip-summary-chart" {...props} /> }));
-vi.mock('./charts/TripsByYearChart', () => ({ default: (props: any) => <div data-testid="trips-by-year-chart" {...props} /> }));
-vi.mock('./charts/ProductTypesChart', () => ({ default: (props: any) => <div data-testid="product-types-chart" {...props} /> }));
-vi.mock('./TopStats', () => ({ default: (props: any) => <div data-testid="top-stats" {...props} /> }));
-vi.mock('./FareDistanceScatterPlot', () => ({ default: (props: any) => <div data-testid="fare-distance-scatter-plot" {...props} /> }));
-vi.mock('./CostEfficiencyChart', () => ({ default: (props: any) => <div data-testid="cost-efficiency-chart" {...props} /> }));
-vi.mock('./CancellationBreakdownChart', () => ({ default: (props: any) => <div data-testid="cancellation-breakdown-chart" {...props} /> }));
-vi.mock('./charts/StreaksAndPauses', () => ({ default: (props: any) => <div data-testid="streaks-and-pauses" {...props} /> }));
+vi.mock('./charts/FareCharts', () => ({
+  default: ({ activeCurrency, setActiveCurrency }: { activeCurrency: string | null, setActiveCurrency: (c: string) => void }) => (
+    <div data-testid="fare-charts" data-active-currency={activeCurrency} onClick={() => setActiveCurrency('USD')} />
+  )
+}));
+vi.mock('./charts/DurationCharts', () => ({ default: () => <div data-testid="duration-charts" /> }));
+vi.mock('./charts/DistanceCharts', () => ({ default: () => <div data-testid="distance-charts" /> }));
+vi.mock('./charts/SpeedCharts', () => ({ default: () => <div data-testid="speed-charts" /> }));
+vi.mock('./charts/WaitingTimeCharts', () => ({ default: () => <div data-testid="waiting-time-charts" /> }));
+vi.mock('./charts/ActivityCharts', () => ({ default: () => <div data-testid="activity-charts" /> }));
+vi.mock('./TopCities', () => ({ default: () => <div data-testid="top-cities" /> }));
+vi.mock('./charts/TripSummaryChart', () => ({ default: () => <div data-testid="trip-summary-chart" /> }));
+vi.mock('./charts/TripsByYearChart', () => ({ default: () => <div data-testid="trips-by-year-chart" /> }));
+vi.mock('./charts/ProductTypesChart', () => ({ default: () => <div data-testid="product-types-chart" /> }));
+vi.mock('./TopStats', () => ({ default: ({ distanceUnit }: { distanceUnit: DistanceUnit }) => <div data-testid="top-stats" data-distance-unit={distanceUnit} /> }));
+vi.mock('./FareDistanceScatterPlot', () => ({ default: () => <div data-testid="fare-distance-scatter-plot" /> }));
+vi.mock('./CostEfficiencyChart', () => ({ default: () => <div data-testid="cost-efficiency-chart" /> }));
+vi.mock('./CancellationBreakdownChart', () => ({ default: () => <div data-testid="cancellation-breakdown-chart" /> }));
+vi.mock('./charts/StreaksAndPauses', () => ({ default: () => <div data-testid="streaks-and-pauses" /> }));
 
 // Mock UI components
 vi.mock('@/components/ui/card', () => ({
@@ -71,12 +75,12 @@ describe('Stats', () => {
   it('should pass the correct props to TopStats', () => {
     render(<Stats {...mockProps} />);
     const topStats = screen.getByTestId('top-stats');
-    expect(topStats).toHaveAttribute('distanceUnit', 'miles');
+    expect(topStats).toHaveAttribute('data-distance-unit', 'miles');
   });
 
   it('should initialize activeCurrency to the first currency in the list', () => {
     render(<Stats {...mockProps} />);
     const fareCharts = screen.getByTestId('fare-charts');
-    expect(fareCharts).toHaveAttribute('activeCurrency', 'USD');
+    expect(fareCharts).toHaveAttribute('data-active-currency', 'USD');
   });
 });

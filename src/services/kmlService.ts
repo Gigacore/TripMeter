@@ -10,21 +10,21 @@ interface KMLPart {
 
 type Which = 'both' | 'begin' | 'drop';
 
-const makeParts = (rows: CSVRow[], { which = 'both' }: { which?: Which } = {}): KMLPart[] => {
+export const makeParts = (rows: CSVRow[], { which = 'both' }: { which?: Which } = {}): KMLPart[] => {
     const parts: KMLPart[] = [];
     rows.forEach((r, idx) => {
       const rowNo = idx + 1;
       if (which === 'both' || which === 'begin') {
-        const lat = toNumber(r.begintrip_lat);
-        const lng = toNumber(r.begintrip_lng);
-        if (lat != null && lng != null) {
+        if (r.begintrip_lat != null && r.begintrip_lng != null) {
+          const lat = toNumber(r.begintrip_lat);
+          const lng = toNumber(r.begintrip_lng);
           parts.push({ name: `Begintrip #${rowNo}`, styleUrl: 'beginStyle', coords: [lng, lat] });
         }
       }
       if (which === 'both' || which === 'drop') {
-        const lat = toNumber(r.dropoff_lat);
-        const lng = toNumber(r.dropoff_lng);
-        if (lat != null && lng != null) {
+        if (r.dropoff_lat != null && r.dropoff_lng != null) {
+          const lat = toNumber(r.dropoff_lat);
+          const lng = toNumber(r.dropoff_lng);
           parts.push({ name: `Dropoff #${rowNo}`, styleUrl: 'dropStyle', coords: [lng, lat] });
         }
       }
@@ -32,7 +32,7 @@ const makeParts = (rows: CSVRow[], { which = 'both' }: { which?: Which } = {}): 
     return parts;
   };
 
-const buildKML = (parts: KMLPart[]): string => {
+export const buildKML = (parts: KMLPart[]): string => {
     const esc = (s: string | number) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const style = (id: string, href: string) => `\n  <Style id="${id}">\n    <IconStyle>\n      <scale>1.1</scale>\n      <Icon><href>${href}</href></Icon>\n    </IconStyle>\n  </Style>`;
     const items = parts.map(p => `\n  <Placemark>\n    <name>${esc(p.name)}</name>\n    ${p.styleUrl ? `<styleUrl>#${p.styleUrl}</styleUrl>` : ''}\n    ${p.desc ? `<description>${esc(p.desc)}</description>` : ''}\n    <Point><coordinates>${p.coords[0]},${p.coords[1]},0</coordinates></Point>\n  </Placemark>`).join('');

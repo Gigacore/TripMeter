@@ -31,3 +31,7 @@ export const getCurrencyCode = (currency: string): string => {
   const map = generateCurrencyMap();
   return map[currency] || currency;
 };
+
+export function resetCurrencyMap() {
+  currencyNameToCodeMap = null;
+}

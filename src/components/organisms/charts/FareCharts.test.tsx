@@ -6,17 +6,21 @@ import { TripStats } from '../../../hooks/useTripData';
 import { CSVRow } from '../../../services/csvParser';
 
 // Mock child components and dependencies
-vi.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
-  BarChart: ({ children, data }: { children: React.ReactNode, data: any[] }) => <div data-testid="bar-chart" data-data={JSON.stringify(data)}>{children}</div>,
-  AreaChart: ({ children, data }: { children: React.ReactNode, data: any[] }) => <div data-testid="area-chart" data-data={JSON.stringify(data)}>{children}</div>,
-  CartesianGrid: () => <div />,
-  XAxis: () => <div />,
-  YAxis: () => <div />,
-  Tooltip: () => <div />,
-  Bar: () => <div />,
-  Area: () => <div />,
-}));
+vi.mock('recharts', async () => {
+  const originalModule = await vi.importActual('recharts');
+  return {
+    ...originalModule,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    BarChart: ({ data }: { data: any[] }) => <div data-testid="bar-chart" data-data={JSON.stringify(data)} />,
+    AreaChart: ({ data }: { data: any[] }) => <div data-testid="area-chart" data-data={JSON.stringify(data)} />,
+    CartesianGrid: () => <div />,
+    XAxis: () => <div />,
+    YAxis: () => <div />,
+    Tooltip: () => <div />,
+    Bar: () => <div />,
+    Area: () => <div />,
+  };
+});
 
 vi.mock('../../atoms/Stat', () => ({
   default: ({ label, value, onClick }: { label: string; value: string | number; onClick?: () => void }) => (

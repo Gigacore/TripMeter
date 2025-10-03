@@ -9,8 +9,7 @@ vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
   Sankey: ({ data, node }: { data: any, node: any }) => (
     <div data-testid="sankey-chart" data-data={JSON.stringify(data)}>
-      {/* Render the node to check its props if needed */}
-      {data.nodes.map((n: any) => node({ ...n, x:0, y:0, width:0, height:0, payload: n }))}
+      {data.nodes.map((n: any) => node({ key: n.name, payload: n }))}
     </div>
   ),
   Tooltip: () => <div />,
@@ -26,7 +25,7 @@ vi.mock('../../atoms/Stat', () => ({
 }));
 
 vi.mock('../../atoms/SankeyNode', () => ({
-    default: (props: any) => <div data-testid="sankey-node" {...props} />,
+  default: ({ payload }: { payload: { name: string } }) => <div data-testid="sankey-node">{payload.name}</div>,
 }));
 
 const mockTripData: TripStats = {
@@ -87,7 +86,7 @@ describe('TripSummaryChart', () => {
 
     const stats = screen.getAllByTestId('stat');
     expect(stats.length).toBe(5); // Including unfulfilled
-    expect(screen.getByText('Total Requests')).toBeInTheDocument();
+    expect(screen.getByText('Total Requests', { selector: 'span' })).toBeInTheDocument();
   });
 
   it('should calculate and display unfulfilled trips', () => {
