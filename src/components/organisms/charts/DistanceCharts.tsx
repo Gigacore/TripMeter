@@ -1,5 +1,5 @@
-import React from 'react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps, AreaChart, Area } from 'recharts';
+import React, { useState, useMemo } from 'react';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps, AreaChart, Area, ReferenceArea } from 'recharts';
 import { timeFormat } from 'd3-time-format';
 import Stat from '../../atoms/Stat';
 import { CSVRow } from '../../../services/csvParser';
@@ -36,17 +36,53 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 
 const formatDate = timeFormat('%b %d, %Y');
 
-const CustomAreaTooltip = ({ active, payload, distanceUnit }: TooltipProps<number, string> & { distanceUnit: DistanceUnit }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
+const CustomAreaTooltip = ({ active, payload, distanceUnit, selectedDistance }: TooltipProps<number, string> & { distanceUnit: DistanceUnit, selectedDistance: { distance: number; startDate: Date; endDate: Date; } | null }) => {  
+  const data = payload?.[0]?.payload;
+
+  if (selectedDistance && selectedDistance.distance > 0) {
+    return (
+      <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">Selected Range</p>
+        </div>
+        <div className="grid grid-cols-[1fr,auto] gap-x-4 gap-y-1.5">
+          <div className="text-slate-300 font-medium">Distance</div>
+          <div className="font-medium text-right text-orange-400">{selectedDistance.distance.toFixed(2)} {distanceUnit}</div>
+          <div className="text-slate-400 text-xs">From</div>
+          <div className="font-medium text-right">{formatDate(selectedDistance.startDate)}</div>
+          <div className="text-slate-400 text-xs">To</div>
+          <div className="font-medium text-right">{formatDate(selectedDistance.endDate)}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (active && data) {
     return (
       <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
         <div className="mb-2 border-b border-slate-700 pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{formatDate(new Date(data.date))}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <div className="text-slate-400 text-orange-400">Total Distance</div>
+          <div className="text-slate-300 font-medium">Total Distance</div>
           <div className="font-medium text-right text-orange-400">{data.cumulativeDistance.toFixed(2)} {distanceUnit}</div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomYearTooltip = ({ active, payload, label, distanceUnit }: TooltipProps<number, string> & { distanceUnit: DistanceUnit }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
+        <div className="mb-2 border-b border-slate-700 pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{`Year: ${label}`}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-slate-300 font-medium">Total Distance</div>
+          <div className="font-medium text-right text-orange-400">{payload[0].value?.toLocaleString()} {distanceUnit}</div>
         </div>
       </div>
     );
@@ -72,7 +108,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
     costPerDistanceByCurrency,
   } = data;
 
-  const distanceDistributionData = React.useMemo(() => {
+  const distanceDistributionData = useMemo(() => {
     if (!rows || rows.length === 0) return [];
     const distances = rows
       .filter(r => r.status?.toLowerCase() === 'completed' && r.distance && parseFloat(r.distance) > 0)
@@ -95,7 +131,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
     }));
   }, [rows, distanceUnit]);
 
-  const cumulativeDistanceData = React.useMemo(() => {
+  const cumulativeDistanceData = useMemo(() => {
     if (!rows || rows.length === 0) return [];
 
     const completedTrips = rows
@@ -117,6 +153,49 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
       };
     });
   }, [rows, convertDistance]);
+
+  const [selection, setSelection] = useState<{ start: number | null, end: number | null }>({ start: null, end: null });
+  const [isSelecting, setIsSelecting] = useState(false);
+
+  const handleMouseUp = () => {
+    setIsSelecting(false);
+  };
+
+  const handleResetSelection = () => {
+    setSelection({ start: null, end: null });
+  };
+
+  const selectedDistance = useMemo(() => {
+    if (!selection.start || !selection.end || !cumulativeDistanceData) return null;
+
+    const [start, end] = [Math.min(selection.start, selection.end), Math.max(selection.start, selection.end)];
+
+    const startPoint = cumulativeDistanceData.find(d => d.date >= start);
+    const endPoint = [...cumulativeDistanceData].reverse().find(d => d.date <= end);
+
+    if (startPoint && endPoint) {
+      const distance = endPoint.cumulativeDistance - startPoint.cumulativeDistance;
+      return {
+        distance: distance < 0 ? 0 : distance,
+        startDate: new Date(start),
+        endDate: new Date(end),
+      };
+    }
+    return null;
+  }, [selection, cumulativeDistanceData]);
+
+  const handleMouseDown = (e: any) => {
+    if (e) {
+      setIsSelecting(true);
+      setSelection({ start: e.activeLabel, end: e.activeLabel });
+    }
+  };
+
+  const handleMouseMove = (e: any) => {
+    if (isSelecting && e) {
+      setSelection(prev => ({ ...prev, end: e.activeLabel }));
+    }
+  };
 
   return (
     <>
@@ -154,7 +233,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
-              <Tooltip content={<CustomAreaTooltip distanceUnit={distanceUnit} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Tooltip content={<CustomYearTooltip distanceUnit={distanceUnit} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
               <Bar dataKey="totalDistance" fill="#fb923c" name={`Distance (${distanceUnit})`} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -162,11 +241,19 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
       )}
       {cumulativeDistanceData && cumulativeDistanceData.length > 0 && (
         <div className="stats-group">
-          <h3>Cumulative Distance Over Time ({distanceUnit})</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3>Cumulative Distance Over Time ({distanceUnit})</h3>
+            {selection.start && (
+              <button onClick={handleResetSelection} className="text-xs text-slate-400 hover:text-slate-100">Reset Selection</button>
+            )}
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart
               data={cumulativeDistanceData}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
             >
               <defs>
                 <linearGradient id="colorCumulativeDistance" x1="0" y1="0" x2="0" y2="1">
@@ -176,9 +263,12 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
               </defs>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis dataKey="date" stroke="#888" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} type="number" tickFormatter={(unixTime) => formatDate(new Date(unixTime))} />
-              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
-              <Tooltip content={<CustomAreaTooltip distanceUnit={distanceUnit} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />              
+              <Tooltip content={<CustomAreaTooltip distanceUnit={distanceUnit} selectedDistance={selectedDistance} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} isAnimationActive={false} />
               <Area type="monotone" dataKey="cumulativeDistance" stroke="#fb923c" fillOpacity={1} fill="url(#colorCumulativeDistance)" name={`Distance (${distanceUnit})`} />
+              {selection.start && selection.end && (
+                <ReferenceArea x1={selection.start} x2={selection.end} strokeOpacity={0.3} fill="rgba(251, 146, 60, 0.2)" />
+              )}
             </AreaChart>
           </ResponsiveContainer>
         </div>
