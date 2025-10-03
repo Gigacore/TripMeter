@@ -10,7 +10,7 @@ vi.mock('./TripList', () => ({
 }));
 
 vi.mock('../molecules/FocusedTripInfo', () => ({
-  default: (props: any) => <div data-testid="focused-trip-info" {...props} />,
+  default: ({ trip, onShowAll }: { trip: CSVRow, onShowAll: () => void}) => <div data-testid="focused-trip-info" {...{ trip, onShowAll }} />,
 }));
 
 // A more robust mock for the Tabs components

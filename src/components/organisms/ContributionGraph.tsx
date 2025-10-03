@@ -176,6 +176,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
     <div className="relative p-4 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700" onMouseMove={handleMouseMove}>
       {tooltip.visible && (
         <div
+          data-testid="contribution-tooltip"
           className="fixed rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-slate-100 shadow-lg backdrop-blur-sm pointer-events-none z-20"
           style={{
             left: tooltip.x + 15,
