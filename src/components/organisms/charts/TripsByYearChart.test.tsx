@@ -10,12 +10,14 @@ vi.mock('recharts', async () => {
   const originalModule = await vi.importActual('recharts');
   return {
     ...originalModule,
-    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
+    BarChart: ({ data }: { data: any[] }) => <div data-testid="bar-chart" data-data={JSON.stringify(data)} />,
     AreaChart: ({ data }: { data: any[] }) => <div data-testid="area-chart" data-data={JSON.stringify(data)} />,
     CartesianGrid: () => <div />,
     XAxis: () => <div />,
     YAxis: () => <div />,
     Tooltip: () => <div />,
+    Bar: () => <div />,
     Area: () => <div />,
   };
 });
@@ -70,22 +72,23 @@ const mockProps = {
   data: mockTripData,
   distanceUnit: 'miles' as DistanceUnit,
   activeCurrency: 'USD',
+  rows: [],
 };
 
 describe('TripsByYearChart', () => {
-  it('should render the area chart and metric buttons', () => {
+  it('should render the bar chart and metric buttons', () => {
     render(<TripsByYearChart {...mockProps} />);
-    expect(screen.getByTestId('area-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Total Trips' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Total Distance' })).toBeInTheDocument();
   });
 
   it('should display data by "Total Trips" by default', () => {
     render(<TripsByYearChart {...mockProps} />);
-    const areaChart = screen.getByTestId('area-chart');
+    const barChart = screen.getByTestId('bar-chart');
     // The dataKey is 'count' by default, but we can't directly check that.
     // Instead, we check the data passed to the chart, which is the full tripsByYear array.
-    const chartData = JSON.parse(areaChart.getAttribute('data-data') || '[]');
+    const chartData = JSON.parse(barChart.getAttribute('data-data') || '[]');
     expect(chartData[0].count).toBe(50);
   });
 
@@ -96,8 +99,8 @@ describe('TripsByYearChart', () => {
     const distanceButton = screen.getByRole('button', { name: 'Total Distance' });
     await user.click(distanceButton);
 
-    const areaChart = screen.getByTestId('area-chart');
-    const chartData = JSON.parse(areaChart.getAttribute('data-data') || '[]');
+    const barChart = screen.getByTestId('bar-chart');
+    const chartData = JSON.parse(barChart.getAttribute('data-data') || '[]');
     expect(chartData[0].totalDistance).toBe(250);
   });
 

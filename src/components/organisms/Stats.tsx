@@ -18,6 +18,7 @@ import FareDistanceScatterPlot from './FareDistanceScatterPlot';
 import CostEfficiencyChart from './CostEfficiencyChart';
 import CancellationBreakdownChart from './CancellationBreakdownChart';
 import StreaksAndPauses from './charts/StreaksAndPauses';
+import CumulativeStatsChart from './charts/CumulativeStatsChart';
 
 interface StatsProps {
   data: TripStats;
@@ -104,10 +105,22 @@ const Stats: React.FC<StatsProps> = ({
             <CardTitle>Completed Trips by Year</CardTitle>
             <CardDescription>The trend of your completed trips over the years.</CardDescription>
           </CardHeader>
+          <CardContent> 
+            <TripsByYearChart data={{...data, rows}} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
+          </CardContent> 
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Cumulative Stats Over Time</CardTitle>
+            <CardDescription>Track the progression of your trips, distance, and spending over time. Click and drag to select a range.</CardDescription>
+          </CardHeader>
           <CardContent>
-            <TripsByYearChart data={data} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
+            <CumulativeStatsChart rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} convertDistance={data.convertDistance} />
           </CardContent>
         </Card>
+
+
         <Card>
           <CardHeader>
             <CardTitle>Duration Charts</CardTitle>

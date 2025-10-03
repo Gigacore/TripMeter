@@ -1,12 +1,14 @@
 import React from 'react';
-import { ResponsiveContainer, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, TooltipProps } from 'recharts';
+import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, TooltipProps, BarChart, Bar } from 'recharts';
 import { TripStats } from '../../../hooks/useTripData';
 import { DistanceUnit } from '../../../App';
 import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
+import { CSVRow } from '@/services/csvParser';
 
 interface TripsByYearChartProps {
   data: TripStats;
+  rows: CSVRow[];
   distanceUnit: DistanceUnit;
   activeCurrency: string | null;
 }
@@ -70,18 +72,13 @@ const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit,
     value.toLocaleString();
 
   return (
-    <div className="stats-group">
+    <>
+      <div className="stats-group">
       <ResponsiveContainer width="100%" height={300}>
-        <AreaChart
+        <BarChart
           data={tripsByYear}
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
         >
-          <defs>
-            <linearGradient id={`color-${metric}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={chartColor} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
-            </linearGradient>
-          </defs>
           <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
           <XAxis
             dataKey="year"
@@ -92,8 +89,8 @@ const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit,
           />
           <YAxis stroke="#888" fontSize={11} tickLine={false} axisLine={false} tickFormatter={yAxisTickFormatter} />
           <Tooltip content={<CustomTooltip distanceUnit={distanceUnit} activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-          <Area type="monotone" dataKey={dataKey} stroke={chartColor} fillOpacity={1} fill={`url(#color-${metric})`} name={metricOptions.find(m => m.value === metric)?.label} />
-        </AreaChart>
+          <Bar dataKey={dataKey} fill={chartColor} name={metricOptions.find(m => m.value === metric)?.label} radius={[4, 4, 0, 0]} />
+        </BarChart>
       </ResponsiveContainer>
       <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-4">
         {metricOptions.map(option => (
@@ -111,6 +108,7 @@ const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit,
         ))}
       </div>
     </div>
+    </>
   );
 };
 
