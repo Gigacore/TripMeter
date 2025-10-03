@@ -4,7 +4,7 @@ export const formatDuration = (totalMinutes: number, includeSeconds = false): st
     if (totalMinutes === 0) return '0 minutes';
 
     const MIN_PER_YEAR = 365.25 * 24 * 60;
-    const MIN_PER_MONTH = 30.44 * 24 * 60;
+    const MIN_PER_MONTH = 30.4375 * 24 * 60;
     const MIN_PER_DAY = 24 * 60;
     const MIN_PER_HOUR = 60;
 
@@ -46,6 +46,7 @@ export const formatDurationWithSeconds = (totalMinutes: number): string => {
 }
 
 export const toNumber = (x: any): number | null => {
+    if (x === null || x === undefined) return null;
     const n = Number(x);
     return Number.isFinite(n) ? n : null;
 };

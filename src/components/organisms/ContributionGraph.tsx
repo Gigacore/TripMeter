@@ -217,6 +217,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
             {week.map((day) => (
               <div
                 key={day.key}
+                data-testid={day.isPlaceholder ? 'placeholder-cell' : 'contribution-cell'}
                 className={`aspect-square rounded-sm ${
                   day.isPlaceholder ? 'bg-transparent' : `transition-transform duration-200 ease-in-out hover:scale-125 hover:shadow-lg hover:z-10 ${levelColorMap[day.level ?? 0]}`
                 } `}

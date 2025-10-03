@@ -36,7 +36,7 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
     rows.forEach(row => {
       const status = row.status?.toLowerCase();
       if ((status === 'rider_canceled' || status === 'driver_canceled') && row.request_time) {
-        const hour = new Date(row.request_time).getHours();
+        const hour = new Date(row.request_time).getUTCHours();
         if (status === 'rider_canceled') {
           hourlyCancellations[hour].rider++;
         } else {
