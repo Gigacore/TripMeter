@@ -103,11 +103,12 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
     if (!rows || rows.length === 0) return [];
 
     const completedTrips = rows
-      .filter(r => r.status?.toLowerCase() === 'completed' && r.request_time)
+      .filter(r => r.status?.toLowerCase() === 'completed' && r.request_time && (!activeCurrency || r.fare_currency === activeCurrency))
       .map(r => ({
         date: new Date(r.request_time),
         distance: r.distance ? convertDistance(parseFloat(r.distance)) : 0,
-        fare: r.fare_currency === activeCurrency && r.fare_amount ? parseFloat(r.fare_amount) : 0,
+        // Fare is already filtered by the main filter, but we keep this for safety and clarity
+        fare: (r.fare_currency === activeCurrency && r.fare_amount) ? parseFloat(r.fare_amount) : 0,
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
