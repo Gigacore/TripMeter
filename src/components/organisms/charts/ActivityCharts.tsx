@@ -7,7 +7,7 @@ import {
   YAxis,
   CartesianGrid,
   ZAxis,
-  ScatterChart,
+  ScatterChart, 
   Scatter,
   RadarChart,
   PolarGrid,
@@ -15,9 +15,11 @@ import {
   Radar,
   PolarRadiusAxis } from 'recharts';
 import { Moon, Sunrise, Sun, Sunset } from 'lucide-react';
-import ContributionGraph, { DailyContribution } from '../ContributionGraph';
+import ContributionGraph, { DailyContribution } from '../ContributionGraph'; 
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
+import { formatCurrency } from '../../../utils/currency';
+import { formatDuration } from '../../../utils/formatters';
 import { DistanceUnit } from '../../../App';
 
 interface ActivityChartsProps {
@@ -42,6 +44,44 @@ const CustomScatterTooltip = ({ active, payload }: TooltipProps<number, string>)
       </div>
     );
   }
+  return null;
+};
+
+const CustomRadarTooltip = ({ active, payload, activeCurrency, distanceUnit }: TooltipProps<number, string> & { activeCurrency: string | null, distanceUnit: DistanceUnit }) => {
+  if (active && payload && payload.length) {
+    const { day, trips, cancellations, totalFare, totalDistance } = payload[0].payload;
+    const value = trips ?? cancellations;
+    const label = trips ? 'Trips' : 'Cancellations';
+
+    return (
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
+          <p className="recharts-tooltip-label font-bold text-base">{day}</p>
+        </div>
+        <div className="grid grid-cols-[1fr,auto] gap-x-4 gap-y-1.5">
+          <div className="text-muted-foreground">{label}</div>
+          <div className="font-medium text-right" style={{ color: payload[0].color }}>{value.toLocaleString()}</div>
+          {trips > 0 && (
+            <>
+              {activeCurrency && totalFare > 0 && (
+                <>
+                  <div className="text-muted-foreground">Total Fare</div>
+                  <div className="font-medium text-right">{formatCurrency(totalFare, activeCurrency)}</div>
+                </>
+              )}
+              {totalDistance > 0 && (
+                <>
+                  <div className="text-muted-foreground">Total Distance</div>
+                  <div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return null;
 };
 
@@ -121,7 +161,11 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
   }, [rows]);
 
   const tripsByDayOfWeekData = React.useMemo(() => {
-    const dayCounts: number[] = Array(7).fill(0); // 0: Sun, 1: Mon, ..., 6: Sat
+    const dayStats = Array(7).fill(0).map(() => ({
+      trips: 0,
+      totalFare: 0,
+      totalDistance: 0,
+    }));
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     rows
@@ -130,13 +174,29 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
         if (row.request_time) {
           const date = new Date(row.request_time);
           if (!isNaN(date.getTime())) {
-            dayCounts[date.getDay()]++;
+            const dayIndex = date.getDay();
+            dayStats[dayIndex].trips++;
+
+            if (row.fare_currency === activeCurrency && row.fare_amount) {
+              const fare = parseFloat(row.fare_amount);
+              if (!isNaN(fare)) {
+                dayStats[dayIndex].totalFare += fare;
+              }
+            }
+
+            if (row.distance) {
+              const distance = parseFloat(row.distance);
+              if (!isNaN(distance)) {
+                const convertedDistance = distanceUnit === 'km' ? distance * 1.60934 : distance;
+                dayStats[dayIndex].totalDistance += convertedDistance;
+              }
+            }
           }
         }
       });
 
-    return days.map((day, index) => ({ day, trips: dayCounts[index] }));
-  }, [rows]);
+    return days.map((day, index) => ({ day, ...dayStats[index] }));
+  }, [rows, activeCurrency, distanceUnit]);
 
   const cancellationsByDayOfWeekData = React.useMemo(() => {
     const dayCounts: number[] = Array(7).fill(0); // 0: Sun, 1: Mon, ..., 6: Sat
@@ -233,22 +293,14 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           <div className="stats-group">
             <h3>Completed Trips by Day</h3>
             <p className="hint -mt-2 mb-4">Shows completed trips for each day of the week.</p>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={500}>
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={tripsByDayOfWeekData}>
                 <PolarGrid className="stroke-border" />
-                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} />
-                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 5']} stroke="#888" fontSize={12} />
-                <Radar name="Trips" dataKey="trips" stroke="#818cf8" fill="#818cf8" fillOpacity={0.6} />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '0.5rem',
-                    border: '1px solid hsl(var(--border))',
-                    backgroundColor: 'hsl(var(--background) / 0.8)',
-                    color: 'hsl(var(--foreground))',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                    backdropFilter: 'blur(4px)',
-                  }}
-                />
+                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />
+                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 5']} stroke="#888" fontSize={10} axisLine={false} tickLine={false} />
+                <Radar name="Trips" dataKey="trips" stroke="#6366f1" fill="#6366f1" fillOpacity={0.6} />
+                <Tooltip cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '3 3' }} content={<CustomRadarTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} />} />
+
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -257,15 +309,13 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           <div className="stats-group">
             <h3>Cancellations by Day</h3>
             <p className="hint -mt-2 mb-4">Shows canceled trips for each day of the week.</p>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={500}>
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={cancellationsByDayOfWeekData}>
                 <PolarGrid className="stroke-border" />
-                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} />
-                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 2']} stroke="#888" fontSize={12} />
-                <Radar name="Cancellations" dataKey="cancellations" stroke="#f87171" fill="#f87171" fillOpacity={0.6} />
-                <Tooltip contentStyle={{
-                  borderRadius: '0.5rem', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background) / 0.8)', color: 'hsl(var(--foreground))', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(4px)',
-                }} />
+                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />
+                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 2']} stroke="#888" fontSize={10} axisLine={false} tickLine={false} />
+                <Radar name="Cancellations" dataKey="cancellations" stroke="#dc2626" fill="#dc2626" fillOpacity={0.6} />
+                <Tooltip cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '3 3' }} content={<CustomRadarTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} />} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
