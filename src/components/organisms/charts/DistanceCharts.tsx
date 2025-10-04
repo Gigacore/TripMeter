@@ -19,12 +19,12 @@ interface DistanceChartsProps {
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <div className="mb-2 border-b border-slate-700 pb-2">
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Distance: ${label}`}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <div className="text-slate-400">Trips</div>
+          <div className="text-muted-foreground">Trips</div>
           <div className="font-medium text-right text-orange-400">{payload[0].value?.toLocaleString()}</div>
         </div>
       </div>
@@ -39,12 +39,12 @@ const formatDate = timeFormat('%b %d, %Y');
 const CustomYearTooltip = ({ active, payload, label, distanceUnit }: TooltipProps<number, string> & { distanceUnit: DistanceUnit }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <div className="mb-2 border-b border-slate-700 pb-2">
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Year: ${label}`}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <div className="text-slate-300 font-medium">Total Distance</div>
+          <div className="text-muted-foreground font-medium">Total Distance</div>
           <div className="font-medium text-right text-orange-400">{payload[0].value?.toLocaleString()} {distanceUnit}</div>
         </div>
       </div>

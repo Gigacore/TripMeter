@@ -242,7 +242,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
             disabled={option.value === 'totalFare' && !activeCurrency}
             className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
               metric === option.value ?
-                'bg-primary text-primary-foreground shadow-md' :
+                'bg-primary text-primary-foreground shadow-sm' :
                 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
             }`}
           >

@@ -29,8 +29,8 @@ const CustomTooltip = ({ active, payload, label, distanceUnit, activeCurrency }:
     } = data;
 
     return (
-      <div className="min-w-[250px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <div className="mb-2 border-b border-slate-200 pb-2 dark:border-slate-700">
+      <div className="min-w-[250px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Year: ${label}`}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -82,12 +82,12 @@ const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit,
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
           <XAxis
             dataKey="year"
-            stroke="hsl(var(--muted-foreground))"
+            stroke="#888"
             fontSize={11}
             tickLine={false}
             axisLine={false}
           />
-          <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} tickFormatter={yAxisTickFormatter} />
+          <YAxis stroke="#888" fontSize={11} tickLine={false} axisLine={false} tickFormatter={yAxisTickFormatter} />
           <Tooltip content={<CustomTooltip distanceUnit={distanceUnit} activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
           <Bar dataKey={dataKey} fill={chartColor} name={metricOptions.find(m => m.value === metric)?.label} radius={[4, 4, 0, 0]} />
         </BarChart>
@@ -99,7 +99,7 @@ const TripsByYearChart: React.FC<TripsByYearChartProps> = ({ data, distanceUnit,
             onClick={() => setMetric(option.value)}
             className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-md disabled:cursor-not-allowed disabled:opacity-50 ${
               metric === option.value
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
             }`}
           >

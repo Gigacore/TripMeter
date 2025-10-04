@@ -24,24 +24,24 @@ interface CustomCumulativeTooltipProps extends TooltipProps<number, string> {
 const CustomCumulativeTooltip: React.FC<CustomCumulativeTooltipProps> = ({ active, payload, activeCurrency, distanceUnit, selectedData, view }) => {
   if (selectedData && (selectedData.trips > 0 || selectedData.distance > 0 || selectedData.fare > 0)) {
     return (
-      <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <div className="mb-2 border-b border-slate-700 pb-2">
+      <div className="min-w-[250px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">Selected Range</p>
         </div>
         <div className="grid grid-cols-[1fr,auto] gap-x-4 gap-y-1.5">
-          <div className="text-slate-300 font-medium">Trips</div>
+          <div className="text-muted-foreground font-medium">Trips</div>
           <div className="font-medium text-right text-emerald-400">{selectedData.trips.toLocaleString()}</div>
-          <div className="text-slate-300 font-medium">Distance</div>
+          <div className="text-muted-foreground font-medium">Distance</div>
           <div className="font-medium text-right text-orange-400">{selectedData.distance.toFixed(2)} {distanceUnit}</div>
           {activeCurrency && (
             <>
-              <div className="text-slate-300 font-medium">Fare</div>
+              <div className="text-muted-foreground font-medium">Fare</div>
               <div className="font-medium text-right text-emerald-400">{formatCurrency(selectedData.fare, activeCurrency)}</div>
             </>
           )}
-          <div className="text-slate-400 text-xs">From</div>
+          <div className="text-muted-foreground text-xs">From</div>
           <div className="font-medium text-right">{formatDate(selectedData.startDate)}</div>
-          <div className="text-slate-400 text-xs">To</div>
+          <div className="text-muted-foreground text-xs">To</div>
           <div className="font-medium text-right">{formatDate(selectedData.endDate)}</div>
         </div>
       </div>
@@ -67,19 +67,19 @@ const CustomCumulativeTooltip: React.FC<CustomCumulativeTooltipProps> = ({ activ
     }
 
     return (
-      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <div className="mb-2 border-b border-slate-700 pb-2">
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{formatDate(new Date(date))}</p>
         </div>
         {view === 'all' ? (
           <div className="grid grid-cols-[1fr,auto] gap-x-4 gap-y-1.5">
-            <div className="text-slate-300 font-medium">Total Trips</div><div className="font-medium text-right text-emerald-400">{cumulativeTrips.toLocaleString()}</div>
-            <div className="text-slate-300 font-medium">Total Distance</div><div className="font-medium text-right text-orange-400">{cumulativeDistance.toFixed(2)} {distanceUnit}</div>
-            {activeCurrency && <><div className="text-slate-300 font-medium">Total Fare</div><div className="font-medium text-right text-emerald-400">{formatCurrency(cumulativeFare, activeCurrency)}</div></>}
+            <div className="text-muted-foreground font-medium">Total Trips</div><div className="font-medium text-right text-emerald-400">{cumulativeTrips.toLocaleString()}</div>
+            <div className="text-muted-foreground font-medium">Total Distance</div><div className="font-medium text-right text-orange-400">{cumulativeDistance.toFixed(2)} {distanceUnit}</div>
+            {activeCurrency && <><div className="text-muted-foreground font-medium">Total Fare</div><div className="font-medium text-right text-emerald-400">{formatCurrency(cumulativeFare, activeCurrency)}</div></>}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            <div className="text-slate-300 font-medium">{label}</div>
+            <div className="text-muted-foreground font-medium">{label}</div>
             <div className="font-medium text-right text-emerald-400">{valueDisplay}</div>
           </div>
         )}
@@ -189,7 +189,7 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
             <TabsTrigger value="fare" disabled={!activeCurrency}>Fare</TabsTrigger>
           </TabsList>
           {selection.start && (
-            <button onClick={handleResetSelection} className="text-xs text-slate-400 hover:text-slate-100">Reset Selection</button>
+            <button onClick={handleResetSelection} className="text-xs text-muted-foreground hover:text-foreground">Reset Selection</button>
           )}
         </div>
         <TabsContent value="all">

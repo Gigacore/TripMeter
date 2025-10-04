@@ -16,8 +16,8 @@ interface FareChartsProps {
 const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
   if (active && payload && payload.length && activeCurrency) {
     return (
-      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <div className="mb-2 border-b border-slate-200 pb-2 dark:border-slate-700">
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Fare: ${label} ${activeCurrency}`}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -33,8 +33,8 @@ const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipPro
 const CustomAreaTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
   if (active && payload && payload.length && activeCurrency) {
     return (
-      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <div className="mb-2 border-b border-slate-200 pb-2 dark:border-slate-700">
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Year: ${label}`}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -122,9 +122,9 @@ const FareCharts: React.FC<FareChartsProps> = ({
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={fareDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip content={<CustomBarTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+                <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip content={<CustomBarTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(61, 91, 131, 0.1)' }} />
                 <Bar dataKey="count" fill="#f59e0b" name="Number of Trips" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -157,8 +157,8 @@ const FareCharts: React.FC<FareChartsProps> = ({
            <ResponsiveContainer width="100%" height={300}>
             <BarChart data={tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency, { notation: 'compact' })} />
+              <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency, { notation: 'compact' })} />
               <Tooltip content={<CustomAreaTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
               <Bar dataKey={(payload) => payload.totalFare[activeCurrency] || 0} fill="#10b981" name={`Fare (${activeCurrency})`} radius={[4, 4, 0, 0]} />
             </BarChart>

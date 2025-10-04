@@ -147,8 +147,8 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           <ResponsiveContainer width="100%" height={300}>
             <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis type="number" dataKey="count" name="Trips" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+              <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis type="number" dataKey="count" name="Trips" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <ZAxis type="number" range={[60, 60]} />
               <Tooltip cursor={{ strokeDasharray: '3 3', fill: 'rgba(100, 116, 139, 0.1)' }} content={<CustomScatterTooltip />} />
               <Scatter name="Trips" data={tripsByHourData} fill="#818cf8" />

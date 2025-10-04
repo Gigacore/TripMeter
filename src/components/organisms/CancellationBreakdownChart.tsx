@@ -198,8 +198,8 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={cancellationData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-            <XAxis dataKey="hour" unit=":00" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+            <XAxis dataKey="hour" unit=":00" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
             <Bar
