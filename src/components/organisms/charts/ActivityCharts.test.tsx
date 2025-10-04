@@ -7,16 +7,25 @@ import { CSVRow } from '../../../services/csvParser';
 import { DistanceUnit } from '../../../App';
 
 // Mock child components and dependencies
-vi.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
-  ScatterChart: ({ children, data }: { children: React.ReactNode, data: any[] }) => <div data-testid="scatter-chart" data-data={JSON.stringify(data)}>{children}</div>,
-  CartesianGrid: () => <div />,
-  XAxis: () => <div />,
-  YAxis: () => <div />,
-  ZAxis: () => <div />,
-  Tooltip: () => <div />,
-  Scatter: () => <div />,
-}));
+vi.mock('recharts', async (importOriginal) => {
+  const original = await importOriginal<typeof import('recharts')>();
+  return {
+    ...original,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
+    ScatterChart: ({ children, data }: { children: React.ReactNode, data: any[] }) => <div data-testid="scatter-chart" data-data={JSON.stringify(data)}>{children}</div>,
+    RadarChart: ({ children, data }: { children: React.ReactNode, data: any[] }) => <div data-testid="radar-chart" data-data={JSON.stringify(data)}>{children}</div>,
+    PolarGrid: () => <div data-testid="polar-grid" />,
+    PolarAngleAxis: () => <div data-testid="polar-angle-axis" />,
+    PolarRadiusAxis: () => <div data-testid="polar-radius-axis" />,
+    Radar: () => <div data-testid="radar" />,
+    Tooltip: () => <div data-testid="tooltip" />,
+    Scatter: () => <div data-testid="scatter" />,
+    CartesianGrid: () => <div data-testid="cartesian-grid" />,
+    XAxis: () => <div data-testid="x-axis" />,
+    YAxis: () => <div data-testid="y-axis" />,
+    ZAxis: () => <div data-testid="z-axis" />,
+  };
+});
 
 vi.mock('../ContributionGraph', () => ({
   default: (props: any) => <div data-testid="contribution-graph" {...props} />,
@@ -80,12 +89,9 @@ describe('ActivityCharts', () => {
     const yearButton = screen.getByRole('button', { name: '2023' });
     await user.click(yearButton);
 
-    // Re-rendering is implicit with state change, so we check the new prop value
-    // This is a limitation of testing with mocked components, but we can infer the state change
-    // by checking if the component would receive the new prop.
-    // In a real scenario, we'd check for a visual change.
-    // For now, we'll just ensure the click handler works.
-    expect(yearButton).toHaveClass('bg-emerald-500');
+    // The button's class should change to reflect the active state.
+    // The active class is `bg-primary`
+    expect(yearButton).toHaveClass('bg-primary');
   });
 
   it('should display a message when there is no data', () => {

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import FareCharts from './FareCharts';
@@ -86,17 +86,19 @@ describe('FareCharts', () => {
     expect(mockProps.setActiveCurrency).toHaveBeenCalledWith('EUR');
   });
 
-  it('should render the BarChart with correct data', () => {
+  it('should render the fare distribution chart with correct data', () => {
     render(<FareCharts {...mockProps} />);
-    const barChart = screen.getByTestId('bar-chart');
+    const fareDistributionSection = screen.getByText(/Fare Distribution/).closest('div.stats-group');
+    const barChart = within(fareDistributionSection!).getByTestId('bar-chart');
     const chartData = JSON.parse(barChart.getAttribute('data-data') || '[]');
     expect(chartData.length).toBeGreaterThan(0);
   });
 
-  it('should render the AreaChart with correct data', () => {
+  it('should render the total fare by year chart with correct data', () => {
     render(<FareCharts {...mockProps} />);
-    const areaChart = screen.getByTestId('area-chart');
-    const chartData = JSON.parse(areaChart.getAttribute('data-data') || '[]');
+    const totalFareByYearSection = screen.getByText(/Total Fare by Year/).closest('div.stats-group');
+    const barChart = within(totalFareByYearSection!).getByTestId('bar-chart');
+    const chartData = JSON.parse(barChart.getAttribute('data-data') || '[]');
     expect(chartData[0].year).toBe('2023');
   });
 
