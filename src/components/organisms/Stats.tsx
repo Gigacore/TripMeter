@@ -97,7 +97,11 @@ const Stats: React.FC<StatsProps> = ({
             <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
           </CardHeader>
           <CardContent>
-            <CancellationBreakdownChart rows={rows} />
+            <CancellationBreakdownChart
+              rows={rows}
+              distanceUnit={distanceUnit}
+              convertDistance={data.convertDistance}
+            />
           </CardContent>
         </Card>
                 <Card>
