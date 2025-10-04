@@ -14,8 +14,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
   if (active && payload && payload.length) {
     const total = payload.reduce((acc, entry) => acc + (entry.value as number), 0);
     return (
-      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <p className="recharts-tooltip-label font-bold text-base mb-2 border-b border-slate-700 pb-2">{`Hour: ${label}:00`}</p>
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
+        <p className="recharts-tooltip-label font-bold text-base mb-2 border-b border-slate-200 pb-2 dark:border-slate-700">{`Hour: ${label}:00`}</p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
           {payload.map(entry => (
             <React.Fragment key={entry.name}>
@@ -23,8 +23,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
               <div className="font-medium text-right" style={{ color: entry.color }}>{entry.value?.toLocaleString()}</div>
             </React.Fragment>
           ))}
-          <div className="text-slate-400 border-t border-slate-700/50 pt-1.5 mt-1">Total</div>
-          <div className="font-medium text-right border-t border-slate-700/50 pt-1.5 mt-1">{total.toLocaleString()}</div>
+          <div className="text-muted-foreground border-t border-slate-200/50 pt-1.5 mt-1 dark:border-slate-700/50">Total</div>
+          <div className="font-medium text-right border-t border-slate-200/50 pt-1.5 mt-1 dark:border-slate-700/50">{total.toLocaleString()}</div>
         </div>
       </div>
     );
@@ -88,13 +88,13 @@ const CancellationsWithFareCard: React.FC<CancellationsWithFareCardProps> = ({ t
   };
 
   return (
-    <div className="mt-6 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-      <h4 className="font-semibold text-slate-200">{title}</h4>
-      <p className="text-xs text-slate-400 mt-1 mb-3">{description}</p>
+    <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border/50">
+      <h4 className="font-semibold text-foreground">{title}</h4>
+      <p className="text-xs text-muted-foreground mt-1 mb-3">{description}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
         <div>
-          <div className="text-slate-400">Rides</div>
-          <div className="font-bold text-lg text-slate-100">{count}</div>
+          <div className="text-muted-foreground">Rides</div>
+          <div className="font-bold text-lg text-foreground">{count}</div>
         </div>
         <div className="flex flex-col">
           <div className="flex-grow" ref={swipeRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleSwipeEnd} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleSwipeEnd} onMouseLeave={handleMouseLeave}>
@@ -102,8 +102,8 @@ const CancellationsWithFareCard: React.FC<CancellationsWithFareCardProps> = ({ t
               <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${activeCurrencyIndex * 100}%)` }}>
                 {currencies.map(([currency, amount]) => (
                   <div key={currency} className="w-full flex-shrink-0">
-                    <div className="text-slate-400">Amount Charged</div>
-                    <div className="font-bold text-lg text-slate-100">{formatCurrency(amount, currency)}</div>
+                    <div className="text-muted-foreground">Amount Charged</div>
+                    <div className="font-bold text-lg text-foreground">{formatCurrency(amount, currency)}</div>
                   </div>
                 ))}
               </div>
@@ -111,7 +111,7 @@ const CancellationsWithFareCard: React.FC<CancellationsWithFareCardProps> = ({ t
           </div>
           {currencies.length > 1 && (
             <div className="mt-auto flex items-center justify-start gap-2 pt-2">
-              {currencies.map((_, index) => (<button key={index} onClick={() => setActiveCurrencyIndex(index)} className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${activeCurrencyIndex === index ? 'w-3 bg-emerald-500' : 'bg-slate-600 hover:bg-slate-500'}`} aria-label={`Go to currency ${index + 1}`} />))}
+              {currencies.map((_, index) => (<button key={index} onClick={() => setActiveCurrencyIndex(index)} className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${activeCurrencyIndex === index ? 'w-3 bg-emerald-500' : 'bg-slate-400 hover:bg-slate-500 dark:bg-slate-600 dark:hover:bg-slate-500'}`} aria-label={`Go to currency ${index + 1}`} />))}
             </div>
           )}
         </div>
@@ -189,7 +189,7 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
   const hasChartData = cancellationData.some(d => d.riderCanceled > 0 || d.driverCanceled > 0);
 
   if (!hasChartData && driverCancellationsWithFare.count === 0 && riderCancellationsWithFare.count === 0) {
-    return <p className="text-slate-500 text-sm mt-2">No cancellation data to display.</p>;
+    return <p className="text-muted-foreground text-sm mt-2">No cancellation data to display.</p>;
   }
 
   return (
@@ -197,9 +197,9 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
       {hasChartData && (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={cancellationData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-            <XAxis dataKey="hour" unit=":00" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+            <XAxis dataKey="hour" unit=":00" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
             <Bar

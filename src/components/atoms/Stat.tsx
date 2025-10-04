@@ -11,7 +11,7 @@ interface StatProps {
 
 const Stat: React.FC<StatProps> = ({ label, value, onClick, unit, unitClassName, subValue }) => {
   const clickableClasses = onClick
-    ? 'cursor-pointer hover:bg-slate-800/50 transition-colors duration-200 rounded-lg'
+    ? 'cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg'
     : '';
 
   return (
@@ -20,14 +20,14 @@ const Stat: React.FC<StatProps> = ({ label, value, onClick, unit, unitClassName,
       onClick={onClick}
       title={subValue ?? undefined}
     >
-      <div className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
         {label}
       </div>
-      <div className="text-2xl font-bold text-slate-50 mt-1">
+      <div className="text-2xl font-bold text-foreground mt-1">
         {value ?? '-'}
-        {unit && <span className={`ml-1 text-lg font-medium text-slate-400 ${unitClassName || ''}`}>{unit}</span>}
+        {unit && <span className={`ml-1 text-lg font-medium text-muted-foreground ${unitClassName || ''}`}>{unit}</span>}
       </div>
-      {subValue && <div className="text-xs text-slate-500 mt-1 truncate max-w-[150px]">{subValue}</div>}
+      {subValue && <div className="text-xs text-muted-foreground mt-1 truncate max-w-[150px]">{subValue}</div>}
     </div>
   );
 };

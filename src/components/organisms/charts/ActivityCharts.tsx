@@ -16,12 +16,12 @@ const CustomScatterTooltip = ({ active, payload }: TooltipProps<number, string>)
   if (active && payload && payload.length) {
     const { hour, count } = payload[0].payload;
     return (
-      <div className="min-w-[150px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <div className="mb-2 border-b border-slate-700 pb-2">
+      <div className="min-w-[150px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <div className="mb-2 border-b border-border pb-2">
           <p className="recharts-tooltip-label font-bold text-base">{`Hour: ${hour}:00 - ${hour}:59`}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <div className="text-slate-400">Trips</div>
+          <div className="text-muted-foreground">Trips</div>
           <div className="font-medium text-right text-indigo-400">{count.toLocaleString()}</div>
         </div>
       </div>
@@ -112,11 +112,11 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h3>Trip Activity</h3>
-          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-800/50 p-1">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1">
             <button
               onClick={() => setContributionView('last-12-months')}
               className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                contributionView === 'last-12-months' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-700/50'
+                contributionView === 'last-12-months' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               }`}
             >
               Last 12 Months
@@ -125,7 +125,9 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
                 <button
                   key={year}
                   onClick={() => setContributionView(year)}
-                  className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${contributionView === year ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-700/50'}`}
+                  className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                    contributionView === year ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  }`}
                 >{year}</button>
               ))}
           </div>
@@ -135,7 +137,7 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           <div>
             <ContributionGraph data={contributionData} view={contributionView} />
           </div>
-        ) : <p className="text-slate-500 text-sm mt-2">No trip data with dates to display.</p>}
+        ) : <p className="text-muted-foreground text-sm mt-2">No trip data with dates to display.</p>}
       </div>
 
       {tripsByHourData.length > 0 && (
@@ -143,10 +145,10 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           <h3>Trips by Hour of Day</h3>
           <p className="hint -mt-2 mb-4">Shows your trip patterns throughout the day.</p>
           <ResponsiveContainer width="100%" height={300}>
-            <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-              <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis type="number" dataKey="count" name="Trips" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis type="number" dataKey="count" name="Trips" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
               <ZAxis type="number" range={[60, 60]} />
               <Tooltip cursor={{ strokeDasharray: '3 3', fill: 'rgba(100, 116, 139, 0.1)' }} content={<CustomScatterTooltip />} />
               <Scatter name="Trips" data={tripsByHourData} fill="#818cf8" />

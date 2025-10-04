@@ -46,7 +46,7 @@ const CustomTreemapContent = React.memo((props: any) => {
           <stop offset="100%" style={{ stopColor: color, stopOpacity: 0.9 }} />
         </linearGradient>
       </defs>
-      <rect x={x} y={y} width={width} height={height} rx={4} ry={4} fill={`url(#grad-${index})`} className="stroke-slate-900/50" strokeWidth={2} />
+      <rect x={x} y={y} width={width} height={height} rx={4} ry={4} fill={`url(#grad-${index})`} className="stroke-background/50" strokeWidth={2} />
       <foreignObject x={x} y={y} width={width} height={height}>
         <div className="w-full h-full flex flex-col justify-center items-center p-2 text-white text-center overflow-hidden">
           {!isSmall && (
@@ -178,8 +178,8 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
     if (active && payload && payload.length) {
       const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount, lastRideTime } = payload[0].payload;
       return (
-        <div className="min-w-[250px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-          <div className="mb-2 border-b border-slate-700 pb-2">
+        <div className="min-w-[250px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+          <div className="mb-2 border-b border-border pb-2">
             <p className="recharts-tooltip-label font-bold text-base">{name}</p>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -188,7 +188,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
                 <span className="text-emerald-400">Successful: {successfulTrips.toLocaleString()}</span>
                 <span className="text-red-400">Canceled: {canceledTrips.toLocaleString()}</span>
               </div>
-              <div className="flex h-2 w-full rounded-full overflow-hidden bg-slate-700">
+              <div className="flex h-2 w-full rounded-full overflow-hidden bg-muted">
                 <div
                   className="bg-emerald-500"
                   style={{ width: `${(successfulTrips / (successfulTrips + canceledTrips)) * 100}%` }}
@@ -204,7 +204,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
                 <span className="text-violet-400">Waiting: {formatDuration(totalWaitingTime, true)}</span>
                 <span className="text-sky-400">Riding: {formatDuration(totalRidingTime, true)}</span>
               </div>
-              <div className="flex h-2 w-full rounded-full overflow-hidden bg-slate-700">
+              <div className="flex h-2 w-full rounded-full overflow-hidden bg-muted">
                 <div
                   className="bg-violet-500"
                   style={{ width: `${(totalWaitingTime / (totalWaitingTime + totalRidingTime)) * 100}%` }}
@@ -215,12 +215,12 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
                 />
               </div>
             </div>
-            <div className="text-slate-400">Total Distance</div><div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
-            <div className="text-slate-400">Top City</div><div className="font-medium text-right">{topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0})</div>
-            {lastRideTime > 0 && <><div className="text-slate-400">Last Ride</div><div className="font-medium text-right">{new Date(lastRideTime).toLocaleDateString()}</div></>}
+            <div className="text-muted-foreground">Total Distance</div><div className="font-medium text-right">{totalDistance.toFixed(2)} {distanceUnit}</div>
+            <div className="text-muted-foreground">Top City</div><div className="font-medium text-right">{topCity || 'N/A'} ({topCityCount?.toLocaleString() || 0})</div>
+            {lastRideTime > 0 && <><div className="text-muted-foreground">Last Ride</div><div className="font-medium text-right">{new Date(lastRideTime).toLocaleDateString()}</div></>}
             {Object.entries(totalFare).map(([currency, amount]) => (
               <React.Fragment key={currency}>
-                <div className="text-slate-400">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
+                <div className="text-muted-foreground">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
               </React.Fragment>
             ))}
           </div>
@@ -233,17 +233,17 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
   return (
     <div className="stats-group">
       <div className="mb-6">
-        <h3 className="mb-3 text-sm font-medium text-slate-400">Breakdown by:</h3>
-        <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-800/50 p-1.5">
+        <h3 className="mb-3 text-sm font-medium text-muted-foreground">Breakdown by:</h3>
+        <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1.5">
         {metricOptions.map(option => (
           <button
             key={option.value}
             onClick={() => setMetric(option.value)}
             disabled={option.value === 'totalFare' && !activeCurrency}
             className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              metric === option.value
-                ? 'bg-emerald-500 text-white shadow-md'
-                : 'text-slate-300 hover:bg-slate-700/50'
+              metric === option.value ?
+                'bg-primary text-primary-foreground shadow-md' :
+                'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
             }`}
           >
             {option.label}

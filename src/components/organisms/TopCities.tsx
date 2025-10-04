@@ -105,37 +105,37 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows, distanceUnit, convertDistan
                         <button
                             key={index}
                             onClick={() => handleCityClick(city.city)}
-                            className={`w-full text-left rounded-lg transition-all duration-300 border-2 ${selectedCity === city.city ? 'bg-slate-800 border-emerald-500/50' : 'bg-slate-800/50 border-transparent hover:bg-slate-800'}`}
+                            className={`w-full text-left rounded-lg transition-all duration-300 border-2 ${selectedCity === city.city ? 'bg-slate-100 dark:bg-slate-800 border-emerald-500/50' : 'bg-slate-100/50 dark:bg-slate-800/50 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                         >
                             <div className="p-3">
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="font-medium text-slate-200">{index + 1}. {city.city}</span>
-                                    <span className="font-mono text-slate-300">{city.count}</span>
+                                    <span className="font-medium text-slate-800 dark:text-slate-200">{index + 1}. {city.city}</span>
+                                    <span className="font-mono text-slate-600 dark:text-slate-300">{city.count}</span>
                                 </div>
-                                <div className="mt-2 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                                <div className="mt-2 h-1.5 bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-emerald-500 rounded-full transition-transform duration-500 ease-out"
                                         style={{ width: `${(city.count / (topCities[0]?.count || 1)) * 100}%` }}
                                     />
                                 </div>
                                 {selectedCity === city.city && cityStats && (
-                                    <div className="mt-4 pt-3 border-t border-slate-700/50 text-xs text-slate-400 grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-400 grid grid-cols-2 gap-x-4 gap-y-2">
                                         <div>
-                                            <div className="font-semibold text-slate-300">Total Fare</div>
+                                            <div className="font-semibold text-slate-700 dark:text-slate-300">Total Fare</div>
                                             {Object.entries(cityStats.totalFare).map(([currency, amount]) => (
                                                 <div key={currency}>{formatCurrency(amount, currency)}</div>
                                             ))}
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-slate-300">Total Distance</div>
+                                            <div className="font-semibold text-slate-700 dark:text-slate-300">Total Distance</div>
                                             <div>{cityStats.totalDistance.toFixed(2)} {distanceUnit}</div>
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-slate-300">Riding Time</div>
+                                            <div className="font-semibold text-slate-700 dark:text-slate-300">Riding Time</div>
                                             <div>{formatDuration(cityStats.totalRidingTime, true)}</div>
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-slate-300">Waiting Time</div>
+                                            <div className="font-semibold text-slate-700 dark:text-slate-300">Waiting Time</div>
                                             <div>{formatDuration(cityStats.totalWaitingTime, true)}</div>
                                         </div>
                                     </div>

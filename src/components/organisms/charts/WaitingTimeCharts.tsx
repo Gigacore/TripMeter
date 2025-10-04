@@ -14,12 +14,12 @@ interface WaitingTimeChartsProps {
 const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <div className="mb-2 border-b border-slate-700 pb-2">
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
+        <div className="mb-2 border-b border-slate-200 pb-2 dark:border-slate-700">
           <p className="recharts-tooltip-label font-bold text-base">{`Waiting Time: ${label}`}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <div className="text-slate-400">Trips</div>
+          <div className="text-muted-foreground">Trips</div>
           <div className="font-medium text-right text-red-400">{payload[0].value?.toLocaleString()}</div>
         </div>
       </div>
@@ -32,11 +32,11 @@ const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<numb
 const CustomBarTooltip = ({ active, payload, activeCurrency }: TooltipProps<number, string> & { activeCurrency?: string | null }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="min-w-[200px] rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-sm text-slate-100 shadow-lg backdrop-blur-sm">
-        <div className="mb-2 border-b border-slate-700 pb-2">
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
+        <div className="mb-2 border-b border-slate-200 pb-2 dark:border-slate-700">
           <p className="recharts-tooltip-label font-bold text-base">{payload[0].name}</p>
         </div>
-        <div className="text-slate-400">Duration</div>
+        <div className="text-muted-foreground">Duration</div>
         <div className="font-medium text-lg" style={{ color: payload[0].color }}>{formatDuration(payload[0].value as number, true)}</div>
       </div>
     );
@@ -98,9 +98,9 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         {waitingTimeDistributionData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={waitingTimeDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-              <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip content={<CustomDistributionTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
               <Bar dataKey="count" fill="#ef4444" name="Number of Trips" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -114,9 +114,9 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         </div>
       </div>
       {totalWaitingTime > 0 && totalTripDuration > 0 && (
-        <div className="stats-group rounded-lg bg-slate-800/50 p-4">
-          <h3 className="mb-2">Total Waiting vs. Riding Time</h3>
-          <p className="text-xs text-slate-400 mt-1 mb-4">A comparison of total time spent waiting vs. total time spent riding across all trips.</p>
+        <div className="stats-group rounded-lg bg-muted/50 p-4">
+          <h3 className="mb-2 text-foreground">Total Waiting vs. Riding Time</h3>
+          <p className="text-xs text-muted-foreground mt-1 mb-4">A comparison of total time spent waiting vs. total time spent riding across all trips.</p>
           <ResponsiveContainer width="100%" height={100}>
             <BarChart
               layout="vertical"
@@ -139,12 +139,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         </div>
       )}
       {waitingLongerThanTripCount > 0 && (
-        <div className="stats-group rounded-lg bg-slate-800/50 p-4 mt-4">
-          <h4 className="flex items-center gap-2 text-slate-300">
+        <div className="stats-group rounded-lg bg-muted/50 p-4 mt-4">
+          <h4 className="flex items-center gap-2 text-card-foreground">
             Waited Longer Than Rode
-            <span className="inline-flex items-center justify-center rounded-full bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-100">{waitingLongerThanTripCount} Rides</span>
+            <span className="inline-flex items-center justify-center rounded-full bg-muted-foreground/20 px-2.5 py-1 text-xs font-medium text-foreground">{waitingLongerThanTripCount} Rides</span>
           </h4>
-          <p className="text-xs text-slate-400 mt-1 mb-3">For these trips, you spent more time waiting for your ride than riding in it.</p>
+          <p className="text-xs text-muted-foreground mt-1 mb-3">For these trips, you spent more time waiting for your ride than riding in it.</p>
           <ResponsiveContainer width="100%" height={100}>
             <BarChart
               layout="vertical"
