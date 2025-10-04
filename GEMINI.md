@@ -82,3 +82,5 @@ To maintain visual consistency across all charts and graphs, use the following c
 | **General/Default**| Uncategorized or Neutral Data  | Gray   | `bg-gray-400`  | `#9ca3af` |
 
 Never edit any files under the `node_modules` or `coverage` directories.
+
+All components should support both light and dark theme color schemes

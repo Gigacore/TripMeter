@@ -1,5 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis, CartesianGrid, ZAxis, ScatterChart, Scatter } from 'recharts';
+import { Moon, Sunrise, Sun, Sunset } from 'lucide-react';
 import ContributionGraph, { DailyContribution } from '../ContributionGraph';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
@@ -154,6 +155,24 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
               <Scatter name="Trips" data={tripsByHourData} fill="#818cf8" />
             </ScatterChart>
           </ResponsiveContainer>
+          <div className="flex justify-between text-xs text-muted-foreground mt-2 px-[30px]">
+            <div className="flex flex-col items-center opacity-70">
+              <Moon className="w-4 h-4" />
+              <span>Night</span>
+            </div>
+            <div className="flex flex-col items-center opacity-70">
+              <Sunrise className="w-4 h-4" />
+              <span>Morning</span>
+            </div>
+            <div className="flex flex-col items-center opacity-70">
+              <Sun className="w-4 h-4" />
+              <span>Day</span>
+            </div>
+            <div className="flex flex-col items-center opacity-70">
+              <Sunset className="w-4 h-4" />
+              <span>Evening</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
