@@ -126,12 +126,12 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
         <div className="stats-group">
           <h3>Total Distance by Year ({distanceUnit})</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart layout="vertical" data={data.tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <BarChart data={data.tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-              <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
-              <YAxis type="category" dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
               <Tooltip content={<CustomYearTooltip distanceUnit={distanceUnit} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Bar dataKey="totalDistance" fill="#fb923c" name={`Distance (${distanceUnit})`} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="totalDistance" fill="#fb923c" name={`Distance (${distanceUnit})`} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
