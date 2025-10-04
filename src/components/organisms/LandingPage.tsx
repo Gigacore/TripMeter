@@ -27,7 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <main className="w-full max-w-4xl mx-auto text-center">
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Trip Visualizer</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Vizualize Your Uber Rides</h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.
           </p>
