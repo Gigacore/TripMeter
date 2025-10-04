@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
+import * as userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import LandingPage from './LandingPage';
 
@@ -15,16 +15,15 @@ const mockProps = {
 describe('LandingPage', () => {
   it('should render the initial state correctly', () => {
     render(<LandingPage {...mockProps} />);
-    expect(screen.getByRole('heading', { name: 'Visualize Your Journeys' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Trip Visualizer' })).toBeInTheDocument();
     expect(screen.getByText('Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Select File' })).toBeInTheDocument();
   });
 
   it('should display the processing state', () => {
     render(<LandingPage {...mockProps} isProcessing={true} />);
-    const button = screen.getByRole('button', { name: 'Processing...' });
-    expect(button).toBeInTheDocument();
-    expect(button).toBeDisabled();
+    expect(screen.getByText('Processing...')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Select File' })).not.toBeInTheDocument();
   });
 
   it('should display an error message', () => {
@@ -36,7 +35,7 @@ describe('LandingPage', () => {
   it('should change style when dragging', () => {
     const { container } = render(<LandingPage {...mockProps} isDragging={true} />);
     const dropZone = container.querySelector('.border-2');
-    expect(dropZone).toHaveClass('border-emerald-500');
+    expect(dropZone).toHaveClass('border-primary');
   });
 
   it('should call onFileSelect when a file is chosen', async () => {
@@ -51,13 +50,20 @@ describe('LandingPage', () => {
     }
   });
 
-  it('should call onDrop when a file is dropped', async () => {
-    const user = userEvent.setup();
-    render(<LandingPage {...mockProps} />);
-    const dropZone = screen.getByText('Drag and drop your file here').parentElement;
+  it('should call onDrop when a file is dropped', () => {
+    const { container } = render(<LandingPage {...mockProps} />);
+    const dropZone = container.querySelector('.border-2');
+    
     if (dropZone) {
-      await user.click(dropZone);
-      expect(mockProps.onDrop).toHaveBeenCalledTimes(0);
+      const file = new File([''], 'test.csv', { type: 'text/csv' });
+      const dropEvent = new Event('drop', { bubbles: true });
+      Object.defineProperty(dropEvent, 'dataTransfer', {
+        value: {
+          files: [file],
+        },
+      });
+      fireEvent(dropZone, dropEvent);
+      expect(mockProps.onDrop).toHaveBeenCalledTimes(1);
     }
   });
 });

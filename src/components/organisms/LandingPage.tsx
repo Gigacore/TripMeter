@@ -1,8 +1,7 @@
 import React, { useRef, DragEvent, ChangeEvent } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Route, Scale, Loader2 } from 'lucide-react';
+import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, TrendingUp, Wallet } from 'lucide-react';
 
 interface LandingPageProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -16,103 +15,100 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, error, isDragging, onDragEvents, onDrop }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  return (
-    <div className="flex h-full flex-col items-center justify-start p-4 sm:p-6 md:p-8 overflow-y-auto">
-      <div className="w-full max-w-4xl text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-50">
-          Visualize Your Journeys
-        </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-400">
-          Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.
-        </p>
-      </div>
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    onFileSelect(e);
+    if (e.target) {
+      (e.target as HTMLInputElement).value = '';
+    }
+  };
 
-      <Card className="w-full max-w-lg mt-8 border-slate-800 bg-slate-900/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle>Upload your CSV file</CardTitle>
-          <CardDescription>Drag and drop your file here or click the button below to select a file.</CardDescription>
-        </CardHeader>
-        <CardContent>
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <main className="w-full max-w-4xl mx-auto text-center">
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Trip Visualizer</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800/50 rounded-xl p-8 mb-8 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div
-            className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors duration-200 ease-in-out ${isDragging ? 'border-emerald-500 bg-slate-800/50' : 'border-slate-700 hover:border-slate-600'}`}
-            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center transition-colors duration-200 ease-in-out cursor-pointer ${isDragging ? 'border-primary bg-gray-50 dark:bg-gray-900/50' : 'border-gray-300 dark:border-gray-600'}`}
+            onClick={() => !isProcessing && fileInputRef.current?.click()}
             onDrop={onDrop}
             onDragEnter={onDragEvents}
             onDragOver={onDragEvents}
             onDragLeave={onDragEvents}
           >
             {isProcessing ? (
-              <div className="flex flex-col items-center gap-2 text-slate-400">
-                <Loader2 className="h-12 w-12 animate-spin text-emerald-500" />
-                <p className="font-semibold text-slate-300 mt-2">Processing...</p>
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <p className="font-semibold mt-2">Processing...</p>
               </div>
             ) : (
               <>
-                <UploadCloud className="mx-auto mb-4 h-12 w-12 text-slate-400" />
-                <p className="text-slate-400">Drag & drop your CSV file here</p>
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-full mb-4">
+                  <UploadCloud className="text-gray-500 dark:text-gray-400 h-8 w-8" />
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">Drag & drop your CSV file here</p>
+                <Button
+                  variant="outline"
+                  className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-6 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                  disabled={isProcessing}
+                >
+                  Select File
+                </Button>
               </>
             )}
             <input
               ref={fileInputRef}
               type="file"
               accept=".csv"
-              onChange={(e) => {
-                onFileSelect(e);
-                // @ts-ignore
-                e.target.value = null;
-              }}
+              onChange={handleFileSelect}
               disabled={isProcessing}
               className="hidden"
               aria-label="File uploader"
             />
           </div>
-        </CardContent>
-        <div className="p-6 pt-0">
-            <Button onClick={() => fileInputRef.current?.click()} disabled={isProcessing} className="w-full">
-            {isProcessing ? 'Processing...' : 'Select File'}
-            </Button>
+          {error && (
+            <div className="pt-4">
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
+          )}
         </div>
-        {error && (
-          <div className="p-6 pt-0">
-            <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          </div>
-        )}
-      </Card>
 
-      <div className="w-full max-w-4xl mt-12 mb-5">
-        <div className="flex items-center justify-center gap-4 rounded-lg bg-slate-800/50 p-6 border border-slate-700">
-          <ShieldCheck className="h-10 w-10 text-emerald-500 flex-shrink-0" />
+        <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-6 flex items-center mb-12 border border-gray-200 dark:border-gray-700">
+          <div className="bg-primary/20 p-3 rounded-full mr-4">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+          </div>
           <div>
-            <h3 className="font-bold text-lg text-slate-100">100% Private and Secure</h3>
-            <p className="text-slate-400 text-sm">All processing is done directly in your browser. Your data never leaves your computer.</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white text-left">100% Private and Secure</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-left">All processing is done directly in your browser. Your data never leaves your computer.</p>
           </div>
         </div>
-      </div>
 
-      <div className="w-full max-w-4xl mt-2">
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-slate-400">
-          <FeatureCard icon={<Map className="h-6 w-6 text-emerald-400" />} title="Interactive Map" description="Visualize all your trips on an interactive map." />
-          <FeatureCard icon={<BarChart className="h-6 w-6 text-emerald-400" />} title="In-depth Analytics" description="Insights on fare, distance, duration, and speed." />
-          <FeatureCard icon={<Clock className="h-6 w-6 text-emerald-400" />} title="Activity Patterns" description="Understand your ride activity by time of day, week, and year." />
-          <FeatureCard icon={<Route className="h-6 w-6 text-emerald-400" />} title="Streaks & Pauses" description="Analyze cancellation behavior and discover your travel streaks." />
-          <FeatureCard icon={<Scale className="h-6 w-6 text-emerald-400" />} title="Cost Efficiency" description="Compare cost-efficiency across different service types." />
-          <FeatureCard icon={<FileDown className="h-6 w-6 text-emerald-400" />} title="KML Export" description="Export your trips to KML for use in Google Earth." />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <FeatureCard icon={<Map className="text-primary h-8 w-8 mb-3" />} title="Interactive Map" description="Visualize all your trips on an interactive map." />
+          <FeatureCard icon={<BarChart className="text-primary h-8 w-8 mb-3" />} title="In-depth Analytics" description="Insights on fare, distance, duration, and speed." />
+          <FeatureCard icon={<Clock className="text-primary h-8 w-8 mb-3" />} title="Activity Patterns" description="Understand your ride activity by time of day, week, and year." />
+          <FeatureCard icon={<TrendingUp className="text-primary h-8 w-8 mb-3" />} title="Streaks & Pauses" description="Analyze cancellation behavior and discover your travel streaks." />
+          <FeatureCard icon={<Wallet className="text-primary h-8 w-8 mb-3" />} title="Cost Efficiency" description="Compare cost-efficiency across different service types." />
+          <FeatureCard icon={<FileDown className="text-primary h-8 w-8 mb-3" />} title="KML Export" description="Export your trips to KML for use in Google Earth." />
         </div>
-      </div>
+      </main>
     </div>
   );
 };
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
-  <div className="flex items-start gap-4 rounded-lg bg-slate-800/50 p-4">
-    <div className="flex-shrink-0">{icon}</div>
-    <div>
-      <h3 className="font-semibold text-slate-200">{title}</h3>
-      <p className="text-sm">{description}</p>
-    </div>
+  <div className="bg-white dark:bg-gray-800/50 rounded-lg p-6 text-left border border-gray-200 dark:border-gray-700 shadow-sm">
+    {icon}
+    <h3 className="font-semibold mb-1 text-gray-900 dark:text-white">{title}</h3>
+    <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
   </div>
 );
 

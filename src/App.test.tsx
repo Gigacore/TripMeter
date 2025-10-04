@@ -9,7 +9,7 @@ import Header from '@/components/organisms/Header';
 vi.mock('@/hooks/useFileHandler');
 vi.mock('@/hooks/useTripData');
 vi.mock('@/components/organisms/Header');
-vi.mock('@/components/organisms/InitialView', () => ({ default: ({ onFileSelect, isProcessing, error, isDragging, onDragEvents, onDrop }: any) => <div data-testid="initial-view" {...{ onFileSelect, isProcessing, error, isDragging, onDragEvents, onDrop }} /> }));
+vi.mock('@/components/organisms/LandingPage', () => ({ default: (props: any) => <div data-testid="landing-page" {...props} /> }));
 vi.mock('@/components/organisms/MainView', () => ({ default: ({ rows, focusedTrip, distanceUnit, convertDistance, tripData, sidebarView, error, isProcessing, tripList, tripListTitle, onShowAll, onFocusOnTrip, onShowTripList, onFileSelect, onBackToStats }: any) => <div data-testid="main-view" {...{ rows, focusedTrip, distanceUnit, convertDistance, tripData, sidebarView, error, isProcessing, tripList, tripListTitle, onShowAll, onFocusOnTrip, onShowTripList, onFileSelect, onBackToStats }} /> }));
 vi.mock('@/components/organisms/SettingsSheet', () => ({ default: (props: any) => <div data-testid="settings-sheet" role="status" aria-hidden={!props.isMenuOpen} /> }));
 vi.mock('@/components/atoms/Spinner', () => ({ default: () => <div data-testid="spinner" /> }));
@@ -39,11 +39,11 @@ describe('App', () => {
     vi.clearAllMocks();
   });
 
-  it('should render InitialView when there are no rows', () => {
+  it('should render LandingPage when there are no rows', () => {
     useFileHandlerMock.mockReturnValue(defaultFileHandlerState);
     useTripDataMock.mockReturnValue(defaultTripDataState);
     render(<App />);
-    expect(screen.getByTestId('initial-view')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-page')).toBeInTheDocument();
     expect(screen.queryByTestId('main-view')).not.toBeInTheDocument();
   });
 
@@ -52,7 +52,7 @@ describe('App', () => {
     useTripDataMock.mockReturnValue(defaultTripDataState);
     render(<App />);
     expect(screen.getByTestId('main-view')).toBeInTheDocument();
-    expect(screen.queryByTestId('initial-view')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
   });
 
   it('should show the spinner when processing', () => {
