@@ -9,42 +9,29 @@ vi.mock('../ThemeProvider', () => ({
 }));
 
 describe('ModeToggle', () => {
-  it('should call setTheme with "light" when Light is clicked', async () => {
+  it('should call setTheme with "dark" when the current theme is "light"', async () => {
     const user = userEvent.setup();
     const setTheme = vi.fn();
-    (useTheme as vi.Mock).mockReturnValue({ setTheme });
+    (useTheme as vi.Mock).mockReturnValue({ theme: 'light', setTheme });
 
     render(<ModeToggle />);
 
-    await user.click(screen.getByRole('button'));
-    await user.click(await screen.findByRole('menuitem', { name: 'Light' }));
-
-    expect(setTheme).toHaveBeenCalledWith('light');
-  });
-
-  it('should call setTheme with "dark" when Dark is clicked', async () => {
-    const user = userEvent.setup();
-    const setTheme = vi.fn();
-    (useTheme as vi.Mock).mockReturnValue({ setTheme });
-
-    render(<ModeToggle />);
-
-    await user.click(screen.getByRole('button'));
-    await user.click(await screen.findByRole('menuitem', { name: 'Dark' }));
+    const toggleButton = screen.getByRole('button', { name: /toggle theme/i });
+    await user.click(toggleButton);
 
     expect(setTheme).toHaveBeenCalledWith('dark');
   });
 
-  it('should call setTheme with "system" when System is clicked', async () => {
+  it('should call setTheme with "light" when the current theme is "dark"', async () => {
     const user = userEvent.setup();
     const setTheme = vi.fn();
-    (useTheme as vi.Mock).mockReturnValue({ setTheme });
+    (useTheme as vi.Mock).mockReturnValue({ theme: 'dark', setTheme });
 
     render(<ModeToggle />);
 
-    await user.click(screen.getByRole('button'));
-    await user.click(await screen.findByRole('menuitem', { name: 'System' }));
+    const toggleButton = screen.getByRole('button', { name: /toggle theme/i });
+    await user.click(toggleButton);
 
-    expect(setTheme).toHaveBeenCalledWith('system');
+    expect(setTheme).toHaveBeenCalledWith('light');
   });
 });

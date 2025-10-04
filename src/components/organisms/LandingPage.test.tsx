@@ -17,13 +17,13 @@ describe('LandingPage', () => {
     render(<LandingPage {...mockProps} />);
     expect(screen.getByRole('heading', { name: 'Trip Visualizer' })).toBeInTheDocument();
     expect(screen.getByText('Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Select File' })).toBeInTheDocument();
+    expect(screen.getByText('Drag & drop your CSV file here, or click to select')).toBeInTheDocument();
   });
 
   it('should display the processing state', () => {
     render(<LandingPage {...mockProps} isProcessing={true} />);
     expect(screen.getByText('Processing...')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Select File' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Drag & drop your CSV file here, or click to select')).not.toBeInTheDocument();
   });
 
   it('should display an error message', () => {

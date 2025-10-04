@@ -41,8 +41,9 @@ const InitialView: React.FC<InitialViewProps> = ({ onFileSelect, isProcessing, e
               onChange={(e) => {
                 onFileSelect(e);
                 // Reset the input value to allow selecting the same file again
-                // @ts-ignore
-                e.target.value = null;
+                if (e.target) {
+                  (e.target as HTMLInputElement).value = '';
+                }
               }}
               disabled={isProcessing}
               className="hidden"

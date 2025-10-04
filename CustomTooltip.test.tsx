@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { CustomTooltip } from './index';
+import CustomTooltip from '@/components/atoms/CustomTooltip';
 import { TooltipPayload } from '@/types';
 
 describe('CustomTooltip', () => {

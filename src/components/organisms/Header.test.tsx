@@ -55,7 +55,6 @@ describe('Header', () => {
     const user = userEvent.setup();
     render(<Header {...mockProps} />);
     await user.click(screen.getByRole('button', { name: 'Clear Data' }));
-    await user.click(await screen.findByRole('menuitem', { name: 'Clear Data' }));
     expect(mockProps.onReset).toHaveBeenCalledTimes(1);
   });
 

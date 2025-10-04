@@ -46,36 +46,3 @@ const categoryConfig: Record<
     formatter: (value) => value.toString(),
   },
 };
-
-export const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded-lg border bg-background p-2 shadow-sm">
-        <div className="grid grid-cols-1 gap-2">
-          <p className="text-sm font-bold text-foreground">{label}</p>
-          {payload.map((pld) => {
-            const category = pld.dataKey as DataCategory;
-            const config = categoryConfig[category] || categoryConfig.general;
-            if (pld.value === undefined || pld.value === null) return null;
-
-            return (
-              <div key={pld.dataKey} className="flex items-center justify-between space-x-4">
-                <div className="flex items-center space-x-2">
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${config.color}`} />
-                  <p className="text-sm text-muted-foreground">{pld.name}</p>
-                </div>
-                <p className="text-right text-sm font-medium text-foreground">
-                  {config.prefix}
-                  {config.formatter(pld.value as number)}
-                  {config.suffix}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-};
