@@ -56,9 +56,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
           </div>
         </CardContent>
         <CardFooter className="flex-col items-stretch gap-4">
-          <Button onClick={() => fileInputRef.current?.click()} disabled={isProcessing} className="w-full" size="lg" variant="emerald">
-            {isProcessing ? 'Processing...' : 'Select File'}
-          </Button>
           {error && (
             <Alert variant="destructive">
               <AlertTitle>Error</AlertTitle>
