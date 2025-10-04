@@ -87,9 +87,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard icon={<Map className="text-primary h-8 w-8 mb-3" />} title="Interactive Map" description="Visualize all your trips on an interactive map." />
-          <FeatureCard icon={<BarChart className="text-primary h-8 w-8 mb-3" />} title="In-depth Analytics" description="Insights on fare, distance, duration, and speed." />
+          <FeatureCard icon={<BarChart className="text-primary h-8 w-8 mb-3" />} title="In-depth Analytics" description="Insights on fare, distance, duration, waiting and cancelations." />
           <FeatureCard icon={<Clock className="text-primary h-8 w-8 mb-3" />} title="Activity Patterns" description="Understand your ride activity by time of day, week, and year." />
-          <FeatureCard icon={<TrendingUp className="text-primary h-8 w-8 mb-3" />} title="Streaks & Pauses" description="Analyze cancellation behavior and discover your travel streaks." />
+          <FeatureCard icon={<TrendingUp className="text-primary h-8 w-8 mb-3" />} title="Streaks" description="Analyze cancellation behavior and discover your travel streaks." />
           <FeatureCard icon={<Wallet className="text-primary h-8 w-8 mb-3" />} title="Cost Efficiency" description="Compare cost-efficiency across different service types." />
           <FeatureCard icon={<FileDown className="text-primary h-8 w-8 mb-3" />} title="KML Export" description="Export your trips to KML for use in Google Earth." />
         </div>

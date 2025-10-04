@@ -19,6 +19,7 @@ import CostEfficiencyChart from './CostEfficiencyChart';
 import CancellationBreakdownChart from './CancellationBreakdownChart';
 import StreaksAndPauses from './charts/StreaksAndPauses';
 import CumulativeStatsChart from './charts/CumulativeStatsChart';
+import FareSplitStats from './FareSplitStats';
 
 interface StatsProps {
   data: TripStats;
@@ -248,6 +249,15 @@ const Stats: React.FC<StatsProps> = ({
           </CardHeader>
           <CardContent>
             <TopCities rows={rows} distanceUnit={distanceUnit} convertDistance={data.convertDistance} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Fare Split Rides</CardTitle>
+            <CardDescription>Summary of rides where the fare was split.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FareSplitStats rows={rows} />
           </CardContent>
         </Card>
       </div>
