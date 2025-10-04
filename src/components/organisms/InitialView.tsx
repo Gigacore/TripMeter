@@ -38,7 +38,12 @@ const InitialView: React.FC<InitialViewProps> = ({ onFileSelect, isProcessing, e
               ref={fileInputRef}
               type="file"
               accept=".csv"
-              onChange={onFileSelect}
+              onChange={(e) => {
+                onFileSelect(e);
+                // Reset the input value to allow selecting the same file again
+                // @ts-ignore
+                e.target.value = null;
+              }}
               disabled={isProcessing}
               className="hidden"
             />
