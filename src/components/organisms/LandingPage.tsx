@@ -2,6 +2,7 @@ import React, { useRef, DragEvent, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, TrendingUp, Wallet } from 'lucide-react';
+import Footer from './Footer';
 
 interface LandingPageProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -51,14 +52,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
                 <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-full mb-4">
                   <UploadCloud className="text-gray-500 dark:text-gray-400 h-8 w-8" />
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">Drag & drop your CSV file here</p>
-                <Button
-                  variant="outline"
-                  className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-6 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                  disabled={isProcessing}
-                >
-                  Select File
-                </Button>
+                <p className="text-gray-600 dark:text-gray-400">Drag & drop your CSV file here, or click to select</p>
               </>
             )}
             <input
@@ -100,6 +94,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
           <FeatureCard icon={<FileDown className="text-primary h-8 w-8 mb-3" />} title="KML Export" description="Export your trips to KML for use in Google Earth." />
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
