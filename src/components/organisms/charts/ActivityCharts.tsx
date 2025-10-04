@@ -1,5 +1,19 @@
 import React from 'react';
-import { ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis, CartesianGrid, ZAxis, ScatterChart, Scatter } from 'recharts';
+import {
+  ResponsiveContainer,
+  Tooltip,
+  TooltipProps,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ZAxis,
+  ScatterChart,
+  Scatter,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
+  PolarRadiusAxis } from 'recharts';
 import { Moon, Sunrise, Sun, Sunset } from 'lucide-react';
 import ContributionGraph, { DailyContribution } from '../ContributionGraph';
 import { CSVRow } from '../../../services/csvParser';
@@ -106,6 +120,44 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
     return Object.entries(hourlyCounts).map(([hour, count]) => ({ hour: parseInt(hour), count }));
   }, [rows]);
 
+  const tripsByDayOfWeekData = React.useMemo(() => {
+    const dayCounts: number[] = Array(7).fill(0); // 0: Sun, 1: Mon, ..., 6: Sat
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    rows
+      .filter(row => row.status?.toLowerCase() === 'completed')
+      .forEach(row => {
+        if (row.request_time) {
+          const date = new Date(row.request_time);
+          if (!isNaN(date.getTime())) {
+            dayCounts[date.getDay()]++;
+          }
+        }
+      });
+
+    return days.map((day, index) => ({ day, trips: dayCounts[index] }));
+  }, [rows]);
+
+  const cancellationsByDayOfWeekData = React.useMemo(() => {
+    const dayCounts: number[] = Array(7).fill(0); // 0: Sun, 1: Mon, ..., 6: Sat
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    rows
+      .filter(row => row.status?.toLowerCase() === 'canceled' || row.status?.toLowerCase() === 'rider_canceled')
+      .forEach(row => {
+        if (row.request_time) {
+          const date = new Date(row.request_time);
+          if (!isNaN(date.getTime())) {
+            dayCounts[date.getDay()]++;
+          }
+        }
+      });
+
+    return days.map((day, index) => ({ day, cancellations: dayCounts[index] }));
+  }, [rows]);
+
+  const hasCancellationsData = React.useMemo(() => cancellationsByDayOfWeekData.some(d => d.cancellations > 0), [cancellationsByDayOfWeekData]);
+
   const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
 
   return (
@@ -175,6 +227,50 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           </div>
         </div>
       )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        {tripsByDayOfWeekData.length > 0 && (
+          <div className="stats-group">
+            <h3>Completed Trips by Day</h3>
+            <p className="hint -mt-2 mb-4">Shows completed trips for each day of the week.</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={tripsByDayOfWeekData}>
+                <PolarGrid className="stroke-border" />
+                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} />
+                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 5']} stroke="#888" fontSize={12} />
+                <Radar name="Trips" dataKey="trips" stroke="#818cf8" fill="#818cf8" fillOpacity={0.6} />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: '0.5rem',
+                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: 'hsl(var(--background) / 0.8)',
+                    color: 'hsl(var(--foreground))',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                    backdropFilter: 'blur(4px)',
+                  }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+        {hasCancellationsData && (
+          <div className="stats-group">
+            <h3>Cancellations by Day</h3>
+            <p className="hint -mt-2 mb-4">Shows canceled trips for each day of the week.</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={cancellationsByDayOfWeekData}>
+                <PolarGrid className="stroke-border" />
+                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} />
+                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 2']} stroke="#888" fontSize={12} />
+                <Radar name="Cancellations" dataKey="cancellations" stroke="#f87171" fill="#f87171" fillOpacity={0.6} />
+                <Tooltip contentStyle={{
+                  borderRadius: '0.5rem', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background) / 0.8)', color: 'hsl(var(--foreground))', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(4px)',
+                }} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

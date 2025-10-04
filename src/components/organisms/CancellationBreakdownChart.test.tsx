@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import CancellationBreakdownChart from './CancellationBreakdownChart';Res
+import CancellationBreakdownChart from './CancellationBreakdownChart';
 import { CSVRow } from '../../services/csvParser';
 
 // Mock recharts library
