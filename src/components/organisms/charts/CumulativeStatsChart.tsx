@@ -206,9 +206,9 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
               </defs>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis dataKey="date" stroke="#888" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} type="number" tickFormatter={(unixTime) => formatDate(new Date(unixTime))} />
-              <YAxis yAxisId="trips" stroke={metrics[0].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
-              <YAxis yAxisId="distance" orientation="right" stroke={metrics[1].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
-              {activeCurrency && <YAxis yAxisId="fare" orientation="right" stroke={metrics[2].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency)} style={{ transform: 'translateX(50px)' }} />}
+              {/* <YAxis yAxisId="trips" stroke={metrics[0].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} /> */}
+              {/* <YAxis yAxisId="distance" orientation="right" stroke={metrics[1].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} /> */}
+              {/* {activeCurrency && <YAxis yAxisId="fare" orientation="right" stroke={metrics[2].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency)} style={{ transform: 'translateX(50px)' }} />} */}
               <Tooltip content={<CustomCumulativeTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} selectedData={selectedData} view={view} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} isAnimationActive={false} />
               {metrics.map(m => !m.disabled && <Area key={m.dataKey} yAxisId={m.yAxisId} type="monotone" dataKey={m.dataKey} stroke={m.color} fillOpacity={1} fill={`url(#colorCumulative-${m.dataKey})`} name={m.name} isAnimationActive={view === 'all'} />)}
               {selection.start && selection.end && (

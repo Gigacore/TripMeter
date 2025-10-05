@@ -5,7 +5,7 @@ import { formatDuration } from '../../utils/formatters';
 import { formatCurrency } from '../../utils/currency';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
-import { CheckCircle, Wallet, Route, Clock } from 'lucide-react';
+import { CheckCircle, Wallet, Route, Clock, TrendingUp } from 'lucide-react';
 
 interface TopStatsProps {
   tripData: TripStats;
@@ -18,6 +18,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
     totalFareByCurrency,
     totalCompletedDistance,
     totalTripDuration,
+    costPerDistanceByCurrency,
   } = tripData;
 
   const currencies = Object.entries(totalFareByCurrency);
@@ -89,14 +90,14 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
   );
 
   return (
-    <div className="grid grid-cols-2 gap-4 py-3 md:grid-cols-4 md:gap-6">
+    <div className="grid grid-cols-2 gap-4 py-3 md:grid-cols-4 lg:grid-cols-4">
       <StatCard icon={<CheckCircle size={20} />} label="Completed Rides" value={successfulTrips} />
       {currencies.length > 0 && (
         <>
           {currencies.length === 1 && (
             <StatCard
               icon={<Wallet size={20} />}
-              label="Total Fare"
+              label={`Total Fare (${currencies[0][0]})`}
               value={formatCurrency(currencies[0][1], currencies[0][0])}
             />
           )}
@@ -143,7 +144,14 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
           )}
         </>
       )}
-      <StatCard icon={<Route size={20} />} label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+      <StatCard icon={<Route size={20} />} label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit}>
+        {currencies.length > 0 && costPerDistanceByCurrency[currencies[activeCurrencyIndex][0]] && (
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+            <TrendingUp size={14} className="text-muted-foreground" />
+            <span>{formatCurrency(costPerDistanceByCurrency[currencies[activeCurrencyIndex][0]], currencies[activeCurrencyIndex][0])} per {distanceUnit}</span>
+          </div>
+        )}
+      </StatCard>
       <StatCard icon={<Clock size={20} />} label="Total Ride Time" value={formatDuration(totalTripDuration, true)} />
     </div>
   );
