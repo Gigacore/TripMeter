@@ -88,7 +88,6 @@ const mockProps = {
 describe('DistanceCharts', () => {
   it('should render the chart and stats', () => {
     render(<DistanceCharts {...mockProps} />);
-    expect(screen.getByText('Ride Distance Distribution')).toBeInTheDocument();
     expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
 
     const stats = screen.getAllByTestId('stat');

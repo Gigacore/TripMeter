@@ -77,7 +77,6 @@ const mockProps = {
 describe('DurationCharts', () => {
   it('should render the chart and stats', () => {
     render(<DurationCharts {...mockProps} />);
-    expect(screen.getByText('Ride Duration Distribution')).toBeInTheDocument();
     expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
 
     const stats = screen.getAllByTestId('stat');

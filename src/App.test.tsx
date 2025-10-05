@@ -12,7 +12,7 @@ vi.mock('@/components/organisms/Header');
 vi.mock('@/components/organisms/LandingPage', () => ({ default: (props: any) => <div data-testid="landing-page" {...props} /> }));
 vi.mock('@/components/organisms/MainView', () => ({ default: ({ rows, focusedTrip, distanceUnit, convertDistance, tripData, sidebarView, error, isProcessing, tripList, tripListTitle, onShowAll, onFocusOnTrip, onShowTripList, onFileSelect, onBackToStats }: any) => <div data-testid="main-view" {...{ rows, focusedTrip, distanceUnit, convertDistance, tripData, sidebarView, error, isProcessing, tripList, tripListTitle, onShowAll, onFocusOnTrip, onShowTripList, onFileSelect, onBackToStats }} /> }));
 vi.mock('@/components/organisms/SettingsSheet', () => ({ default: (props: any) => <div data-testid="settings-sheet" role="status" aria-hidden={!props.isMenuOpen} /> }));
-vi.mock('@/components/atoms/Spinner', () => ({ default: () => <div data-testid="spinner" /> }));
+vi.mock('@/components/ui/spinner', () => ({ Spinner: () => <div data-testid="spinner" /> }));
 
 const useFileHandlerMock = useFileHandler.useFileHandler as vi.Mock;
 const useTripDataMock = useTripData.useTripData as vi.Mock;
