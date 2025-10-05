@@ -159,9 +159,14 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
       stats.topCity = topCity;
       stats.topCityCount = topCityCount;
 
-      let value: number | string | undefined = stats[metric as keyof typeof stats];
-      if (metric === 'totalFare' && activeCurrency) value = stats.totalFare[activeCurrency] || 0;
-      else if (metric === 'topCity') value = stats.topCityCount;
+      let value: number | string | undefined;
+      if (metric === 'totalFare' && activeCurrency) {
+        value = stats.totalFare[activeCurrency] || 0;
+      } else if (metric === 'topCity') {
+        value = stats.topCityCount;
+      } else {
+        value = stats[metric as keyof typeof stats] as number;
+      }
       return {
         name,
         ...stats,
@@ -174,7 +179,9 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
 
   if (productTypeData.length === 0) return null;
 
-  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  // HACK: Using `any` to bypass a type issue with recharts TooltipProps.
+  const CustomTooltip = (props: any) => {
+    const { active, payload } = props;
     if (active && payload && payload.length) {
       const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount, lastRideTime } = payload[0].payload;
       return (
@@ -232,8 +239,8 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
 
   return (
     <div className="stats-group">
-      <div className="mb-6">
-        <h3 className="mb-3 text-sm font-medium text-muted-foreground">Breakdown by:</h3>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        {/* <h3 className="text-lg font-semibold">Product Types</h3> */}
         <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1.5">
         {metricOptions.map(option => (
           <button
@@ -265,7 +272,6 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
             activeCurrency={activeCurrency}
             colors={treemapColors}
           />}
-          colors={treemapColors}
         >
           <Tooltip content={<CustomTooltip />} />
         </Treemap>

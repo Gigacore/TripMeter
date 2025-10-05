@@ -11,7 +11,9 @@ interface DurationChartsProps {
   onFocusOnTrip: (tripRow: CSVRow) => void;
 }
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+// HACK: Using `any` to bypass a type issue with recharts TooltipProps.
+const CustomTooltip = (props: any) => {
+  const { active, payload, label } = props;
   if (active && payload && payload.length) {
     return (
       <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
@@ -69,11 +71,10 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
 
   return (
     <div className="stats-group">
-      <h3 className="mb-2">Ride Duration Distribution</h3>
       {durationDistributionData.length > 0 && (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={durationDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
             <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />

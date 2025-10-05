@@ -181,9 +181,12 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
 
   return (
     <div className="stats-group">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <p className="text-sm text-muted-foreground">Click and drag on a chart to select a range of data to inspect.</p>
+      </div>
       <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-full">
         <div className="flex justify-between items-center mb-4">
-          <TabsList>
+          <TabsList className="grid grid-cols-4 w-full max-w-md">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="trips">Trips</TabsTrigger>
             <TabsTrigger value="distance">Distance</TabsTrigger>
@@ -208,7 +211,7 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
               <XAxis dataKey="date" stroke="#888" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} type="number" tickFormatter={(unixTime) => formatDate(new Date(unixTime))} />
               <YAxis yAxisId="trips" stroke={metrics[0].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
               <YAxis yAxisId="distance" orientation="right" stroke={metrics[1].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
-              {activeCurrency && <YAxis yAxisId="fare" orientation="right" stroke={metrics[2].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency, { notation: 'compact' })} style={{ transform: 'translateX(50px)' }} />}
+              {activeCurrency && <YAxis yAxisId="fare" orientation="right" stroke={metrics[2].color} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency)} style={{ transform: 'translateX(50px)' }} />}
               <Tooltip content={<CustomCumulativeTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} selectedData={selectedData} view={view} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} isAnimationActive={false} />
               {metrics.map(m => !m.disabled && <Area key={m.dataKey} yAxisId={m.yAxisId} type="monotone" dataKey={m.dataKey} stroke={m.color} fillOpacity={1} fill={`url(#colorCumulative-${m.dataKey})`} name={m.name} isAnimationActive={view === 'all'} />)}
               {selection.start && selection.end && (

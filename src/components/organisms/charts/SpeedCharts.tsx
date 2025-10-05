@@ -60,19 +60,18 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
   };
 
   return (
-    <>
+    <div className="grid grid-cols-1 gap-6">
       <div className="stats-group">
-        <h3 className="mb-2">Average Ride Speed Distribution</h3>
         {speedDistribution.length > 0 && (
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
               layout="vertical"
               data={speedDistribution}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 30, left: 20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis type="category" dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} unit={distanceUnit === 'miles' ? ' mph' : ' km/h'} width={80} />
+              <YAxis type="category" dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} unit={distanceUnit === 'miles' ? ' mph' : ' km/h'} width={100} />
               <Tooltip content={<CustomDistributionTooltip unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
               <Bar dataKey="count" name="Number of Trips" radius={[0, 4, 4, 0]}>
                 {speedDistribution.map((entry, index) => (
@@ -88,7 +87,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
           <Stat label="Slowest Trip" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

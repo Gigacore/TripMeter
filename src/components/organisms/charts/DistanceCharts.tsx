@@ -16,7 +16,9 @@ interface DistanceChartsProps {
   convertDistance: (miles: number) => number;
 }
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+// HACK: Using `any` to bypass a type issue with recharts TooltipProps.
+const CustomTooltip = (props: any) => {
+  const { active, payload, label } = props;
   if (active && payload && payload.length) {
     return (
       <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
@@ -36,7 +38,9 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 
 const formatDate = timeFormat('%b %d, %Y');
 
-const CustomYearTooltip = ({ active, payload, label, distanceUnit }: TooltipProps<number, string> & { distanceUnit: DistanceUnit }) => {
+// HACK: Using `any` to bypass a type issue with recharts TooltipProps.
+const CustomYearTooltip = (props: any) => {
+  const { active, payload, label, distanceUnit } = props;
   if (active && payload && payload.length) {
     return (
       <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
@@ -95,12 +99,12 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
   }, [rows, distanceUnit]);
 
   return (
-    <>
+    <div className="grid grid-cols-1 gap-6">
       <div className="stats-group">
-        <h3 className="mb-2">Ride Distance Distribution</h3>
+        {/* <h3 className="text-lg font-semibold mb-2">Ride Distance Distribution</h3> */}
         {distanceDistributionData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart layout="vertical" data={distanceDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <BarChart layout="vertical" data={distanceDistributionData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis type="category" dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} width={120} />
@@ -124,10 +128,10 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
       </div>
       {data.tripsByYear && data.tripsByYear.length > 0 && (
         <div className="stats-group">
-          <h3>Total Distance by Year ({distanceUnit})</h3>
+          <h3 className="text-lg font-semibold">Total Distance by Year ({distanceUnit})</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value as number).toLocaleString()}`} />
               <Tooltip content={<CustomYearTooltip distanceUnit={distanceUnit} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
@@ -136,7 +140,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
           </ResponsiveContainer>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

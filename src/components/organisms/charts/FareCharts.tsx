@@ -90,9 +90,9 @@ const FareCharts: React.FC<FareChartsProps> = ({
   }, [rows, activeCurrency]);
 
   return (
-    <>
+    <div className="grid grid-cols-1 gap-6">
       {currencies.length > 1 && (
-        <div className="mb-6 border-b border-border">
+        <div className="border-b border-border">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {currencies.map(currency => (
               <button
@@ -117,7 +117,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
       )}
       {currencies.length > 0 && activeCurrency && (
         <div className="stats-group">
-          <h3 className="mb-2">Fare Distribution ({activeCurrency})</h3>
+          <h3 className="text-lg font-semibold mb-2">Fare Distribution ({activeCurrency})</h3>
           {fareDistributionData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={fareDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -153,19 +153,19 @@ const FareCharts: React.FC<FareChartsProps> = ({
       )}
       {activeCurrency && tripsByYear && tripsByYear.length > 0 && (
         <div className="stats-group">
-          <h3>Total Fare by Year ({activeCurrency})</h3>
+          <h3 className="text-lg font-semibold">Total Fare by Year ({activeCurrency})</h3>
            <ResponsiveContainer width="100%" height={300}>
             <BarChart data={tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency, { notation: 'compact' })} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency)} />
               <Tooltip content={<CustomAreaTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
               <Bar dataKey={(payload) => payload.totalFare[activeCurrency] || 0} fill="#10b981" name={`Fare (${activeCurrency})`} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

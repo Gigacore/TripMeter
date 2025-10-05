@@ -29,9 +29,12 @@ interface ActivityChartsProps {
   activeCurrency: string | null;
 }
 
-const CustomScatterTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+// HACK: Using `any` to bypass a type issue with recharts TooltipProps.
+const CustomScatterTooltip = (props: any) => {
+  const { active, payload } = props;
   if (active && payload && payload.length) {
-    const { hour, count } = payload[0].payload;
+    const data = payload[0].payload;
+    const { hour, count } = data;
     return (
       <div className="min-w-[150px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
         <div className="mb-2 border-b border-border pb-2">
@@ -47,9 +50,12 @@ const CustomScatterTooltip = ({ active, payload }: TooltipProps<number, string>)
   return null;
 };
 
-const CustomRadarTooltip = ({ active, payload, activeCurrency, distanceUnit }: TooltipProps<number, string> & { activeCurrency: string | null, distanceUnit: DistanceUnit }) => {
+// HACK: Using `any` to bypass a type issue with recharts TooltipProps.
+const CustomRadarTooltip = (props: any) => {
+  const { active, payload, activeCurrency, distanceUnit } = props;
   if (active && payload && payload.length) {
-    const { day, trips, cancellations, totalFare, totalDistance } = payload[0].payload;
+    const data = payload[0].payload;
+    const { day, trips, cancellations, totalFare, totalDistance } = data;
     const value = trips ?? cancellations;
     const label = trips ? 'Trips' : 'Cancellations';
 
@@ -221,10 +227,10 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
   const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
 
   return (
-    <div className="stats-group grid grid-cols-1 gap-8">
-      <div>
+    <div className="grid grid-cols-1 gap-6 @container">
+      <div className="stats-group">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <h3>Trip Activity</h3>
+          <h3 className="text-lg font-semibold"></h3>
           <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1">
             <button
               onClick={() => setContributionView('last-12-months')}
@@ -255,10 +261,10 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
       {tripsByHourData.length > 0 && (
         <div className="stats-group">
-          <h3>Trips by Hour of Day</h3>
-          <p className="hint -mt-2 mb-4">Shows your trip patterns throughout the day.</p>
+          <h3 className="text-lg font-semibold">Trips by Hour of Day</h3>
+          <p className="text-sm text-muted-foreground -mt-2 mb-4">Shows your trip patterns throughout the day.</p>
           <ResponsiveContainer width="100%" height={300}>
-            <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
+            <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis type="number" dataKey="count" name="Trips" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
@@ -288,12 +294,12 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+      <div className="grid grid-cols-1 @[768px]:grid-cols-2 gap-6 mt-6">
         {tripsByDayOfWeekData.length > 0 && (
           <div className="stats-group">
-            <h3>Completed Trips by Day</h3>
-            <p className="hint -mt-2 mb-4">Shows completed trips for each day of the week.</p>
-            <ResponsiveContainer width="100%" height={500}>
+            <h3 className="text-lg font-semibold">Completed Trips by Day</h3>
+            <p className="text-sm text-muted-foreground -mt-2 mb-4">Shows completed trips for each day of the week.</p>
+            <ResponsiveContainer width="100%" height={400}>
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={tripsByDayOfWeekData}>
                 <PolarGrid className="stroke-border" />
                 <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />
@@ -307,9 +313,9 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
         )}
         {hasCancellationsData && (
           <div className="stats-group">
-            <h3>Cancellations by Day</h3>
-            <p className="hint -mt-2 mb-4">Shows canceled trips for each day of the week.</p>
-            <ResponsiveContainer width="100%" height={500}>
+            <h3 className="text-lg font-semibold">Cancellations by Day</h3>
+            <p className="text-sm text-muted-foreground -mt-2 mb-4">Shows canceled trips for each day of the week.</p>
+            <ResponsiveContainer width="100%" height={400}>
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={cancellationsByDayOfWeekData}>
                 <PolarGrid className="stroke-border" />
                 <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />

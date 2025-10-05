@@ -98,7 +98,7 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows, distanceUnit, convertDistan
 
     return (
         <div className="stats-group">
-            <h3>Top Cities by Completed Trip Count</h3>
+            {/* <h3>Top Cities by Completed Trip Count</h3> */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div className="flex flex-col gap-2">
                         {topCities.map((city, index) => (
