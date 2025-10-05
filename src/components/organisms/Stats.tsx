@@ -142,7 +142,7 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Distance</CardTitle>
-            <CardDescription>A look at the distances of your trips and cost efficiency.</CardDescription>
+            <CardDescription>A look at the distances of your trips.</CardDescription>
           </CardHeader>
           <CardContent>
             <DistanceCharts
@@ -222,19 +222,6 @@ const Stats: React.FC<StatsProps> = ({
           </CardHeader>
           <CardContent>
             <ProductTypesChart
-              rows={rows}
-              distanceUnit={distanceUnit}
-              activeCurrency={activeCurrency}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Ride Efficiency by Product</CardTitle>
-            <CardDescription>A comparison of distance per unit of currency across different service types.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CostEfficiencyChart
               rows={rows}
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}

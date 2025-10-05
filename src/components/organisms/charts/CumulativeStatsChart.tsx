@@ -181,9 +181,6 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
 
   return (
     <div className="stats-group">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <p className="text-sm text-muted-foreground">Click and drag on a chart to select a range of data to inspect.</p>
-      </div>
       <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList className="grid grid-cols-4 w-full max-w-md">

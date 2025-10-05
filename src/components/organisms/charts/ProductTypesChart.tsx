@@ -4,6 +4,7 @@ import { CSVRow } from '../../../services/csvParser';
 import { DistanceUnit } from '../../../App';
 import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
+import CostEfficiencyChart from '../CostEfficiencyChart';
 
 interface ProductTypeStats {
   name: string;
@@ -17,6 +18,7 @@ interface ProductTypeStats {
   topCity?: string;
   topCityCount?: number;
   lastRideTime?: number;
+  breakdown?: { [key: string]: Omit<ProductTypeStats, 'name' | 'breakdown'> };
 }
 
 const isTripCompleted = (trip: CSVRow): boolean => {
@@ -47,7 +49,7 @@ const CustomTreemapContent = React.memo((props: any) => {
         </linearGradient>
       </defs>
       <rect x={x} y={y} width={width} height={height} rx={4} ry={4} fill={`url(#grad-${index})`} className="stroke-background/50" strokeWidth={2} />
-      <foreignObject x={x} y={y} width={width} height={height}>
+      <foreignObject x={x} y={y} width={width} height={height} style={{ pointerEvents: 'none' }}>
         <div className="w-full h-full flex flex-col justify-center items-center p-2 text-white text-center overflow-hidden">
           {!isSmall && (
             <>
@@ -68,6 +70,7 @@ interface ProductTypesChartProps {
   rows: CSVRow[];
   distanceUnit: DistanceUnit;
   activeCurrency: string | null;
+  convertDistance: (miles: number) => number;
 }
 
 type Metric = 'size' | 'successfulTrips' | 'canceledTrips' | 'totalFare' | 'totalDistance' | 'totalWaitingTime' | 'totalRidingTime' | 'topCity';
@@ -81,17 +84,18 @@ const metricOptions: { value: Metric; label: string }[] = [
   { value: 'totalWaitingTime', label: 'Waiting Time' },
 ];
 
-const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUnit, activeCurrency }) => {
+const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUnit, activeCurrency, convertDistance }) => {
   const [metric, setMetric] = React.useState('size');
 
   const productTypeData = React.useMemo(() => {
     if (!rows || rows.length === 0) {
       return [];
     }
-    const statsByProduct = rows.reduce((acc: { [key: string]: Omit<ProductTypeStats, 'name'> & { cityCounts: { [key: string]: number }, lastRideTime: number } }, trip) => {
-      const product = trip.product_type || 'N/A';
+    const statsByProduct = rows.reduce((acc: { [key: string]: Omit<ProductTypeStats, 'name'> & { cityCounts: { [key: string]: number }, lastRideTime: number, breakdown?: { [key: string]: any } } }, trip) => {
+      const originalProduct = trip.product_type || 'N/A';
+      const product = originalProduct.toLowerCase().includes('auto') ? 'Auto' : originalProduct;
       if (!acc[product]) {
-        acc[product] = {
+        const newStat: Omit<ProductTypeStats, 'name'> & { cityCounts: { [key: string]: number }, lastRideTime: number, breakdown?: { [key: string]: any } } = {
           size: 0,
           totalFare: {},
           totalDistance: 0,
@@ -102,7 +106,12 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
           cityCounts: {},
           lastRideTime: 0,
         };
+        if (product === 'Auto') {
+          newStat.breakdown = {};
+        }
+        acc[product] = newStat;
       }
+
 
       acc[product].size += 1;
       const status = trip.status?.toLowerCase() ?? '';
@@ -117,28 +126,53 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
         acc[product].lastRideTime = requestTime;
       }
 
+      if (product === 'Auto') {
+        if (!acc.Auto.breakdown![originalProduct]) {
+          acc.Auto.breakdown![originalProduct] = {
+            size: 0,
+            totalFare: {},
+            totalDistance: 0,
+            totalWaitingTime: 0,
+            totalRidingTime: 0,
+            successfulTrips: 0,
+            canceledTrips: 0,
+          };
+        }
+        acc.Auto.breakdown![originalProduct].size += 1;
+      }
+
+      const targetStat = product === 'Auto' ? acc.Auto.breakdown![originalProduct] : acc[product];
+
+
+
 
       if (isTripCompleted(trip)) {
         acc[product].successfulTrips += 1;
-        const fare = parseFloat(trip.fare_amount);
-        const currency = trip.fare_currency;
+        const fare = parseFloat(trip.fare_amount!);
+        const currency = trip.fare_currency!;
         if (currency && !isNaN(fare)) {
-          if (!acc[product].totalFare[currency]) {
-            acc[product].totalFare[currency] = 0;
+          if (!targetStat.totalFare[currency]) {
+            targetStat.totalFare[currency] = 0;
           }
-          acc[product].totalFare[currency] += fare;
+          targetStat.totalFare[currency] += fare;
         }
         const distance = parseFloat(trip.distance);
         if (!isNaN(distance)) {
-          acc[product].totalDistance += distanceUnit === 'km' ? distance * 1.60934 : distance;
+          const convertedDistance = distanceUnit === 'km' ? distance * 1.60934 : distance;
+          targetStat.totalDistance += convertedDistance;
+          if (product === 'Auto') {
+            acc.Auto.totalDistance += convertedDistance;
+          }
         }
         if (trip.request_time && trip.begin_trip_time) {
           const waitingTime = (new Date(trip.begin_trip_time).getTime() - new Date(trip.request_time).getTime()) / (1000 * 60);
-          if (waitingTime > 0) acc[product].totalWaitingTime += waitingTime;
+          if (waitingTime > 0) targetStat.totalWaitingTime += waitingTime;
+          if (product === 'Auto' && waitingTime > 0) acc.Auto.totalWaitingTime += waitingTime;
         }
         if (trip.begin_trip_time && trip.dropoff_time) {
           const ridingTime = (new Date(trip.dropoff_time).getTime() - new Date(trip.begin_trip_time).getTime()) / (1000 * 60);
-          if (ridingTime > 0) acc[product].totalRidingTime += ridingTime;
+          if (ridingTime > 0) targetStat.totalRidingTime += ridingTime;
+          if (product === 'Auto' && ridingTime > 0) acc.Auto.totalRidingTime += ridingTime;
         }
       } else if (status === 'rider_canceled' || status === 'driver_canceled') {
         acc[product].canceledTrips += 1;
@@ -159,13 +193,11 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
       stats.topCity = topCity;
       stats.topCityCount = topCityCount;
 
-      let value: number | string | undefined;
+      let value: number | string | undefined = stats[metric as keyof typeof stats];
       if (metric === 'totalFare' && activeCurrency) {
         value = stats.totalFare[activeCurrency] || 0;
       } else if (metric === 'topCity') {
         value = stats.topCityCount;
-      } else {
-        value = stats[metric as keyof typeof stats] as number;
       }
       return {
         name,
@@ -182,12 +214,12 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
   // HACK: Using `any` to bypass a type issue with recharts TooltipProps.
   const CustomTooltip = (props: any) => {
     const { active, payload } = props;
-    if (active && payload && payload.length) {
-      const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount, lastRideTime } = payload[0].payload;
+    if (active && payload && payload.length && payload[0].payload) {
+      const { name, successfulTrips, canceledTrips, totalFare, totalDistance, totalWaitingTime, totalRidingTime, topCity, topCityCount, lastRideTime, breakdown } = payload[0].payload;
       return (
         <div className="min-w-[250px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
           <div className="mb-2 border-b border-border pb-2">
-            <p className="recharts-tooltip-label font-bold text-base">{name}</p>
+            <p className="recharts-tooltip-label font-bold text-base">{name} {breakdown && `(${Object.keys(breakdown).length} types)`}</p>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             <div className="col-span-2">
@@ -230,6 +262,16 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
                 <div className="text-muted-foreground">Total Fare ({currency})</div><div className="font-medium text-right">{formatCurrency(amount as number, currency)}</div>
               </React.Fragment>
             ))}
+            {breakdown && (
+              <div className="col-span-2 mt-2 pt-2 border-t border-border/50">
+                <p className="font-semibold text-xs mb-1">Breakdown:</p>
+                <div className="flex flex-col gap-0.5">
+                  {Object.entries(breakdown).map(([subName, subStats]: [string, any]) => (
+                    <div key={subName} className="flex justify-between text-xs"><span className="text-muted-foreground">{subName}</span> <span className="font-mono">{subStats.size.toLocaleString()}</span></div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -240,7 +282,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
   return (
     <div className="stats-group">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        {/* <h3 className="text-lg font-semibold">Product Types</h3> */}
+        <h3 className="text-lg font-semibold">Product Types</h3>
         <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1.5">
         {metricOptions.map(option => (
           <button
@@ -276,6 +318,16 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
           <Tooltip content={<CustomTooltip />} />
         </Treemap>
       </ResponsiveContainer>
+      <div className="mt-12">
+        <h3 className="text-lg font-semibold">Ride Efficiency by Product</h3>
+        <p className="text-sm text-muted-foreground mb-4">A comparison of distance per unit of currency across different service types.</p>
+        <CostEfficiencyChart
+          rows={rows}
+          distanceUnit={distanceUnit}
+          activeCurrency={activeCurrency}
+          convertDistance={convertDistance}
+        />
+      </div>
     </div>
   );
 };
