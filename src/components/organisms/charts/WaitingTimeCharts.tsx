@@ -29,6 +29,25 @@ const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<numb
   return null;
 };
 
+const CustomDayOfWeekTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
+        <div className="mb-2 border-b border-slate-200 pb-2 dark:border-slate-700">
+          <p className="recharts-tooltip-label font-bold text-base">{label}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-muted-foreground">Avg. Waiting Time</div>
+          <div className="font-medium text-right text-red-400">
+            {formatDurationWithSeconds(payload[0].value as number)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const CustomBarTooltip = ({ active, payload, activeCurrency }: TooltipProps<number, string> & { activeCurrency?: string | null }) => {
   if (active && payload && payload.length) {
     return (
@@ -86,6 +105,36 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
     }));
   }, [rows]);
 
+  const waitingTimeByDayOfWeekData = React.useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+
+    const dayStats = Array(7).fill(0).map(() => ({
+      totalWaitingTime: 0,
+      tripCount: 0,
+    }));
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    rows
+      .filter(r => r.status?.toLowerCase() === 'completed' && r.request_time && r.begin_trip_time)
+      .forEach(r => {
+        const requestTime = new Date(r.request_time!);
+        const beginTripTime = new Date(r.begin_trip_time!);
+        if (!isNaN(requestTime.getTime()) && !isNaN(beginTripTime.getTime())) {
+          const waitingTime = (beginTripTime.getTime() - requestTime.getTime()) / (1000 * 60); // in minutes
+          if (waitingTime > 0) {
+            const dayIndex = requestTime.getDay();
+            dayStats[dayIndex].totalWaitingTime += waitingTime;
+            dayStats[dayIndex].tripCount++;
+          }
+        }
+      });
+
+    return days.map((day, index) => ({
+      day,
+      avgWaitingTime: dayStats[index].tripCount > 0 ? dayStats[index].totalWaitingTime / dayStats[index].tripCount : 0,
+    }));
+  }, [rows]);
+
   const waitingVsRidingData = [
     { name: 'Riding Time', value: totalTripDuration, fill: '#34d399' },
     { name: 'Waiting Time', value: totalWaitingTime, fill: '#a78bfa' },
@@ -94,7 +143,6 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
   return (
     <>
       <div className="stats-group">
-        {/* <h3 className="mb-2">Waiting Time Distribution</h3> */}
         {waitingTimeDistributionData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={waitingTimeDistributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -107,6 +155,20 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
           </ResponsiveContainer>
         )}
       </div>
+      {waitingTimeByDayOfWeekData.length > 0 && (
+        <div className="stats-group mt-6">
+          <h3 className="text-lg font-semibold">Average Waiting Time by Day of Week</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={waitingTimeByDayOfWeekData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} unit=" min" />
+              <Tooltip content={<CustomDayOfWeekTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Bar dataKey="avgWaitingTime" fill="#ef4444" name="Avg. Waiting Time" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       {totalWaitingTime > 0 && totalTripDuration > 0 && (
         <div className="stats-group rounded-lg bg-muted/50 p-4">
           <h3 className="mb-2 text-foreground">Total Waiting vs. Riding Time</h3>
