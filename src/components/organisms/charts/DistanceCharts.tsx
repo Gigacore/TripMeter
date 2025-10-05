@@ -113,18 +113,6 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
             </BarChart>
           </ResponsiveContainer>
         )}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-          <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-          <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
-          <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
-          <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
-          {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
-            <Stat
-              label={`Cost per ${distanceUnit}`}
-              value={`${formatCurrency(costPerDistanceByCurrency[activeCurrency]!, activeCurrency)}/${distanceUnit}`}
-            />
-          )}
-        </div>
       </div>
       {data.tripsByYear && data.tripsByYear.length > 0 && (
         <div className="stats-group">
@@ -140,6 +128,18 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
           </ResponsiveContainer>
         </div>
       )}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+          <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+          <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
+          <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrip(longestTripByDistRow)} />
+          <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrip(shortestTripByDistRow)} />
+          {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
+            <Stat
+              label={`Cost per ${distanceUnit}`}
+              value={`${formatCurrency(costPerDistanceByCurrency[activeCurrency]!, activeCurrency)}/${distanceUnit}`}
+            />
+          )}
+        </div>
     </div>
   );
 };

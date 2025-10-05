@@ -5,6 +5,7 @@ import { CSVRow } from '@/services/csvParser';
 import { DistanceUnit } from '@/App';
 import { formatCurrency } from '@/utils/currency';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Stat from '@/components/atoms/Stat';
 
 const formatDate = timeFormat('%b %d, %Y');
 
@@ -179,6 +180,10 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
 
   const activeMetric = metrics.find(m => m.yAxisId === view);
 
+  const totalTrips = cumulativeData[cumulativeData.length - 1]?.cumulativeTrips || 0;
+  const totalDistance = cumulativeData[cumulativeData.length - 1]?.cumulativeDistance || 0;
+  const totalFare = cumulativeData[cumulativeData.length - 1]?.cumulativeFare || 0;
+
   return (
     <div className="stats-group">
       <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-full">
@@ -240,6 +245,13 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
           </TabsContent>
         ))}
       </Tabs>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+        <Stat label="Total Trips" value={totalTrips.toLocaleString()} />
+        <Stat label="Total Distance" value={totalDistance.toFixed(2)} unit={distanceUnit} />
+        {activeCurrency && (
+          <Stat label="Total Fare" value={formatCurrency(totalFare, activeCurrency)} />
+        )}
+      </div>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { DistanceUnit } from '../../../App';
 import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
 import CostEfficiencyChart from '../CostEfficiencyChart';
+import Stat from '@/components/atoms/Stat';
 
 interface ProductTypeStats {
   name: string;
@@ -321,6 +322,9 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
       <div className="mt-12">
         <h3 className="text-lg font-semibold">Ride Efficiency by Product</h3>
         <p className="text-sm text-muted-foreground mb-4">A comparison of distance per unit of currency across different service types.</p>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mb-4">
+          <Stat label="Unique Product Types" value={productTypeData.length} />
+        </div>
         <CostEfficiencyChart
           rows={rows}
           distanceUnit={distanceUnit}

@@ -3,6 +3,7 @@ import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, Tooltip
 import { CSVRow } from '../../services/csvParser';
 import { DistanceUnit } from '../../App';
 import { formatCurrency } from '../../utils/currency';
+import Stat from '../atoms/Stat';
 
 interface FareDistanceScatterPlotProps {
   rows: CSVRow[];
@@ -51,20 +52,38 @@ const FareDistanceScatterPlot: React.FC<FareDistanceScatterPlotProps> = ({ rows,
       }));
   }, [rows, activeCurrency, convertDistance]);
 
+  const stats = React.useMemo(() => {
+    if (scatterData.length === 0) return null;
+    const totalFare = scatterData.reduce((sum, trip) => sum + trip.fare, 0);
+    const totalDistance = scatterData.reduce((sum, trip) => sum + trip.distance, 0);
+    return {
+      avgFare: totalFare / scatterData.length,
+      avgDistance: totalDistance / scatterData.length,
+    };
+  }, [scatterData]);
+
   if (scatterData.length === 0) {
     return <p className="text-slate-500 text-sm mt-2">Not enough data to display fare vs. distance for the selected currency.</p>;
   }
 
   return (
-    <ResponsiveContainer width="100%" height={500}>
-      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-        <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-        <XAxis type="number" dataKey="distance" name="Distance" unit={distanceUnit} stroke="#888" fontSize={12} />
-        <YAxis type="number" dataKey="fare" name="Fare" unit={activeCurrency || ''} stroke="#888" fontSize={12} tickFormatter={(value) => formatCurrency(value as number, activeCurrency!, { notation: 'compact' })} />
-        <Tooltip content={<CustomTooltip distanceUnit={distanceUnit} activeCurrency={activeCurrency} />} cursor={{ strokeDasharray: '3 3' }} />
-        <Scatter name="Trips" data={scatterData} fill="#8884d8" fillOpacity={0.6} />
-      </ScatterChart>
-    </ResponsiveContainer>
+    <>
+      <ResponsiveContainer width="100%" height={500}>
+        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+          <XAxis type="number" dataKey="distance" name="Distance" unit={distanceUnit} stroke="#888" fontSize={12} />
+          <YAxis type="number" dataKey="fare" name="Fare" unit={activeCurrency || ''} stroke="#888" fontSize={12} tickFormatter={(value) => formatCurrency(value as number, activeCurrency!, { notation: 'compact' })} />
+          <Tooltip content={<CustomTooltip distanceUnit={distanceUnit} activeCurrency={activeCurrency} />} cursor={{ strokeDasharray: '3 3' }} />
+          <Scatter name="Trips" data={scatterData} fill="#8884d8" fillOpacity={0.6} />
+        </ScatterChart>
+      </ResponsiveContainer>
+      {stats && activeCurrency && (
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+          <Stat label="Avg. Fare" value={formatCurrency(stats.avgFare, activeCurrency)} />
+          <Stat label="Avg. Distance" value={stats.avgDistance.toFixed(2)} unit={distanceUnit} />
+        </div>
+      )}
+    </>
   );
 };
 

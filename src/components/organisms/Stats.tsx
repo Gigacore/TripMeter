@@ -92,19 +92,7 @@ const Stats: React.FC<StatsProps> = ({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Cancellation Breakdown</CardTitle>
-            <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CancellationBreakdownChart
-              rows={rows}
-              distanceUnit={distanceUnit}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
+       
                 <Card>
           <CardHeader>
             <CardTitle>Completed Trips by Year</CardTitle>
@@ -117,18 +105,7 @@ const Stats: React.FC<StatsProps> = ({
 
         <Card>
           <CardHeader>
-            <CardTitle>Cumulative Stats Over Time</CardTitle>
-            <CardDescription>Track the progression of your trips, distance, and spending over time. Click and drag to select a range.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CumulativeStatsChart rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} convertDistance={data.convertDistance} />
-          </CardContent>
-        </Card>
-
-
-        <Card>
-          <CardHeader>
-            <CardTitle>DurationRide Duration Distribution</CardTitle>
+            <CardTitle>Duration</CardTitle>
             <CardDescription>Analysis of how long your trips typically take.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -155,6 +132,7 @@ const Stats: React.FC<StatsProps> = ({
             />
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Speed</CardTitle>
@@ -167,7 +145,6 @@ const Stats: React.FC<StatsProps> = ({
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
               onFocusOnTrip={onFocusOnTrip}
-              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>
@@ -181,6 +158,28 @@ const Stats: React.FC<StatsProps> = ({
               data={data}
               rows={rows}
               onFocusOnTrip={onFocusOnTrip}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Cumulative Stats Over Time</CardTitle>
+            <CardDescription>Track the progression of your trips, distance, and spending over time. Click and drag to select a range.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CumulativeStatsChart rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} convertDistance={data.convertDistance} />
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader>
+            <CardTitle>Cancellation Breakdown</CardTitle>
+            <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CancellationBreakdownChart
+              rows={rows}
+              distanceUnit={distanceUnit}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>

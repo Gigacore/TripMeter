@@ -129,7 +129,23 @@ const FareCharts: React.FC<FareChartsProps> = ({
               </BarChart>
             </ResponsiveContainer>
           ) : <p className="text-muted-foreground text-sm mt-2">No fare data to display for this currency.</p>}
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+        </div>
+      )}
+      {activeCurrency && tripsByYear && tripsByYear.length > 0 && (
+        <div className="stats-group">
+          <h3 className="text-lg font-semibold">Total Fare by Year ({activeCurrency})</h3>
+           <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency)} />
+              <Tooltip content={<CustomAreaTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              <Bar dataKey={(payload) => payload.totalFare[activeCurrency] || 0} fill="#10b981" name={`Fare (${activeCurrency})`} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
             <Stat
               label="Avg. Fare"
               value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
@@ -149,22 +165,6 @@ const FareCharts: React.FC<FareChartsProps> = ({
               />
             )}
           </div>
-        </div>
-      )}
-      {activeCurrency && tripsByYear && tripsByYear.length > 0 && (
-        <div className="stats-group">
-          <h3 className="text-lg font-semibold">Total Fare by Year ({activeCurrency})</h3>
-           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value as number, activeCurrency)} />
-              <Tooltip content={<CustomAreaTooltip activeCurrency={activeCurrency} />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Bar dataKey={(payload) => payload.totalFare[activeCurrency] || 0} fill="#10b981" name={`Fare (${activeCurrency})`} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
     </div>
   );
 };

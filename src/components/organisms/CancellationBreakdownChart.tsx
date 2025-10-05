@@ -1,5 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar, TooltipProps } from 'recharts';
+import Stat from '../atoms/Stat';
 import { CSVRow } from '../../services/csvParser';
 
 interface CancellationBreakdownChartProps {
@@ -61,30 +62,39 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
     return <p className="text-muted-foreground text-sm mt-2">No cancellation data to display.</p>;
   }
 
+  const totalRiderCanceled = cancellationData.reduce((sum, d) => sum + d.riderCanceled, 0);
+  const totalDriverCanceled = cancellationData.reduce((sum, d) => sum + d.driverCanceled, 0);
+
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={cancellationData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-        <XAxis dataKey="hour" unit=":00" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-        <Bar
-          dataKey="riderCanceled"
-          stackId="a"
-          fill="#f97316" // orange-500
-          name="Rider Canceled"
-          radius={[4, 4, 0, 0]}
-        />
-        <Bar
-          dataKey="driverCanceled"
-          stackId="a"
-          fill="#ef4444" // red-500
-          name="Driver Canceled"
-          radius={[4, 4, 0, 0]}
-        />
-      </BarChart>
-    </ResponsiveContainer>
+    <>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={cancellationData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+          <XAxis dataKey="hour" unit=":00" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+          <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+          <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+          <Bar
+            dataKey="riderCanceled"
+            stackId="a"
+            fill="#f97316" // orange-500
+            name="Rider Canceled"
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar
+            dataKey="driverCanceled"
+            stackId="a"
+            fill="#ef4444" // red-500
+            name="Driver Canceled"
+            radius={[4, 4, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+        <Stat label="Rider Canceled" value={totalRiderCanceled} />
+        <Stat label="Driver Canceled" value={totalDriverCanceled} />
+      </div>
+    </>
   );
 };
 

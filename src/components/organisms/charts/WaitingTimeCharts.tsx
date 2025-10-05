@@ -106,12 +106,6 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
             </BarChart>
           </ResponsiveContainer>
         )}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-          <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
-          <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
-          <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
-          <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
-        </div>
       </div>
       {totalWaitingTime > 0 && totalTripDuration > 0 && (
         <div className="stats-group rounded-lg bg-muted/50 p-4">
@@ -166,6 +160,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
           </ResponsiveContainer>
         </div>
       )}
+       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+          <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
+          <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
+          <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
+          <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
+        </div>
     </>
   );
 };
