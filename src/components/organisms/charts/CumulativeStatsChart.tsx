@@ -6,6 +6,8 @@ import { DistanceUnit } from '@/App';
 import { formatCurrency } from '@/utils/currency';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Stat from '@/components/atoms/Stat';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 const formatDate = timeFormat('%b %d, %Y');
 
@@ -99,12 +101,27 @@ interface CumulativeStatsChartProps {
 
 const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, distanceUnit, activeCurrency, convertDistance }) => {
   const [view, setView] = React.useState<'all' | 'trips' | 'distance' | 'fare'>('all');
+  const [selectedYear, setSelectedYear] = React.useState<'all' | number>('all');
+
+  const availableYears = React.useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+    const yearSet = new Set<number>();
+    rows.forEach(row => {
+      if (row.request_time) {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          yearSet.add(date.getFullYear());
+        }
+      }
+    });
+    return Array.from(yearSet).sort((a, b) => b - a);
+  }, [rows]);
 
   const cumulativeData = React.useMemo(() => {
     if (!rows || rows.length === 0) return [];
 
     const completedTrips = rows
-      .filter(r => r.status?.toLowerCase() === 'completed' && r.request_time && (!activeCurrency || r.fare_currency === activeCurrency))
+      .filter(r => r.status?.toLowerCase() === 'completed' && r.request_time && (!activeCurrency || r.fare_currency === activeCurrency) && (selectedYear === 'all' || new Date(r.request_time).getFullYear() === selectedYear))
       .map(r => ({
         date: new Date(r.request_time),
         distance: r.distance ? convertDistance(parseFloat(r.distance)) : 0,
@@ -125,7 +142,7 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
       cumulativeFare += trip.fare;
       return { date: trip.date.getTime(), cumulativeTrips, cumulativeDistance, cumulativeFare };
     });
-  }, [rows, activeCurrency, convertDistance]);
+  }, [rows, activeCurrency, convertDistance, selectedYear]);
 
   const [selection, setSelection] = React.useState<{ start: number | null, end: number | null }>({ start: null, end: null });
   const [isSelecting, setIsSelecting] = React.useState(false);
@@ -178,11 +195,9 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
     { dataKey: 'cumulativeFare', color: '#818cf8', yAxisId: 'fare', name: `Fare (${activeCurrency})`, disabled: !activeCurrency },
   ];
 
-  const activeMetric = metrics.find(m => m.yAxisId === view);
-
-  const totalTrips = cumulativeData[cumulativeData.length - 1]?.cumulativeTrips || 0;
-  const totalDistance = cumulativeData[cumulativeData.length - 1]?.cumulativeDistance || 0;
-  const totalFare = cumulativeData[cumulativeData.length - 1]?.cumulativeFare || 0;
+  const totalTrips = cumulativeData?.[cumulativeData.length - 1]?.cumulativeTrips || 0;
+  const totalDistance = cumulativeData?.[cumulativeData.length - 1]?.cumulativeDistance || 0;
+  const totalFare = cumulativeData?.[cumulativeData.length - 1]?.cumulativeFare || 0;
 
   return (
     <div className="stats-group">
@@ -194,6 +209,21 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
             <TabsTrigger value="distance">Distance</TabsTrigger>
             <TabsTrigger value="fare" disabled={!activeCurrency}>Fare</TabsTrigger>
           </TabsList>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8">
+                  {selectedYear}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => setSelectedYear('all')}>All Time</DropdownMenuItem>
+                {availableYears.map(year => (
+                  <DropdownMenuItem key={year} onSelect={() => setSelectedYear(year)}>{year}</DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           {selection.start && (
             <button onClick={handleResetSelection} className="text-xs text-muted-foreground hover:text-foreground">Reset Selection</button>
           )}

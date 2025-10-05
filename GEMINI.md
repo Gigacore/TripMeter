@@ -41,11 +41,10 @@ Always adhere to the Atomic Design methodology for structuring components. This 
     -   *Examples*: `ContributionGraph`, `ProductTypesChart`, `Header`.
 -   **`src/components/templates`**: Page-level layouts that structure organisms and molecules.
 -   **`src/pages`**: The final pages of the application, which are instances of templates filled with real data.
+-   **Shadcn UI**: Prioritize using components from the Shadcn UI. Only create a custom component if a suitable one does not exist in Shadcn.
 
-#### Styling (Tailwind CSS & Shadcn UI)
-
+Styling:
 -   **Tailwind CSS**: Use Tailwind's utility classes for all styling. Avoid writing custom CSS files.
--   **Shadcn UI**: Prioritize using components from the Shadcn UI library (`@/components/ui`). Only create a custom component if a suitable one does not exist in Shadcn.
 -   **Consistency**: Ensure all UI elements, especially tooltips, maintain a consistent design and format. The `CustomTooltip` component in `index.tsx` serves as the standard.
 -   **Responsiveness**: All components must be fully responsive and tested on various screen sizes.
 
