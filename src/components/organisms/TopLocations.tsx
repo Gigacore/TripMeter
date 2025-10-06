@@ -3,6 +3,8 @@ import { CSVRow } from '../../services/csvParser';
 import { MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import { featureCollection, point } from '@turf/helpers';
 import clustersDbscan from '@turf/clusters-dbscan';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
 interface TopLocationsProps {
@@ -129,38 +131,73 @@ const LocationTable: React.FC<{
 );
 
 const TopLocations: React.FC<TopLocationsProps> = ({ rows }) => {
-  const completedTrips = useMemo(() => rows.filter(row => row.status?.toLowerCase() === 'completed'), [rows]);
+  const [selectedCity, setSelectedCity] = useState<string>('all');
+
+  const { cities, completedTrips } = useMemo(() => {
+    const completed = rows.filter(row => row.status?.toLowerCase() === 'completed');
+    const citySet = new Set<string>();
+    completed.forEach(row => {
+      if (row.city) {
+        citySet.add(row.city);
+      }
+    });
+    return { cities: Array.from(citySet).sort(), completedTrips: completed };
+  }, [rows]);
+
+  const filteredTrips = useMemo(() => {
+    if (selectedCity === 'all') {
+      return completedTrips;
+    }
+    return completedTrips.filter(trip => trip.city === selectedCity);
+  }, [completedTrips, selectedCity]);
 
   const [pickupsExpanded, setPickupsExpanded] = useState(false);
   const [dropoffsExpanded, setDropoffsExpanded] = useState(false);
 
-  const topPickups = useMemo(() => analyzeLocations(completedTrips, 'begintrip_lat', 'begintrip_lng'), [completedTrips]);
-  const topDropoffs = useMemo(() => analyzeLocations(completedTrips, 'dropoff_lat', 'dropoff_lng'), [completedTrips]);
+  const topPickups = useMemo(() => analyzeLocations(filteredTrips, 'begintrip_lat', 'begintrip_lng'), [filteredTrips]);
+  const topDropoffs = useMemo(() => analyzeLocations(filteredTrips, 'dropoff_lat', 'dropoff_lng'), [filteredTrips]);
 
   if (completedTrips.length === 0) {
     return <p className="text-muted-foreground text-sm mt-2">No completed trips to analyze for top locations.</p>;
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {topPickups.length > 0 && (
-        <LocationTable
-          locations={pickupsExpanded ? topPickups : topPickups.slice(0, 5)}
-          type="Pickup"
-          isExpanded={pickupsExpanded}
-          onToggle={() => setPickupsExpanded(!pickupsExpanded)}
-          canExpand={topPickups.length > 5}
-        />
-      )}
-      {topDropoffs.length > 0 && (
-        <LocationTable
-          locations={dropoffsExpanded ? topDropoffs : topDropoffs.slice(0, 5)}
-          type="Drop-off"
-          isExpanded={dropoffsExpanded}
-          onToggle={() => setDropoffsExpanded(!dropoffsExpanded)}
-          canExpand={topDropoffs.length > 5}
-        />
-      )}
+    <div>
+      <div className="flex justify-end mb-4">
+        <div className="flex items-center gap-2">
+          <Select value={selectedCity} onValueChange={setSelectedCity}>
+            <SelectTrigger id="city-filter" className="w-[180px]">
+              <SelectValue placeholder="Select a city" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cities</SelectItem>
+              {cities.map(city => (
+                <SelectItem key={city} value={city}>{city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="flex flex-col gap-6">
+        {topPickups.length > 0 && (
+          <LocationTable
+            locations={pickupsExpanded ? topPickups : topPickups.slice(0, 5)}
+            type="Pickup"
+            isExpanded={pickupsExpanded}
+            onToggle={() => setPickupsExpanded(!pickupsExpanded)}
+            canExpand={topPickups.length > 5}
+          />
+        )}
+        {topDropoffs.length > 0 && (
+          <LocationTable
+            locations={dropoffsExpanded ? topDropoffs : topDropoffs.slice(0, 5)}
+            type="Drop-off"
+            isExpanded={dropoffsExpanded}
+            onToggle={() => setDropoffsExpanded(!dropoffsExpanded)}
+            canExpand={topDropoffs.length > 5}
+          />
+        )}
+      </div>
     </div>
   );
 };
