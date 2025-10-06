@@ -95,6 +95,11 @@ export interface TripStats {
   };
   tripsByYear: YearlyStat[];
   avgSpeedByDayOfWeek: { day: string; avgSpeed: number }[];
+  mostSuccessfulTripsInADay: {
+    count: number;
+    date: number | null;
+    trips: CSVRow[];
+  };
   longestConsecutiveTripsChain: CSVRow[];
   convertDistance: (miles: number) => number;
 }
@@ -171,6 +176,11 @@ const INITIAL_STATS: TripStats = {
   tripsByYear: [],
   avgSpeedByDayOfWeek: [],
   longestConsecutiveTripsChain: [],
+  mostSuccessfulTripsInADay: {
+    count: 0,
+    date: null,
+    trips: [],
+  },
   convertDistance: (miles: number) => miles,
 };
 
@@ -242,6 +252,29 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
         let longestConsecutiveTripsChain: CSVRow[] = [];
         let currentConsecutiveTripsChain: CSVRow[] = [];
 
+        const tripsByDay: { [key: string]: CSVRow[] } = {};
+
+        rows.forEach(row => {
+          if (row.status?.toLowerCase() === 'completed' && row.request_time) {
+            const date = new Date(row.request_time).toLocaleDateString('en-CA', { timeZone: 'UTC' }); // YYYY-MM-DD format
+            if (!tripsByDay[date]) {
+              tripsByDay[date] = [];
+            }
+            tripsByDay[date].push(row);
+          }
+        });
+    
+        let maxTrips = 0;
+        let maxDate: number | null = null;
+        let maxTripsRows: CSVRow[] = [];
+    
+        for (const date in tripsByDay) {
+          if (tripsByDay[date].length > maxTrips) {
+            maxTrips = tripsByDay[date].length;
+            maxDate = new Date(date).getTime();
+            maxTripsRows = tripsByDay[date];
+          }
+        }
         // Main processing loop
         sortedRows.forEach((r: CSVRow) => {
           const status = r.status?.toLowerCase().trim();
@@ -724,6 +757,11 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           tripsByYear: formattedTripsByYear,
           avgSpeedByDayOfWeek,
           longestConsecutiveTripsChain,
+          mostSuccessfulTripsInADay: {
+            count: maxTrips,
+            date: maxDate,
+            trips: maxTripsRows,
+          },
           convertDistance,
           // Initialize fields that will be set below
           avgTripDuration: 0,
