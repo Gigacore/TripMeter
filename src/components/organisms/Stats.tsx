@@ -22,6 +22,7 @@ import CumulativeStatsChart from './charts/CumulativeStatsChart';
 import FareSplitStats from './FareSplitStats';
 import TopLocations from './TopLocations';
 
+import ConsecutiveTrips from './ConsecutiveTrips';
 interface StatsProps {
   data: TripStats;
   onFocusOnTrip: (tripRow: CSVRow) => void;
@@ -37,7 +38,7 @@ const Stats: React.FC<StatsProps> = ({
   distanceUnit,
   rows,
 }) => {
-  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak, longestSuccessfulStreakBeforeDriverCancellation, longestDriverCancellationStreak } = data;
+  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak, longestSuccessfulStreakBeforeDriverCancellation, longestDriverCancellationStreak, longestConsecutiveTripsChain } = data;
   const currencies = Object.keys(totalFareByCurrency);
   const [activeCurrency, setActiveCurrency] = React.useState<string | null>(currencies.length > 0 ? currencies[0] : null);
 
@@ -257,6 +258,8 @@ const Stats: React.FC<StatsProps> = ({
           </CardContent>
         </Card>
       </div>
+      {/* ConsecutiveTrips is now a self-contained section, not a simple card */}
+      <ConsecutiveTrips tripChain={longestConsecutiveTripsChain} onFocusOnTrip={onFocusOnTrip} />
     </div>
   );
 };
