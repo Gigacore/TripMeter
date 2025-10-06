@@ -42,7 +42,10 @@ const MainView: React.FC<MainViewProps> = ({
   onBackToStats,
 }) => {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)] relative">
+    <div
+      className="flex flex-col min-h-[calc(100vh-3.5rem)] relative"
+      data-testid="main-view"
+    >
       <div className="flex-grow main-content grid gap-4 p-4 container mx-auto relative z-0">
         <Map
             rows={rows}

@@ -7,7 +7,7 @@ import { CSVRow } from './services/csvParser';
 import { downloadKML } from './services/kmlService';
 import { KM_PER_MILE } from './constants';
 import InitialView from './components/organisms/InitialView';
-import Spinner from './components/atoms/Spinner';
+import { Spinner } from '@/components/ui/spinner';
 import Header from './components/organisms/Header';
 import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
@@ -105,7 +105,11 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      {showSpinner && <Spinner />}
+      {showSpinner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <Spinner />
+        </div>
+      )}
       <Header
         onReset={resetMap}
         actionsEnabled={actionsEnabled}
