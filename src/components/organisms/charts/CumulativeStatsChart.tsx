@@ -213,7 +213,7 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8">
-                  {selectedYear}
+                  {selectedYear === 'all' ? 'All Time' : selectedYear}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
