@@ -24,7 +24,7 @@ interface MapProps {
     layout?: any;
     distanceUnit: DistanceUnit;
     convertDistance: (miles: number) => number;
-    locations?: Location[];
+    locations: Location[];
     selectedLocation?: Location | null;
 }
 

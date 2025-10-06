@@ -54,7 +54,7 @@ const MostTripsInADay: React.FC<MostTripsInADayProps> = ({ mostTripsInADay }) =>
           </Button>
         </DialogTrigger>
       </Card>
-      <DialogContent className="max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Busiest Day Details</DialogTitle>
           <DialogDescription>

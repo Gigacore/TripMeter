@@ -22,6 +22,7 @@ import CumulativeStatsChart from './charts/CumulativeStatsChart';
 import FareSplitStats from './FareSplitStats';
 import TopLocations from './TopLocations';
 import MostTripsInADay from './MostTripsInADay';
+import ConsecutiveTrips from './ConsecutiveTrips';
 
 interface StatsProps {
   data: TripStats;
@@ -51,7 +52,6 @@ const Stats: React.FC<StatsProps> = ({
   return (
     <div className="flex flex-col gap-4 overflow-y-auto pr-2">
       <TopStats tripData={data} distanceUnit={distanceUnit} />
-      <MostTripsInADay mostTripsInADay={mostSuccessfulTripsInADay} />
       <div className="grid grid-cols-1 gap-4">
                 <Card>
           {/* Fare Insights */}
@@ -203,7 +203,6 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Streaks</CardTitle>
-            <CardDescription>Consecutive days with trips (streak) versus consecutive days without (pause).</CardDescription>
           </CardHeader>
           <CardContent>
             <StreaksAndPauses
@@ -215,6 +214,7 @@ const Stats: React.FC<StatsProps> = ({
               longestSuccessfulStreakBeforeDriverCancellation={longestSuccessfulStreakBeforeDriverCancellation}
               longestDriverCancellationStreak={longestDriverCancellationStreak}
               longestConsecutiveTripsChain={longestConsecutiveTripsChain}
+              mostTripsInADay={data.mostSuccessfulTripsInADay}
             />
           </CardContent>
         </Card>
