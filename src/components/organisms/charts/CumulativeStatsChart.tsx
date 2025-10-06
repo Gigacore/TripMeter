@@ -6,8 +6,7 @@ import { DistanceUnit } from '@/App';
 import { formatCurrency } from '@/utils/currency';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Stat from '@/components/atoms/Stat';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formatDate = timeFormat('%b %d, %Y');
 
@@ -147,6 +146,14 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
   const [selection, setSelection] = React.useState<{ start: number | null, end: number | null }>({ start: null, end: null });
   const [isSelecting, setIsSelecting] = React.useState(false);
 
+  const handleYearChange = (value: string) => {
+    if (value === 'all') {
+      setSelectedYear('all');
+    } else {
+      setSelectedYear(Number(value));
+    }
+  };
+
   const handleMouseUp = () => setIsSelecting(false);
   const handleResetSelection = () => setSelection({ start: null, end: null });
 
@@ -209,20 +216,18 @@ const CumulativeStatsChart: React.FC<CumulativeStatsChartProps> = ({ rows, dista
             <TabsTrigger value="distance">Distance</TabsTrigger>
             <TabsTrigger value="fare" disabled={!activeCurrency}>Fare</TabsTrigger>
           </TabsList>
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8">
-                  {selectedYear === 'all' ? 'All Time' : selectedYear}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => setSelectedYear('all')}>All Time</DropdownMenuItem>
+          <div className="flex items-center gap-2">  
+            <Select value={String(selectedYear)} onValueChange={handleYearChange}>
+              <SelectTrigger id="year-filter" className="w-[120px]">
+                <SelectValue placeholder="Select year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
                 {availableYears.map(year => (
-                  <DropdownMenuItem key={year} onSelect={() => setSelectedYear(year)}>{year}</DropdownMenuItem>
+                  <SelectItem key={year} value={String(year)}>{year}</SelectItem>
                 ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </SelectContent>
+            </Select>
           </div>
           {selection.start && (
             <button onClick={handleResetSelection} className="text-xs text-muted-foreground hover:text-foreground">Reset Selection</button>
