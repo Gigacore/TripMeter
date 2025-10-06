@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { CSVRow } from '../../services/csvParser';
 import { MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { featureCollection, point } from '@turf/helpers';
+import clustersDbscan from '@turf/clusters-dbscan';
 import { Button } from '@/components/ui/button';
 
 interface TopLocationsProps {
@@ -30,45 +32,49 @@ const getMostCommonAddress = (addresses: (string | undefined)[]): string => {
 const analyzeLocations = (
   trips: CSVRow[],
   latField: keyof CSVRow,
-  lngField: keyof CSVRow,
-  addressField: keyof CSVRow,
-  gridSize: number
+  lngField: keyof CSVRow
 ): LocationData[] => {
-  const grid: { [key: string]: { lat: number; lng: number; count: number; addresses: (string | undefined)[] } } = {};
+  const points = featureCollection(
+    trips.map((trip) => {
+      const lat = parseFloat(trip[latField] as string);
+      const lng = parseFloat(trip[lngField] as string);
+      if (isNaN(lat) || isNaN(lng)) return null;
+      return point([lng, lat], { trip });
+    }).filter((p): p is GeoJSON.Feature<GeoJSON.Point, { trip: CSVRow }> => p !== null)
+  );
 
-  trips.forEach(trip => {
-    const lat = parseFloat(trip[latField] as string);
-    const lng = parseFloat(trip[lngField] as string);
+  if (points.features.length === 0) return [];
 
-    if (isNaN(lat) || isNaN(lng)) return;
+  // Use DBSCAN for clustering.
+  // maxDistance (epsilon) is in kilometers. 0.2km = 200 meters.
+  // minPoints is the minimum number of points to form a dense region.
+  const clustered = clustersDbscan(points, 0.2, { minPoints: 3 });
 
-    const gridLat = Math.floor(lat / gridSize) * gridSize;
-    const gridLng = Math.floor(lng / gridSize) * gridSize;
-    const key = `${gridLat.toFixed(6)},${gridLng.toFixed(6)}`;
+  const clusters: { [key: number]: { points: { lat: number, lng: number }[], addresses: (string | undefined)[] } } = {};
 
-    if (!grid[key]) {
-      grid[key] = {
-        lat: gridLat + gridSize / 2,
-        lng: gridLng + gridSize / 2,
-        count: 0,
-        addresses: []
-      };
+  clustered.features.forEach(feature => {
+    const clusterId = feature.properties.cluster;
+    if (clusterId !== undefined) {
+      if (!clusters[clusterId]) {
+        clusters[clusterId] = { points: [], addresses: [] };
+      }
+      const [lng, lat] = feature.geometry.coordinates;
+      clusters[clusterId].points.push({ lat, lng });
+      const addressField = latField === 'begintrip_lat' ? 'begintrip_address' : 'dropoff_address';
+      clusters[clusterId].addresses.push(feature.properties.trip[addressField]);
     }
-
-    grid[key].count++;
-    grid[key].addresses.push(trip[addressField]);
   });
 
-  return Object.values(grid)
+  return Object.values(clusters)
+    .map(cluster => {
+      const count = cluster.points.length;
+      const avgLat = cluster.points.reduce((sum, p) => sum + p.lat, 0) / count;
+      const avgLng = cluster.points.reduce((sum, p) => sum + p.lng, 0) / count;
+      return { lat: avgLat, lng: avgLng, count, commonAddress: getMostCommonAddress(cluster.addresses) };
+    })
     .sort((a, b) => b.count - a.count)
     .slice(0, 10)
-    .map((loc, idx) => ({
-      rank: idx + 1,
-      lat: loc.lat,
-      lng: loc.lng,
-      count: loc.count,
-      commonAddress: getMostCommonAddress(loc.addresses)
-    }));
+    .map((cluster, idx) => ({ rank: idx + 1, ...cluster }));
 };
 
 const LocationTable: React.FC<{
@@ -123,15 +129,13 @@ const LocationTable: React.FC<{
 );
 
 const TopLocations: React.FC<TopLocationsProps> = ({ rows }) => {
-  const gridSize = 0.005; // Fixed grid size, ~555m
-
   const completedTrips = useMemo(() => rows.filter(row => row.status?.toLowerCase() === 'completed'), [rows]);
 
   const [pickupsExpanded, setPickupsExpanded] = useState(false);
   const [dropoffsExpanded, setDropoffsExpanded] = useState(false);
 
-  const topPickups = useMemo(() => analyzeLocations(completedTrips, 'begintrip_lat', 'begintrip_lng', 'begintrip_address', gridSize), [completedTrips]);
-  const topDropoffs = useMemo(() => analyzeLocations(completedTrips, 'dropoff_lat', 'dropoff_lng', 'dropoff_address', gridSize), [completedTrips]);
+  const topPickups = useMemo(() => analyzeLocations(completedTrips, 'begintrip_lat', 'begintrip_lng'), [completedTrips]);
+  const topDropoffs = useMemo(() => analyzeLocations(completedTrips, 'dropoff_lat', 'dropoff_lng'), [completedTrips]);
 
   if (completedTrips.length === 0) {
     return <p className="text-muted-foreground text-sm mt-2">No completed trips to analyze for top locations.</p>;
