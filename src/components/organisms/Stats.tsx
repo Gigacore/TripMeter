@@ -20,6 +20,7 @@ import CancellationBreakdownChart from './CancellationBreakdownChart';
 import StreaksAndPauses from './charts/StreaksAndPauses';
 import CumulativeStatsChart from './charts/CumulativeStatsChart';
 import FareSplitStats from './FareSplitStats';
+import TopLocations from './TopLocations';
 
 interface StatsProps {
   data: TripStats;
@@ -235,6 +236,15 @@ const Stats: React.FC<StatsProps> = ({
           </CardHeader>
           <CardContent>
             <TopCities rows={rows} distanceUnit={distanceUnit} convertDistance={data.convertDistance} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Location Hotspots</CardTitle>
+            <CardDescription>Identify your most frequent pickup and drop-off areas.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopLocations rows={rows} />
           </CardContent>
         </Card>
         <Card>
