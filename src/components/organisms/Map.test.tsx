@@ -57,6 +57,7 @@ vi.mock('leaflet', () => ({
 vi.mock('../../constants', () => ({
   greenIcon: {},
   redIcon: {},
+  blueIcon: {},
 }));
 
 vi.mock('../../utils/currency', () => ({

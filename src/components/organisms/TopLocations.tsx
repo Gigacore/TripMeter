@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { CSVRow } from '../../services/csvParser';
-import { MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { featureCollection, point } from '@turf/helpers';
 import clustersDbscan from '@turf/clusters-dbscan';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import Map from './Map';
 
 interface TopLocationsProps {
   rows: CSVRow[];
@@ -17,6 +17,7 @@ interface LocationData {
   lng: number;
   count: number;
   commonAddress: string;
+  type: 'pickup' | 'dropoff';
 }
 
 const getMostCommonAddress = (addresses: (string | undefined)[]): string => {
@@ -34,7 +35,8 @@ const getMostCommonAddress = (addresses: (string | undefined)[]): string => {
 const analyzeLocations = (
   trips: CSVRow[],
   latField: keyof CSVRow,
-  lngField: keyof CSVRow
+  lngField: keyof CSVRow,
+  type: 'pickup' | 'dropoff'
 ): LocationData[] => {
   const points = featureCollection(
     trips.map((trip) => {
@@ -72,66 +74,16 @@ const analyzeLocations = (
       const count = cluster.points.length;
       const avgLat = cluster.points.reduce((sum, p) => sum + p.lat, 0) / count;
       const avgLng = cluster.points.reduce((sum, p) => sum + p.lng, 0) / count;
-      return { lat: avgLat, lng: avgLng, count, commonAddress: getMostCommonAddress(cluster.addresses) };
+      return { lat: avgLat, lng: avgLng, count, commonAddress: getMostCommonAddress(cluster.addresses), type };
     })
     .sort((a, b) => b.count - a.count)
     .slice(0, 10)
     .map((cluster, idx) => ({ rank: idx + 1, ...cluster }));
 };
 
-const LocationTable: React.FC<{
-  locations: LocationData[];
-  type: string;
-  isExpanded: boolean;
-  onToggle: () => void;
-  canExpand: boolean;
-}> = ({ locations, type, isExpanded, onToggle, canExpand }) => (
-  <div>
-    <div className="flex items-center gap-2 mb-4">
-      <MapPin className="text-primary" size={24} />
-      <h4 className="text-lg font-semibold text-card-foreground">Top {type} Locations</h4>
-    </div>
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/50">
-          <tr className="border-b border-border">
-            <th className="text-left py-3 px-3 font-semibold text-muted-foreground">Rank</th>
-            <th className="text-left py-3 px-3 font-semibold text-muted-foreground">Trips</th>
-            <th className="text-left py-3 px-3 font-semibold text-muted-foreground">Coordinates</th>
-            <th className="text-left py-3 px-3 font-semibold text-muted-foreground">Common Address</th>
-          </tr>
-        </thead>
-        <tbody>
-          {locations.map((loc) => (
-            <tr key={loc.rank} className="border-b border-border last:border-b-0 hover:bg-muted/50">
-              <td className="py-3 px-3 font-medium text-muted-foreground w-16 text-center">
-                {loc.rank}
-              </td>
-              <td className="py-3 px-3 font-semibold text-foreground">{loc.count}</td>
-              <td className="py-3 px-3 text-muted-foreground font-mono">
-                {loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}
-              </td>
-              <td className="py-3 px-3 text-muted-foreground max-w-xs truncate" title={loc.commonAddress}>
-                {loc.commonAddress}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-    {canExpand && (
-      <div className="mt-2 text-center">
-        <Button variant="ghost" size="sm" onClick={onToggle} className="text-sm text-muted-foreground">
-          {isExpanded ? 'Show Top 5' : 'Show Top 10'}
-          {isExpanded ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
-        </Button>
-      </div>
-    )}
-  </div>
-);
-
 const TopLocations: React.FC<TopLocationsProps> = ({ rows }) => {
   const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
 
   const { cities, completedTrips } = useMemo(() => {
     const completed = rows.filter(row => row.status?.toLowerCase() === 'completed');
@@ -151,52 +103,111 @@ const TopLocations: React.FC<TopLocationsProps> = ({ rows }) => {
     return completedTrips.filter(trip => trip.city === selectedCity);
   }, [completedTrips, selectedCity]);
 
-  const [pickupsExpanded, setPickupsExpanded] = useState(false);
-  const [dropoffsExpanded, setDropoffsExpanded] = useState(false);
+  const topPickups = useMemo(() => analyzeLocations(filteredTrips, 'begintrip_lat', 'begintrip_lng', 'pickup'), [filteredTrips]);
+  const topDropoffs = useMemo(() => analyzeLocations(filteredTrips, 'dropoff_lat', 'dropoff_lng', 'dropoff'), [filteredTrips]);
 
-  const topPickups = useMemo(() => analyzeLocations(filteredTrips, 'begintrip_lat', 'begintrip_lng'), [filteredTrips]);
-  const topDropoffs = useMemo(() => analyzeLocations(filteredTrips, 'dropoff_lat', 'dropoff_lng'), [filteredTrips]);
+  const combinedLocations = useMemo(() => {
+    const combined: LocationData[] = [];
+    const maxLength = Math.max(topPickups.length, topDropoffs.length);
+    for (let i = 0; i < maxLength; i++) {
+      if (topPickups[i]) {
+        combined.push(topPickups[i]);
+      }
+      if (topDropoffs[i]) {
+        combined.push(topDropoffs[i]);
+      }
+    }
+    return combined;
+  }, [topPickups, topDropoffs]);
+
+  const locationsToShow = combinedLocations;
+
+  const handleLocationClick = (location: LocationData) => {
+    if (selectedLocation && selectedLocation.rank === location.rank && selectedLocation.type === location.type) {
+      setSelectedLocation(null); // Deselect if clicking the same row
+    } else {
+      setSelectedLocation(location);
+    }
+  };
 
   if (completedTrips.length === 0) {
     return <p className="text-muted-foreground text-sm mt-2">No completed trips to analyze for top locations.</p>;
   }
 
   return (
-    <div>
-      <div className="flex justify-end mb-4">
-        <div className="flex items-center gap-2">
-          <Select value={selectedCity} onValueChange={setSelectedCity}>
-            <SelectTrigger id="city-filter" className="w-[180px]">
-              <SelectValue placeholder="Select a city" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Cities</SelectItem>
-              {cities.map(city => (
-                <SelectItem key={city} value={city}>{city}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex justify-end">
+        <Select value={selectedCity} onValueChange={setSelectedCity}>
+          <SelectTrigger id="city-filter" className="w-full md:w-[200px]">
+            <SelectValue placeholder="Select a city" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Cities</SelectItem>
+            {cities.map(city => (
+              <SelectItem key={city} value={city}>{city}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <div className="flex flex-col gap-6">
-        {topPickups.length > 0 && (
-          <LocationTable
-            locations={pickupsExpanded ? topPickups : topPickups.slice(0, 5)}
-            type="Pickup"
-            isExpanded={pickupsExpanded}
-            onToggle={() => setPickupsExpanded(!pickupsExpanded)}
-            canExpand={topPickups.length > 5}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex flex-col">
+          <div className="bg-card rounded-xl shadow-sm overflow-hidden flex-grow border border-border">
+            <div className="p-4 border-b border-border">
+              <div className="flex items-center space-x-2">
+                <MapPin className="text-primary" />
+                <h2 className="text-lg font-semibold text-card-foreground">Top Pickup & Drop-off Locations</h2>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="overflow-auto h-[570px]">
+                <table className="w-full text-sm text-left relative">
+                  <thead className="sticky top-0 z-10">
+                    <tr>
+                      <th scope="col" className="px-4 py-3 font-medium bg-muted/50 text-xs text-muted-foreground uppercase">Rank</th>
+                      <th scope="col" className="px-4 py-3 font-medium bg-muted/50 text-xs text-muted-foreground uppercase">Type</th>
+                      <th scope="col" className="px-4 py-3 font-medium bg-muted/50 text-xs text-muted-foreground uppercase">Trips</th>
+                      <th scope="col" className="px-4 py-3 font-medium bg-muted/50 text-xs text-muted-foreground uppercase">Common Address</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {locationsToShow.map((loc) => (
+                      <tr key={`${loc.type}-${loc.rank}`}
+                        className={cn(
+                          "border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer",
+                          selectedLocation?.rank === loc.rank && selectedLocation?.type === loc.type && "bg-primary/10 dark:bg-primary/20"
+                        )}
+                        onClick={() => handleLocationClick(loc)}>
+                        <td className="px-4 py-4 font-medium">{loc.rank}</td>
+                        <td className="px-4 py-4">
+                          <span className={cn(
+                            "inline-flex items-center px-2 py-1 text-xs font-medium rounded-full capitalize",
+                            loc.type === 'pickup' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                          )}>
+                            {loc.type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">{loc.count}</td>
+                        <td className="px-4 py-4 max-w-xs truncate" title={loc.commonAddress}>{loc.commonAddress}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+            </div>
+          </div>
+        </div>
+        <div className="w-full h-96 lg:h-auto min-h-[400px] rounded-xl shadow-sm overflow-hidden">
+          <Map
+            rows={[]}
+            focusedTrip={null}
+            distanceUnit="miles"
+            convertDistance={(m) => m}
+            locations={selectedLocation ? [selectedLocation] : locationsToShow}
+            selectedLocation={selectedLocation}
           />
-        )}
-        {topDropoffs.length > 0 && (
-          <LocationTable
-            locations={dropoffsExpanded ? topDropoffs : topDropoffs.slice(0, 5)}
-            type="Drop-off"
-            isExpanded={dropoffsExpanded}
-            onToggle={() => setDropoffsExpanded(!dropoffsExpanded)}
-            canExpand={topDropoffs.length > 5}
-          />
-        )}
+        </div>
       </div>
     </div>
   );
