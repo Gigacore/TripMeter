@@ -76,7 +76,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
         </ResponsiveContainer>
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-        <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
+        <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all-map')} />
         <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
         <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
         <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />

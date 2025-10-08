@@ -107,6 +107,17 @@ describe('TripSummaryChart', () => {
     }
   });
 
+  it('should call onShowTripList with "all-map" when Total Requests stat is clicked', async () => {
+    const user = userEvent.setup();
+    render(<TripSummaryChart {...mockProps} />);
+
+    const totalRequestsStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Total Requests'));
+    if (totalRequestsStat) {
+      await user.click(totalRequestsStat);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith('all-map');
+    }
+  });
+
   it('should return null if there are no trips', () => {
     const noTripData = { ...mockTripData, totalTrips: 0, successfulTrips: 0, riderCanceledTrips: 0, driverCanceledTrips: 0 };
     const { container } = render(<TripSummaryChart {...mockProps} data={noTripData} />);

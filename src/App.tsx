@@ -11,6 +11,7 @@ import { Spinner } from '@/components/ui/spinner';
 import Header from './components/organisms/Header';
 import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
+import MapModal from './components/organisms/charts/MapModal';
 import MainView from './components/organisms/MainView';
 import LandingPage from './components/organisms/LandingPage';
 
@@ -34,6 +35,7 @@ function App() {
   const [tripList, setTripList] = useState<CSVRow[]>([]);
   const [tripListTitle, setTripListTitle] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
 
   const [tripData, isAnalyzing] = useTripData(rows, distanceUnit);
 
@@ -62,6 +64,9 @@ function App() {
     let title = '';
 
     switch (type) {
+      case 'all-map':
+        setIsMapModalOpen(true);
+        return;
       case 'all':
         list = rows;
         title = `All Trip Requests (${rows.length})`;
@@ -124,6 +129,13 @@ function App() {
         toggleMenu={toggleSettings}
       />
 
+      <MapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        rows={rows}
+        distanceUnit={distanceUnit}
+        convertDistance={convertDistance}
+      />
       {rows.length === 0 ? (
         <LandingPage
           onFileSelect={handleFileSelect}
