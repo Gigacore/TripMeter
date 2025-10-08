@@ -32,8 +32,8 @@ vi.mock('../../../utils/formatters', () => ({
   formatDurationWithSeconds: (minutes: number) => `${minutes} min`,
 }));
 
-const mockLongestWaitRow: CSVRow = { id: 'longest_wait' };
-const mockShortestWaitRow: CSVRow = { id: 'shortest_wait' };
+const mockLongestWaitRow: CSVRow = { 'Request id': 'longest_wait' };
+const mockShortestWaitRow: CSVRow = { 'Request id': 'shortest_wait' };
 
 const mockTripData: TripStats = {
   totalWaitingTime: 60,
@@ -87,17 +87,21 @@ const mockProps = {
   rows: [
     { status: 'completed', request_time: '2023-01-01T10:00:00Z', begin_trip_time: '2023-01-01T10:10:00Z' },
   ],
-  onFocusOnTrip: vi.fn(),
+  onShowTripList: vi.fn(),
 };
 
 describe('WaitingTimeCharts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should render the distribution chart and stats', () => {
     render(<WaitingTimeCharts {...mockProps} />);
     expect(screen.getAllByTestId('bar-chart').length).toBeGreaterThan(0);
 
     const stats = screen.getAllByTestId('stat');
-    expect(stats.some(s => s.textContent?.includes('Total'))).toBe(true);
-    expect(stats.some(s => s.textContent?.includes('Average'))).toBe(true);
+    expect(stats.some(s => s.textContent?.includes('Total Wait'))).toBe(true);
+    expect(stats.some(s => s.textContent?.includes('Average Wait'))).toBe(true);
   });
 
   it('should render the "Waited Longer Than Rode" section when applicable', () => {
@@ -112,23 +116,23 @@ describe('WaitingTimeCharts', () => {
     expect(screen.queryByText('Waited Longer Than Rode')).not.toBeInTheDocument();
   });
 
-  it('should call onFocusOnTrip when longest waiting time stat is clicked', async () => {
+  it('should call onShowTripList when longest waiting time stat is clicked', async () => {
     const user = userEvent.setup();
     render(<WaitingTimeCharts {...mockProps} />);
-    const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest'));
+    const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest Wait'));
     if (longestStat) {
       await user.click(longestStat);
-      expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockLongestWaitRow);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockLongestWaitRow['Request id']}`);
     }
   });
 
-  it('should call onFocusOnTrip when shortest waiting time stat is clicked', async () => {
+  it('should call onShowTripList when shortest waiting time stat is clicked', async () => {
     const user = userEvent.setup();
     render(<WaitingTimeCharts {...mockProps} />);
-    const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest'));
+    const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest Wait'));
     if (shortestStat) {
       await user.click(shortestStat);
-      expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockShortestWaitRow);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockShortestWaitRow['Request id']}`);
     }
   });
 });

@@ -53,11 +53,6 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
     ].filter(link => link.value > 0),
   };
 
-  const renderSankeyNode = React.useCallback(
-    (props: any) => <SankeyNode {...props} onShowTripList={onShowTripList} />,
-    [onShowTripList]
-  );
-
   if (sankeyData.links.length === 0) return null;
 
   return (
@@ -66,7 +61,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
         <ResponsiveContainer width="100%" height={500}>
           <Sankey
             data={sankeyData}
-            node={renderSankeyNode}
+            node={<SankeyNode onShowTripList={onShowTripList} />}
             nodePadding={50}
             margin={{ left: 100, right: 100, top: 5, bottom: 5 }}
             link={{ stroke: '#77c878' }}

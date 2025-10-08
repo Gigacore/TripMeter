@@ -116,6 +116,7 @@ const Stats: React.FC<StatsProps> = ({
               data={data}
               rows={rows}
               onFocusOnTrip={onFocusOnTrip}
+              onShowTripList={onShowTripList}
             />
           </CardContent>
         </Card>
@@ -132,6 +133,7 @@ const Stats: React.FC<StatsProps> = ({
               activeCurrency={activeCurrency}
               onFocusOnTrip={onFocusOnTrip}
               convertDistance={data.convertDistance}
+              onShowTripList={onShowTripList}
             />
           </CardContent>
         </Card>
@@ -148,6 +150,7 @@ const Stats: React.FC<StatsProps> = ({
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
               onFocusOnTrip={onFocusOnTrip}
+              onShowTripList={onShowTripList}
             />
           </CardContent>
         </Card>
@@ -161,6 +164,7 @@ const Stats: React.FC<StatsProps> = ({
               data={data}
               rows={rows}
               onFocusOnTrip={onFocusOnTrip}
+              onShowTripList={onShowTripList}
             />
           </CardContent>
         </Card>

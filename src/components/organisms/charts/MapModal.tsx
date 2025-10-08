@@ -117,9 +117,9 @@ const MapModal: React.FC<MapModalProps> = ({
                 All Requests ({rows.length})
               </div>
               <ul className="space-y-1">
-                {rows.map((row) => (
+                {rows.map((row, index) => (
                   <li
-                    key={row['Request id']}
+                    key={`${row['Request id'] || 'row'}-${index}`}
                     onClick={() => handleSelectTrip(row)}
                     className={cn("flex gap-3 p-2.5 cursor-pointer hover:bg-muted rounded-lg text-sm transition-colors", selectedTrip?.['Request id'] === row['Request id'] && "bg-muted")}
                   >

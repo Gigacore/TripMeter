@@ -30,8 +30,8 @@ vi.mock('../../../utils/formatters', () => ({
   formatDurationWithSeconds: (minutes: number) => `${minutes} min`,
 }));
 
-const mockLongestTripRow: CSVRow = { id: 'longest' };
-const mockShortestTripRow: CSVRow = { id: 'shortest' };
+const mockLongestTripRow: CSVRow = { 'Request id': 'longest' };
+const mockShortestTripRow: CSVRow = { 'Request id': 'shortest' };
 
 const mockTripData: TripStats = {
   totalTripDuration: 1200,
@@ -71,36 +71,40 @@ const mockProps = {
   rows: [
     { status: 'completed', begin_trip_time: '2023-01-01T10:00:00Z', dropoff_time: '2023-01-01T10:30:00Z' },
   ],
-  onFocusOnTrip: vi.fn(),
+  onShowTripList: vi.fn(),
 };
 
 describe('DurationCharts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should render the chart and stats', () => {
     render(<DurationCharts {...mockProps} />);
     expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
 
     const stats = screen.getAllByTestId('stat');
-    expect(stats.some(s => s.textContent?.includes('Total'))).toBe(true);
-    expect(stats.some(s => s.textContent?.includes('Average'))).toBe(true);
+    expect(stats.some(s => s.textContent?.includes('Total Duration'))).toBe(true);
+    expect(stats.some(s => s.textContent?.includes('Average Duration'))).toBe(true);
   });
 
-  it('should call onFocusOnTrip when longest trip stat is clicked', async () => {
+  it('should call onShowTripList when longest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<DurationCharts {...mockProps} />);
     const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest'));
     if (longestStat) {
       await user.click(longestStat);
-      expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockLongestTripRow);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockLongestTripRow['Request id']}`);
     }
   });
 
-  it('should call onFocusOnTrip when shortest trip stat is clicked', async () => {
+  it('should call onShowTripList when shortest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<DurationCharts {...mockProps} />);
     const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest'));
     if (shortestStat) {
       await user.click(shortestStat);
-      expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockShortestTripRow);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockShortestTripRow['Request id']}`);
     }
   });
 });

@@ -27,8 +27,8 @@ vi.mock('../../atoms/Stat', () => ({
   ),
 }));
 
-const mockFastestTripRow: CSVRow = { id: 'fastest' };
-const mockSlowestTripRow: CSVRow = { id: 'slowest' };
+const mockFastestTripRow: CSVRow = { 'Request id': 'fastest' };
+const mockSlowestTripRow: CSVRow = { 'Request id': 'slowest' };
 
 const mockTripData: TripStats = {
   avgSpeed: 30,
@@ -71,12 +71,16 @@ const mockTripData: TripStats = {
 const mockProps = {
   data: mockTripData,
   rows: [],
-  distanceUnit: 'mph' as DistanceUnit,
+  distanceUnit: 'miles' as DistanceUnit,
   activeCurrency: 'USD',
-  onFocusOnTrip: vi.fn(),
+  onShowTripList: vi.fn(),
 };
 
 describe('SpeedCharts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should render the chart and stats', () => {
     render(<SpeedCharts {...mockProps} />);
     expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
@@ -86,23 +90,23 @@ describe('SpeedCharts', () => {
     expect(stats.some(s => s.textContent?.includes('Fastest Trip'))).toBe(true);
   });
 
-  it('should call onFocusOnTrip when fastest trip stat is clicked', async () => {
+  it('should call onShowTripList when fastest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<SpeedCharts {...mockProps} />);
     const fastestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Fastest Trip'));
     if (fastestStat) {
       await user.click(fastestStat);
-      expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockFastestTripRow);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockFastestTripRow['Request id']}`);
     }
   });
 
-  it('should call onFocusOnTrip when slowest trip stat is clicked', async () => {
+  it('should call onShowTripList when slowest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<SpeedCharts {...mockProps} />);
     const slowestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Slowest Trip'));
     if (slowestStat) {
       await user.click(slowestStat);
-      expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockSlowestTripRow);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockSlowestTripRow['Request id']}`);
     }
   });
 });

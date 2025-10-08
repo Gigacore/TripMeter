@@ -65,6 +65,18 @@ function App() {
     let list: CSVRow[] = [];
     let title = '';
 
+    if (type.startsWith('single-trip-map:')) {
+      const tripId = type.split(':')[1];
+      const trip = rows.find(r => r['Request id'] === tripId);
+      if (trip) {
+        setMapModalRows([trip]);
+        setMapModalTitle('Trip Details');
+        setIsMapModalOpen(true);
+      }
+      return;
+    }
+
+
     switch (type) {
       case 'all-map':
         setMapModalRows(rows);
