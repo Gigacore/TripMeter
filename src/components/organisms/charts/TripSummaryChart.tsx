@@ -77,10 +77,10 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
         <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all-map')} />
-        <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
-        <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
-        <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />
-        {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
+        <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful-map')} />
+        <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled-map')} />
+        <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled-map')} />
+        {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled-map')} />}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ interface MapModalProps {
   convertDistance: (miles: number) => number;
   isOpen: boolean;
   onClose: () => void;
+  title: string;
 }
 
 const StatusIcon = ({ status }: { status: string }) => {
@@ -37,6 +38,7 @@ const MapModal: React.FC<MapModalProps> = ({
   convertDistance,
   isOpen,
   onClose,
+  title,
 }) => {
   const getTripDate = (trip: CSVRow): Date | null => {
     const dateKeys = ['Request timestamp', 'Request Time', 'request_time_utc'];
@@ -106,12 +108,12 @@ const MapModal: React.FC<MapModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>All Trip Requests</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-row flex-grow gap-4 min-h-0">
           <div className="w-[380px] flex-shrink-0 flex flex-col border-r pr-4">
             <div className="overflow-y-auto flex-grow space-y-2 pt-2">
-              <div className="text-sm font-medium text-muted-foreground px-2">
+              <div className="text-sm font-medium text-muted-foreground px-2 pb-2">
                 All Requests ({rows.length})
               </div>
               <ul className="space-y-1">

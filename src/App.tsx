@@ -36,6 +36,8 @@ function App() {
   const [tripListTitle, setTripListTitle] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
+  const [mapModalRows, setMapModalRows] = useState<CSVRow[]>([]);
+  const [mapModalTitle, setMapModalTitle] = useState<string>('');
 
   const [tripData, isAnalyzing] = useTripData(rows, distanceUnit);
 
@@ -65,8 +67,36 @@ function App() {
 
     switch (type) {
       case 'all-map':
+        setMapModalRows(rows);
+        setMapModalTitle(`All Trip Requests (${rows.length})`);
         setIsMapModalOpen(true);
         return;
+      case 'successful-map':
+        list = rows.filter(r => r.status?.toLowerCase() === 'completed');
+        setMapModalRows(list);
+        setMapModalTitle(`Successful Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      case 'rider_canceled-map':
+        list = rows.filter(r => r.status?.toLowerCase() === 'rider_canceled');
+        setMapModalRows(list);
+        setMapModalTitle(`Rider Canceled Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      case 'driver_canceled-map':
+        list = rows.filter(r => r.status?.toLowerCase() === 'driver_canceled');
+        setMapModalRows(list);
+        setMapModalTitle(`Driver Canceled Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      case 'unfulfilled-map': {
+        const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
+        list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase() || ''));
+        setMapModalRows(list);
+        setMapModalTitle(`Unfulfilled Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      }
       case 'all':
         list = rows;
         title = `All Trip Requests (${rows.length})`;
@@ -132,7 +162,8 @@ function App() {
       <MapModal
         isOpen={isMapModalOpen}
         onClose={() => setIsMapModalOpen(false)}
-        rows={rows}
+        rows={mapModalRows}
+        title={mapModalTitle}
         distanceUnit={distanceUnit}
         convertDistance={convertDistance}
       />
