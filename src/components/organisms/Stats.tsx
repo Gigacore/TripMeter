@@ -117,7 +117,7 @@ const Stats: React.FC<StatsProps> = ({
             <DurationCharts
               data={data}
               rows={rows}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
               onShowTripList={onShowTripList}
             />
           </CardContent>
@@ -133,9 +133,8 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
               convertDistance={data.convertDistance}
-              onShowTripList={onShowTripList}
             />
           </CardContent>
         </Card>

@@ -12,7 +12,7 @@ interface DistanceChartsProps {
   rows: CSVRow[];
   distanceUnit: DistanceUnit;
   activeCurrency: string | null;
-  onShowTripList: (type: string) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
   convertDistance: (miles: number) => number;
 }
 
@@ -62,7 +62,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
   rows,
   distanceUnit,
   activeCurrency,
-  onShowTripList,
+  onFocusOnTrips,
   convertDistance,
 }) => {
   const {
@@ -129,10 +129,10 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
         </div>
       )}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-          <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} onClick={() => onShowTripList('completed-map')} />
-          <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} onClick={() => onShowTripList('completed-map')} />
-          <Stat label="Longest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onShowTripList(`single-trip-map:${longestTripByDistRow['Request id']}`)} />
-          <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onShowTripList(`single-trip-map:${shortestTripByDistRow['Request id']}`)} />
+          <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+          <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
+          <Stat label="Farthest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrips([longestTripByDistRow], 'Farthest Trip')} />
+          <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrips([shortestTripByDistRow], 'Shortest Trip')} />
           {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
             <Stat
               label={`Cost per ${distanceUnit}`}

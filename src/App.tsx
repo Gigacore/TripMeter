@@ -68,7 +68,7 @@ function App() {
     setFocusedTrip(null);
   };
 
-  const handleShowTripList = (type: string) => {
+  const handleShowTripList = (type: string, trips?: CSVRow[]) => {
     if (rows.length === 0) return;
 
     let list: CSVRow[] = [];
