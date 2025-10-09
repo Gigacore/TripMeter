@@ -55,6 +55,15 @@ function App() {
     setFocusedTrip(tripRow);
   };
 
+  const handleFocusOnTrips = (tripRows: CSVRow[], title?: string) => {
+    setMapModalRows(tripRows);
+    setMapModalTitle(
+      title ||
+        `Found ${tripRows.length} trip${tripRows.length > 1 ? 's' : ''}`
+    );
+    setIsMapModalOpen(true);
+  };
+
   const handleShowAll = () => {
     setFocusedTrip(null);
   };
@@ -202,6 +211,7 @@ function App() {
           tripListTitle={tripListTitle}
           onShowAll={handleShowAll}
           onFocusOnTrip={handleFocusOnTrip}
+          onFocusOnTrips={handleFocusOnTrips}
           onShowTripList={handleShowTripList}
           onFileSelect={handleFileSelect}
           onBackToStats={() => setSidebarView('stats')}

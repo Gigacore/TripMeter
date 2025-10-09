@@ -19,6 +19,7 @@ interface MainViewProps {
   tripListTitle: string;
   onShowAll: () => void;
   onFocusOnTrip: (tripRow: CSVRow) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
   onShowTripList: (type: string) => void;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBackToStats: () => void;
@@ -37,6 +38,7 @@ const MainView: React.FC<MainViewProps> = ({
   tripListTitle,
   onShowAll,
   onFocusOnTrip,
+  onFocusOnTrips,
   onShowTripList,
   onFileSelect,
   onBackToStats,
@@ -53,7 +55,7 @@ const MainView: React.FC<MainViewProps> = ({
             distanceUnit={distanceUnit}
             convertDistance={convertDistance}
           />
-        <Stats data={tripData} onFocusOnTrip={onFocusOnTrip} onShowTripList={onShowTripList} distanceUnit={distanceUnit} rows={rows} />
+        <Stats data={tripData} onFocusOnTrip={onFocusOnTrip} onFocusOnTrips={onFocusOnTrips} onShowTripList={onShowTripList} distanceUnit={distanceUnit} rows={rows} />
         <div className="md:col-span-1 flex flex-col gap-4">
           {/* <Sidebar
             focusedTrip={focusedTrip}

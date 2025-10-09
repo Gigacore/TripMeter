@@ -27,6 +27,7 @@ import ConsecutiveTrips from './ConsecutiveTrips';
 interface StatsProps {
   data: TripStats;
   onFocusOnTrip: (tripRow: CSVRow) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
   onShowTripList: (type: string) => void;
   distanceUnit: DistanceUnit;
   rows: CSVRow[];
@@ -35,6 +36,7 @@ interface StatsProps {
 const Stats: React.FC<StatsProps> = ({
   data,
   onFocusOnTrip,
+  onFocusOnTrips,
   onShowTripList,
   distanceUnit,
   rows,
@@ -65,7 +67,7 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               activeCurrency={activeCurrency}
               setActiveCurrency={setActiveCurrency}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
             />
           </CardContent>
         </Card>
