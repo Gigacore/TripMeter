@@ -12,14 +12,15 @@ interface SankeyNodeProps {
 }
 
 const SankeyNode: React.FC<SankeyNodeProps> = ({ x, y, width, height, index, payload, onShowTripList }) => {
-  const isClickable = payload.name !== 'Total Requests';
+  const isClickable = payload.name === 'Total Requests' || payload.value > 0;
   const handleClick = () => {
     if (!isClickable) return;
     const typeMap: { [key: string]: string } = {
-      'Successful': 'successful',
-      'Rider Canceled': 'rider_canceled',
-      'Driver Canceled': 'driver_canceled',
-      'Unfulfilled': 'unfulfilled',
+      'Successful': 'successful-map',
+      'Rider Canceled': 'rider_canceled-map',
+      'Driver Canceled': 'driver_canceled-map',
+      'Unfulfilled': 'unfulfilled-map',
+      'Total Requests': 'all-map',
     };
     onShowTripList(typeMap[payload.name]);
   };
