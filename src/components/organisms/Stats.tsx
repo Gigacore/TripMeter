@@ -150,8 +150,7 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
-              onFocusOnTrip={onFocusOnTrip}
-              onShowTripList={onShowTripList}
+              onFocusOnTrips={onFocusOnTrips}
             />
           </CardContent>
         </Card>
@@ -164,8 +163,7 @@ const Stats: React.FC<StatsProps> = ({
             <WaitingTimeCharts
               data={data}
               rows={rows}
-              onFocusOnTrip={onFocusOnTrip}
-              onShowTripList={onShowTripList}
+              onFocusOnTrips={onFocusOnTrips}
             />
           </CardContent>
         </Card>
