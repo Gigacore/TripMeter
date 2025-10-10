@@ -3,6 +3,8 @@ import { add, multiply, divide } from '../utils/currency';
 import { KM_PER_MILE } from '../constants';
 import { CSVRow } from '../services/csvParser';
 import { DistanceUnit } from '../App';
+import { point } from '@turf/helpers';
+import distance from '@turf/distance';
 
 export interface YearlyStat {
   year: number;
@@ -93,6 +95,12 @@ export interface TripStats {
   };
   tripsByYear: YearlyStat[];
   avgSpeedByDayOfWeek: { day: string; avgSpeed: number }[];
+  mostSuccessfulTripsInADay: {
+    count: number;
+    date: number | null;
+    trips: CSVRow[];
+  };
+  longestConsecutiveTripsChain: CSVRow[];
   convertDistance: (miles: number) => number;
 }
 
@@ -167,6 +175,12 @@ const INITIAL_STATS: TripStats = {
   longestDriverCancellationStreak: { count: 0, startDate: null, endDate: null },
   tripsByYear: [],
   avgSpeedByDayOfWeek: [],
+  longestConsecutiveTripsChain: [],
+  mostSuccessfulTripsInADay: {
+    count: 0,
+    date: null,
+    trips: [],
+  },
   convertDistance: (miles: number) => miles,
 };
 
@@ -235,6 +249,32 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           lowestFare: {},
         });
 
+        let longestConsecutiveTripsChain: CSVRow[] = [];
+        let currentConsecutiveTripsChain: CSVRow[] = [];
+
+        const tripsByDay: { [key: string]: CSVRow[] } = {};
+
+        rows.forEach(row => {
+          if (row.status?.toLowerCase() === 'completed' && row.request_time) {
+            const date = new Date(row.request_time).toLocaleDateString('en-CA', { timeZone: 'UTC' }); // YYYY-MM-DD format
+            if (!tripsByDay[date]) {
+              tripsByDay[date] = [];
+            }
+            tripsByDay[date].push(row);
+          }
+        });
+    
+        let maxTrips = 0;
+        let maxDate: number | null = null;
+        let maxTripsRows: CSVRow[] = [];
+    
+        for (const date in tripsByDay) {
+          if (tripsByDay[date].length > maxTrips) {
+            maxTrips = tripsByDay[date].length;
+            maxDate = new Date(date).getTime();
+            maxTripsRows = tripsByDay[date];
+          }
+        }
         // Main processing loop
         sortedRows.forEach((r: CSVRow) => {
           const status = r.status?.toLowerCase().trim();
@@ -488,6 +528,53 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           }
         });
 
+        // Calculate longest consecutive trips chain
+        const completedTripsSorted = sortedRows
+          .filter(r => r.status?.toLowerCase() === 'completed' && r.begin_trip_time && r.dropoff_time)
+          .sort((a, b) => new Date(a.begin_trip_time!).getTime() - new Date(b.begin_trip_time!).getTime());
+
+        if (completedTripsSorted.length > 0) {
+          currentConsecutiveTripsChain = [completedTripsSorted[0]];
+
+          for (let i = 1; i < completedTripsSorted.length; i++) {
+            const prevTrip = completedTripsSorted[i - 1];
+            const currentTrip = completedTripsSorted[i];
+
+            const prevDropoffTime = safeParseDate(prevTrip.dropoff_time);
+            const currentBeginTime = safeParseDate(currentTrip.begin_trip_time);
+
+            if (prevDropoffTime?.toDateString() === currentBeginTime?.toDateString()) {
+              const prevDropoffLat = safeParseFloat(prevTrip.dropoff_lat);
+              const prevDropoffLng = safeParseFloat(prevTrip.dropoff_lng);
+              const currentBeginLat = safeParseFloat(currentTrip.begintrip_lat);
+              const currentBeginLng = safeParseFloat(currentTrip.begintrip_lng);
+
+              if (prevDropoffLat && prevDropoffLng && currentBeginLat && currentBeginLng) {
+                const from = point([prevDropoffLng, prevDropoffLat]);
+                const to = point([currentBeginLng, currentBeginLat]);
+                const dist = distance(from, to, { units: 'kilometers' });
+
+                if (dist <= 0.2) { // 200 meters threshold
+                  currentConsecutiveTripsChain.push(currentTrip);
+                } else {
+                  if (currentConsecutiveTripsChain.length > longestConsecutiveTripsChain.length) {
+                    longestConsecutiveTripsChain = [...currentConsecutiveTripsChain];
+                  }
+                  currentConsecutiveTripsChain = [currentTrip];
+                }
+              }
+            } else {
+              if (currentConsecutiveTripsChain.length > longestConsecutiveTripsChain.length) {
+                longestConsecutiveTripsChain = [...currentConsecutiveTripsChain];
+              }
+              currentConsecutiveTripsChain = [currentTrip];
+            }
+          }
+        }
+        if (currentConsecutiveTripsChain.length > longestConsecutiveTripsChain.length) {
+          longestConsecutiveTripsChain = [...currentConsecutiveTripsChain];
+        }
+
         // Final check for streaks at the end of the data
         if (currentSuccessfulStreak.count > longestSuccessfulStreakBeforeCancellation.count) {
           longestSuccessfulStreakBeforeCancellation = { ...currentSuccessfulStreak };
@@ -669,6 +756,12 @@ export const useTripData = (rows: CSVRow[], distanceUnit: DistanceUnit): [TripSt
           totalRidingTimeForLongerWaits,
           tripsByYear: formattedTripsByYear,
           avgSpeedByDayOfWeek,
+          longestConsecutiveTripsChain,
+          mostSuccessfulTripsInADay: {
+            count: maxTrips,
+            date: maxDate,
+            trips: maxTripsRows,
+          },
           convertDistance,
           // Initialize fields that will be set below
           avgTripDuration: 0,

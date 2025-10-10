@@ -11,6 +11,7 @@ import { Spinner } from '@/components/ui/spinner';
 import Header from './components/organisms/Header';
 import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
+import MapModal from './components/organisms/charts/MapModal';
 import MainView from './components/organisms/MainView';
 import LandingPage from './components/organisms/LandingPage';
 
@@ -34,6 +35,9 @@ function App() {
   const [tripList, setTripList] = useState<CSVRow[]>([]);
   const [tripListTitle, setTripListTitle] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
+  const [mapModalRows, setMapModalRows] = useState<CSVRow[]>([]);
+  const [mapModalTitle, setMapModalTitle] = useState<string>('');
 
   const [tripData, isAnalyzing] = useTripData(rows, distanceUnit);
 
@@ -51,17 +55,69 @@ function App() {
     setFocusedTrip(tripRow);
   };
 
+  const handleFocusOnTrips = (tripRows: CSVRow[], title?: string) => {
+    setMapModalRows(tripRows);
+    setMapModalTitle(
+      title ||
+        `Found ${tripRows.length} trip${tripRows.length > 1 ? 's' : ''}`
+    );
+    setIsMapModalOpen(true);
+  };
+
   const handleShowAll = () => {
     setFocusedTrip(null);
   };
 
-  const handleShowTripList = (type: string) => {
+  const handleShowTripList = (type: string, trips?: CSVRow[]) => {
     if (rows.length === 0) return;
 
     let list: CSVRow[] = [];
     let title = '';
 
+    if (type.startsWith('single-trip-map:')) {
+      const tripId = type.split(':')[1];
+      const trip = rows.find(r => r['Request id'] === tripId);
+      if (trip) {
+        setMapModalRows([trip]);
+        setMapModalTitle('Trip Details');
+        setIsMapModalOpen(true);
+      }
+      return;
+    }
+
+
     switch (type) {
+      case 'all-map':
+        setMapModalRows(rows);
+        setMapModalTitle(`All Trip Requests (${rows.length})`);
+        setIsMapModalOpen(true);
+        return;
+      case 'successful-map':
+        list = rows.filter(r => r.status?.toLowerCase() === 'completed');
+        setMapModalRows(list);
+        setMapModalTitle(`Successful Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      case 'rider_canceled-map':
+        list = rows.filter(r => r.status?.toLowerCase() === 'rider_canceled');
+        setMapModalRows(list);
+        setMapModalTitle(`Rider Canceled Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      case 'driver_canceled-map':
+        list = rows.filter(r => r.status?.toLowerCase() === 'driver_canceled');
+        setMapModalRows(list);
+        setMapModalTitle(`Driver Canceled Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      case 'unfulfilled-map': {
+        const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
+        list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase() || ''));
+        setMapModalRows(list);
+        setMapModalTitle(`Unfulfilled Trips (${list.length})`);
+        setIsMapModalOpen(true);
+        return;
+      }
       case 'all':
         list = rows;
         title = `All Trip Requests (${rows.length})`;
@@ -124,6 +180,14 @@ function App() {
         toggleMenu={toggleSettings}
       />
 
+      <MapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        rows={mapModalRows}
+        title={mapModalTitle}
+        distanceUnit={distanceUnit}
+        convertDistance={convertDistance}
+      />
       {rows.length === 0 ? (
         <LandingPage
           onFileSelect={handleFileSelect}
@@ -147,6 +211,7 @@ function App() {
           tripListTitle={tripListTitle}
           onShowAll={handleShowAll}
           onFocusOnTrip={handleFocusOnTrip}
+          onFocusOnTrips={handleFocusOnTrips}
           onShowTripList={handleShowTripList}
           onFileSelect={handleFileSelect}
           onBackToStats={() => setSidebarView('stats')}

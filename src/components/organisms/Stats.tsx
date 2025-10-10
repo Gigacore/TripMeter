@@ -20,10 +20,14 @@ import CancellationBreakdownChart from './CancellationBreakdownChart';
 import StreaksAndPauses from './charts/StreaksAndPauses';
 import CumulativeStatsChart from './charts/CumulativeStatsChart';
 import FareSplitStats from './FareSplitStats';
+import TopLocations from './TopLocations';
+import MostTripsInADay from './MostTripsInADay';
+import ConsecutiveTrips from './ConsecutiveTrips';
 
 interface StatsProps {
   data: TripStats;
   onFocusOnTrip: (tripRow: CSVRow) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
   onShowTripList: (type: string) => void;
   distanceUnit: DistanceUnit;
   rows: CSVRow[];
@@ -32,11 +36,12 @@ interface StatsProps {
 const Stats: React.FC<StatsProps> = ({
   data,
   onFocusOnTrip,
+  onFocusOnTrips,
   onShowTripList,
   distanceUnit,
   rows,
 }) => {
-  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak, longestSuccessfulStreakBeforeDriverCancellation, longestDriverCancellationStreak } = data;
+  const { totalFareByCurrency, longestStreak, longestGap, longestSuccessfulStreakBeforeCancellation, longestCancellationStreak, longestSuccessfulStreakBeforeDriverCancellation, longestDriverCancellationStreak, longestConsecutiveTripsChain, mostSuccessfulTripsInADay } = data;
   const currencies = Object.keys(totalFareByCurrency);
   const [activeCurrency, setActiveCurrency] = React.useState<string | null>(currencies.length > 0 ? currencies[0] : null);
 
@@ -62,7 +67,7 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               activeCurrency={activeCurrency}
               setActiveCurrency={setActiveCurrency}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
             />
           </CardContent>
         </Card>
@@ -112,7 +117,8 @@ const Stats: React.FC<StatsProps> = ({
             <DurationCharts
               data={data}
               rows={rows}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
+              onShowTripList={onShowTripList}
             />
           </CardContent>
         </Card>
@@ -127,7 +133,7 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
               convertDistance={data.convertDistance}
             />
           </CardContent>
@@ -144,7 +150,7 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               distanceUnit={distanceUnit}
               activeCurrency={activeCurrency}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
             />
           </CardContent>
         </Card>
@@ -157,7 +163,7 @@ const Stats: React.FC<StatsProps> = ({
             <WaitingTimeCharts
               data={data}
               rows={rows}
-              onFocusOnTrip={onFocusOnTrip}
+              onFocusOnTrips={onFocusOnTrips}
             />
           </CardContent>
         </Card>
@@ -200,16 +206,18 @@ const Stats: React.FC<StatsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>Streaks</CardTitle>
-            <CardDescription>Consecutive days with trips (streak) versus consecutive days without (pause).</CardDescription>
           </CardHeader>
           <CardContent>
             <StreaksAndPauses
+              onFocusOnTrip={onFocusOnTrip}
               longestStreak={longestStreak}
               longestGap={longestGap}
               longestSuccessfulStreakBeforeCancellation={longestSuccessfulStreakBeforeCancellation}
               longestCancellationStreak={longestCancellationStreak}
               longestSuccessfulStreakBeforeDriverCancellation={longestSuccessfulStreakBeforeDriverCancellation}
               longestDriverCancellationStreak={longestDriverCancellationStreak}
+              longestConsecutiveTripsChain={longestConsecutiveTripsChain}
+              mostTripsInADay={data.mostSuccessfulTripsInADay}
             />
           </CardContent>
         </Card>
@@ -235,6 +243,15 @@ const Stats: React.FC<StatsProps> = ({
           </CardHeader>
           <CardContent>
             <TopCities rows={rows} distanceUnit={distanceUnit} convertDistance={data.convertDistance} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Location Hotspots</CardTitle>
+            <CardDescription>Identify your most frequent pickup and drop-off areas.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopLocations rows={rows} />
           </CardContent>
         </Card>
         <Card>

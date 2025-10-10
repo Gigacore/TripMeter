@@ -3,22 +3,32 @@ import L, { LatLngExpression } from 'leaflet';
 import 'leaflet.heat';
 import 'leaflet-fullscreen';
 import 'leaflet-fullscreen/dist/leaflet.fullscreen.css';
-import { greenIcon, redIcon } from '../../constants';
+import { greenIcon, redIcon, blueIcon } from '../../constants';
 import { formatCurrency } from '../../utils/currency';
 import { toNumber } from '../../utils/formatters';
 import { CSVRow } from '../../services/csvParser';
 import { DistanceUnit } from '../../App';
 
 let mapIdCounter = 0;
+
+interface Location {
+  lat: number;
+  lng: number;
+  count: number;
+  commonAddress: string;
+  type?: 'pickup' | 'dropoff';
+}
 interface MapProps {
     rows: CSVRow[];
     focusedTrip: CSVRow | null;
     layout?: any;
     distanceUnit: DistanceUnit;
     convertDistance: (miles: number) => number;
+    locations: Location[];
+    selectedLocation?: Location | null;
 }
 
-const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, convertDistance }) => {
+const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, convertDistance, locations }) => {
     const mapRef = useRef<L.Map | null>(null);
     const beginLayerRef = useRef<L.FeatureGroup | null>(null);
     const dropLayerRef = useRef<L.FeatureGroup | null>(null);
@@ -26,9 +36,10 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
     const heatLayerRef = useRef<any>(null); // Using any because leaflet.heat types are not available
 
     const fitToLayers = () => {
-        if (mapRef.current && beginLayerRef.current && dropLayerRef.current) {
-            const group = L.featureGroup([beginLayerRef.current, dropLayerRef.current]);
-            if (group.getLayers().length > 0) {
+        if (mapRef.current) {
+            const layers = [beginLayerRef.current, dropLayerRef.current].filter(Boolean) as L.FeatureGroup[];
+            const group = L.featureGroup(layers);
+            if (group && group.getLayers().length > 0) {
                 try {
                     const b = group.getBounds();
                     if (b.isValid()) {
@@ -42,7 +53,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
     };
 
     useEffect(() => {
-        if (rows.length > 0 && !mapRef.current) {
+        if ((rows.length > 0 || (locations && locations.length > 0)) && !mapRef.current) {
             const map = L.map(mapIdRef.current);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -62,7 +73,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             // Add fullscreen control
             (L.control as any).fullscreen().addTo(map);
         }
-    }, [rows]);
+    }, [rows, locations]);
 
     useEffect(() => {
         if (mapRef.current) {
@@ -161,10 +172,25 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
 
         heatLayerRef.current?.setLatLngs(heatPoints);
 
-        if (rows.length > 0 && !focusedTrip) {
+        if (locations) {
+            locations.forEach(loc => {
+                const icon = loc.type === 'pickup' ? greenIcon : loc.type === 'dropoff' ? redIcon : blueIcon;
+                const marker = L.marker([loc.lat, loc.lng], { icon });
+                marker.bindPopup(`
+                    <b>Location Hotspot</b><br>
+                    <b>Trip Count:</b> ${loc.count}<br>
+                    <b>Common Address:</b> ${loc.commonAddress || 'N/A'}<br>
+                    <b>Coordinates:</b> ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}
+                `);
+                beginLayerRef.current?.addLayer(marker);
+            });
+        }
+
+        if ((rows.length > 0 || (locations && locations.length > 0)) && !focusedTrip) {
             fitToLayers();
         }
-    }, [rows, focusedTrip, convertDistance, distanceUnit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rows, focusedTrip, convertDistance, distanceUnit, locations]);
 
     return (
     <div className="flex-shrink-0 map-hero">

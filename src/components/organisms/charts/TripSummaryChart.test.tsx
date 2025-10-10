@@ -8,7 +8,7 @@ import { TripStats } from '../../../hooks/useTripData';
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
   Sankey: ({ data, node }: { data: any, node: any }) => (
-    <div data-testid="sankey-chart" data-data={JSON.stringify(data)}>
+    <div data-testid="sankey-chart" data-data={JSON.stringify(data)} data-node-is-fn={typeof node === 'function'}>
       {data.nodes.map(({ key, ...rest }: any) => node({ key, payload: rest }))}
     </div>
   ),
@@ -103,7 +103,18 @@ describe('TripSummaryChart', () => {
     const successfulStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Successful'));
     if (successfulStat) {
       await user.click(successfulStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith('successful');
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith('successful-map');
+    }
+  });
+
+  it('should call onShowTripList with "all-map" when Total Requests stat is clicked', async () => {
+    const user = userEvent.setup();
+    render(<TripSummaryChart {...mockProps} />);
+
+    const totalRequestsStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Total Requests'));
+    if (totalRequestsStat) {
+      await user.click(totalRequestsStat);
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith('all');
     }
   });
 
@@ -111,5 +122,11 @@ describe('TripSummaryChart', () => {
     const noTripData = { ...mockTripData, totalTrips: 0, successfulTrips: 0, riderCanceledTrips: 0, driverCanceledTrips: 0 };
     const { container } = render(<TripSummaryChart {...mockProps} data={noTripData} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it('should pass a function to the node prop of Sankey', () => {
+    render(<TripSummaryChart {...mockProps} />);
+    const sankeyChart = screen.getByTestId('sankey-chart');
+    expect(sankeyChart).toHaveAttribute('data-node-is-fn', 'true');
   });
 });

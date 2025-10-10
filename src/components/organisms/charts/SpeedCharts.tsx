@@ -11,7 +11,7 @@ interface SpeedChartsProps {
   rows: CSVRow[];
   distanceUnit: DistanceUnit;
   activeCurrency: string | null;
-  onFocusOnTrip: (tripRow: CSVRow) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
 }
 
 const CustomDistributionTooltip = ({ active, payload, label, unit }: TooltipProps<number, string> & { unit: string }) => {
@@ -37,7 +37,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
   rows,
   distanceUnit,
   activeCurrency,
-  onFocusOnTrip,
+  onFocusOnTrips,
 }) => {
   const {
     avgSpeed,
@@ -83,8 +83,8 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
         )}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
           <Stat label="Overall Avg. Speed" value={avgSpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
-          <Stat label="Fastest Trip" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrip(fastestTripBySpeedRow)} />
-          <Stat label="Slowest Trip" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrip(slowestTripBySpeedRow)} />
+          <Stat label="Fastest Trip" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => fastestTripBySpeedRow && onFocusOnTrips([fastestTripBySpeedRow], 'Fastest Trip')} />
+          <Stat label="Slowest Trip" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} onClick={() => slowestTripBySpeedRow && onFocusOnTrips([slowestTripBySpeedRow], 'Slowest Trip')} />
         </div>
       </div>
     </div>

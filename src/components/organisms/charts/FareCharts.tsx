@@ -10,7 +10,7 @@ interface FareChartsProps {
   rows: CSVRow[];
   activeCurrency: string | null;
   setActiveCurrency: (currency: string) => void;
-  onFocusOnTrip: (tripRow: CSVRow) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
 }
 
 const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
@@ -53,7 +53,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
   rows,
   activeCurrency,
   setActiveCurrency,
-  onFocusOnTrip,
+  onFocusOnTrips = () => {}, // Add a default empty function
 }) => {
   const {
     totalFareByCurrency,
@@ -65,16 +65,35 @@ const FareCharts: React.FC<FareChartsProps> = ({
 
   const currencies = Object.keys(totalFareByCurrency);
 
+  const completedTrips = React.useMemo(() => {
+    return rows.filter(row => row.status?.toLowerCase() === 'completed');
+  }, [rows]);
+
+  const { lowestFare, highestFare } = React.useMemo(() => {
+    if (!activeCurrency) return { lowestFare: null, highestFare: null };
+
+    const faresInCurrency = completedTrips
+      .filter(row => row.fare_currency === activeCurrency && row.fare_amount)
+      .map(row => parseFloat(row.fare_amount!));
+
+    if (faresInCurrency.length === 0) return { lowestFare: null, highestFare: null };
+
+    const min = Math.min(...faresInCurrency);
+    const max = Math.max(...faresInCurrency);
+
+    return { lowestFare: { amount: min }, highestFare: { amount: max } };
+  }, [completedTrips, activeCurrency]);
+
   const fareDistributionData = React.useMemo(() => {
-    if (!rows || rows.length === 0 || !activeCurrency) return [];
-    const fares = rows
+    if (!completedTrips || completedTrips.length === 0 || !activeCurrency) return [];
+    const fares = completedTrips
       .filter(r => r.fare_currency === activeCurrency && r.fare_amount && parseFloat(r.fare_amount) > 0)
       .map(r => parseFloat(r.fare_amount));
     if (fares.length === 0) return [];
 
     const maxFare = Math.max(...fares);
     const bucketCount = 10;
-    const bucketSize = Math.ceil(maxFare / bucketCount);
+    const bucketSize = maxFare > 0 ? Math.ceil(maxFare / bucketCount) : 1;
     if (bucketSize === 0) return [];
 
     const buckets = Array.from({ length: bucketCount }, () => 0);
@@ -87,7 +106,28 @@ const FareCharts: React.FC<FareChartsProps> = ({
       name: `${i * bucketSize}-${(i + 1) * bucketSize}`,
       count,
     }));
-  }, [rows, activeCurrency]);
+  }, [completedTrips, activeCurrency]);
+
+  const handleFocusOnTripsByFare = (amount: number) => {
+    if (!activeCurrency) return;
+    const trips = completedTrips.filter(
+      (row) =>
+        row.fare_currency === activeCurrency &&
+        row.fare_amount &&
+        parseFloat(row.fare_amount) === amount
+    );
+    if (trips.length > 0) {
+      const title = `${trips.length} trip${trips.length > 1 ? 's' : ''} with fare ${formatCurrency(amount, activeCurrency)}`;
+      onFocusOnTrips(trips, title);
+    }
+  };
+
+  const lowestFareTripsCount = lowestFare
+    ? completedTrips.filter(r => r.fare_currency === activeCurrency && parseFloat(r.fare_amount!) === lowestFare.amount).length
+    : 0;
+  const highestFareTripsCount = highestFare
+    ? completedTrips.filter(r => r.fare_currency === activeCurrency && parseFloat(r.fare_amount!) === highestFare.amount).length
+    : 0;
 
   return (
     <div className="grid grid-cols-1 gap-6">
@@ -150,18 +190,20 @@ const FareCharts: React.FC<FareChartsProps> = ({
               label="Avg. Fare"
               value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
             />
-            {lowestFareByCurrency[activeCurrency] && (
+            {lowestFare && (
               <Stat
                 label="Lowest Fare"
-                value={formatCurrency(lowestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
-                onClick={() => lowestFareByCurrency[activeCurrency] && onFocusOnTrip(lowestFareByCurrency[activeCurrency]!.row)}
+                value={formatCurrency(lowestFare.amount, activeCurrency)}
+                subValue={lowestFareTripsCount > 1 ? `(${lowestFareTripsCount} trips)` : undefined}
+                onClick={() => handleFocusOnTripsByFare(lowestFare.amount)}
               />
             )}
-            {highestFareByCurrency[activeCurrency] && (
+            {highestFare && (
               <Stat
                 label="Highest Fare"
-                value={formatCurrency(highestFareByCurrency[activeCurrency]!.amount, activeCurrency)}
-                onClick={() => highestFareByCurrency[activeCurrency] && onFocusOnTrip(highestFareByCurrency[activeCurrency]!.row)}
+                value={formatCurrency(highestFare.amount, activeCurrency)}
+                subValue={highestFareTripsCount > 1 ? `(${highestFareTripsCount} trips)` : undefined}
+                onClick={() => handleFocusOnTripsByFare(highestFare.amount)}
               />
             )}
           </div>

@@ -18,11 +18,18 @@ interface TopCitiesProps {
     convertDistance: (miles: number) => number;
 }
 
+interface TopLocation {
+    location: { lat: number; lng: number };
+    count: number;
+}
+
 const TopCities: React.FC<TopCitiesProps> = ({ rows, distanceUnit, convertDistance }) => {
     const [topCities, setTopCities] = useState<{ city: string; count: number }[]>([]);
     const [selectedCity, setSelectedCity] = useState<string | null>(null);
     const [cityRides, setCityRides] = useState<CSVRow[]>([]);
     const [cityStats, setCityStats] = useState<CityStats | null>(null);
+    const [topPickups, setTopPickups] = useState<TopLocation[]>([]);
+    const [topDropoffs, setTopDropoffs] = useState<TopLocation[]>([]);
 
     useEffect(() => {
         if (rows.length > 0) {
@@ -92,6 +99,78 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows, distanceUnit, convertDistan
         }
     }, [cityRides, convertDistance]);
 
+    useEffect(() => {
+        if (cityRides.length > 0) {
+            const gridSize = 0.001; // Corresponds to ~111 meters
+
+            const cluster = (latKey: keyof CSVRow, lngKey: keyof CSVRow) => {
+                const grid: { [key: string]: { lat: number; lng: number; count: number; addresses: (string | undefined)[] } } = {};
+
+                cityRides.forEach(ride => {
+                    const lat = parseFloat(ride[latKey] as string);
+                    const lng = parseFloat(ride[lngKey] as string);
+
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const gridLat = Math.floor(lat / gridSize) * gridSize;
+                        const gridLng = Math.floor(lng / gridSize) * gridSize;
+                        const key = `${gridLat.toFixed(5)},${gridLng.toFixed(5)}`;
+
+                        if (!grid[key]) {
+                            grid[key] = {
+                                lat: gridLat + gridSize / 2,
+                                lng: gridLng + gridSize / 2,
+                                count: 0,
+                                addresses: []
+                            };
+                        }
+                        grid[key].count++;
+                    }
+                });
+
+                return Object.values(grid)
+                    .map((data) => {
+                        return {
+                            location: { lat: data.lat, lng: data.lng },
+                            count: data.count,
+                        };
+                    })
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 5);
+            };
+
+            setTopPickups(cluster('pickup_latitude', 'pickup_longitude'));
+            setTopDropoffs(cluster('dropoff_latitude', 'dropoff_longitude'));
+
+        } else {
+            setTopPickups([]);
+            setTopDropoffs([]);
+        }
+    }, [cityRides]);
+
+    const renderLocationTable = (title: string, data: TopLocation[]) => (
+        <div>
+            <h4 className="text-md font-semibold mb-2 text-slate-800 dark:text-slate-200">{title}</h4>
+            <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+                <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-100/80 dark:bg-slate-800/80 text-xs uppercase text-slate-600 dark:text-slate-400">
+                        <tr>
+                            <th className="px-4 py-2">Location (Lat, Lng)</th>
+                            <th className="px-4 py-2 text-right">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.map((item, index) => (
+                            <tr key={index} className="border-b border-slate-200 dark:border-slate-700 last:border-b-0">
+                                <td className="px-4 py-2 font-mono">{item.location.lat.toFixed(4)}, {item.location.lng.toFixed(4)}</td>
+                                <td className="px-4 py-2 font-mono text-right">{item.count}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+
     const handleCityClick = (city: string) => {
         setSelectedCity(city);
     };
@@ -157,6 +236,15 @@ const TopCities: React.FC<TopCitiesProps> = ({ rows, distanceUnit, convertDistan
                     )}
                 </div>
             </div>
+            {selectedCity && (topPickups.length > 0 || topDropoffs.length > 0) && (
+                <div className="mt-8">
+                    <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-slate-100">Top Locations in {selectedCity}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {renderLocationTable('Top 5 Pickup Locations', topPickups)}
+                        {renderLocationTable('Top 5 Dropoff Locations', topDropoffs)}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

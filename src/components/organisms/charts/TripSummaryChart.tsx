@@ -53,11 +53,6 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
     ].filter(link => link.value > 0),
   };
 
-  const renderSankeyNode = React.useCallback(
-    (props: any) => <SankeyNode {...props} onShowTripList={onShowTripList} />,
-    [onShowTripList]
-  );
-
   if (sankeyData.links.length === 0) return null;
 
   return (
@@ -66,7 +61,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
         <ResponsiveContainer width="100%" height={500}>
           <Sankey
             data={sankeyData}
-            node={renderSankeyNode}
+            node={<SankeyNode onShowTripList={onShowTripList} />}
             nodePadding={50}
             margin={{ left: 100, right: 100, top: 5, bottom: 5 }}
             link={{ stroke: '#77c878' }}
@@ -76,11 +71,11 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
         </ResponsiveContainer>
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-        <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all')} />
-        <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful')} />
-        <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled')} />
-        <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled')} />
-        {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled')} />}
+        <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all-map')} />
+        <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful-map')} />
+        <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled-map')} />
+        <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled-map')} />
+        {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled-map')} />}
       </div>
     </div>
   );

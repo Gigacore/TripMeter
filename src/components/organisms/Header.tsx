@@ -77,17 +77,6 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, error, toggleS
               </TooltipTrigger>
               <TooltipContent>Settings</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a href="https://github.com/sansunda/trip-visualizer" target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" size="icon">
-                    <Github className="h-4 w-4" />
-                    <span className="sr-only">GitHub</span>
-                  </Button>
-                </a>
-              </TooltipTrigger>
-              <TooltipContent>GitHub</TooltipContent>
-            </Tooltip>
             <ModeToggle />
           </div>
         </div>

@@ -8,7 +8,7 @@ import { TripStats } from '../../../hooks/useTripData';
 interface WaitingTimeChartsProps {
   data: TripStats;
   rows: CSVRow[];
-  onFocusOnTrip: (tripRow: CSVRow) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
 }
 
 const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
@@ -66,7 +66,7 @@ const CustomBarTooltip = ({ active, payload, activeCurrency }: TooltipProps<numb
 const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
   data,
   rows,
-  onFocusOnTrip,
+  onFocusOnTrips,
 }) => {
   const {
     totalWaitingTime,
@@ -223,10 +223,10 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         </div>
       )}
        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-          <Stat label="Total" value={formatDuration(totalWaitingTime, true)} />
-          <Stat label="Average" value={formatDurationWithSeconds(avgWaitingTime)} />
-          <Stat label="Longest" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrip(longestWaitingTimeRow)} />
-          <Stat label="Shortest" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrip(shortestWaitingTimeRow)} />
+          <Stat label="Total Wait" value={formatDuration(totalWaitingTime, true)} onClick={() => onShowTripList('completed-map')} />
+          <Stat label="Average Wait" value={formatDurationWithSeconds(avgWaitingTime)} onClick={() => onShowTripList('completed-map')} />
+          <Stat label="Longest Wait" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrips([longestWaitingTimeRow], 'Longest Wait Time')} />
+          <Stat label="Shortest Wait" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrips([shortestWaitingTimeRow], 'Shortest Wait Time')} />
         </div>
     </>
   );

@@ -8,7 +8,8 @@ import { TripStats } from '../../../hooks/useTripData';
 interface DurationChartsProps {
   data: TripStats;
   rows: CSVRow[];
-  onFocusOnTrip: (tripRow: CSVRow) => void;
+  onShowTripList: (type: string, trips?: CSVRow[]) => void;
+  onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
 }
 
 // HACK: Using `any` to bypass a type issue with recharts TooltipProps.
@@ -34,7 +35,8 @@ const CustomTooltip = (props: any) => {
 const DurationCharts: React.FC<DurationChartsProps> = ({
   data,
   rows,
-  onFocusOnTrip,
+  onShowTripList,
+  onFocusOnTrips,
 }) => {
   const {
     totalTripDuration,
@@ -83,10 +85,10 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
         </ResponsiveContainer>
       )}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-        <Stat label="Total" value={formatDuration(totalTripDuration, true)} />
-        <Stat label="Average" value={formatDurationWithSeconds(avgTripDuration)} />
-        <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrip(longestTripRow)} />
-        <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrip(shortestTripRow)} />
+        <Stat label="Total Duration" value={formatDuration(totalTripDuration, true)} />
+        <Stat label="Average Duration" value={formatDurationWithSeconds(avgTripDuration)} />
+        <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrips([longestTripRow], 'Longest Trip')} />
+        <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrips([shortestTripRow], 'Shortest Trip')} />
       </div>
     </div>
   );
