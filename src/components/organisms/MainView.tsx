@@ -57,17 +57,6 @@ const MainView: React.FC<MainViewProps> = ({
           />
         <Stats data={tripData} onFocusOnTrip={onFocusOnTrip} onFocusOnTrips={onFocusOnTrips} onShowTripList={onShowTripList} distanceUnit={distanceUnit} rows={rows} />
         <div className="md:col-span-1 flex flex-col gap-4">
-          {/* <Sidebar
-            focusedTrip={focusedTrip}
-            onShowAll={onShowAll}
-            sidebarView={sidebarView}
-            onFocusOnTrip={onFocusOnTrip}
-            onShowTripList={onShowTripList}
-            tripList={tripList}
-            tripListTitle={tripListTitle}
-            onBackToStats={onBackToStats}
-          /> */}
-        
         </div>
       </div>
       <Footer />

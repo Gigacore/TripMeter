@@ -25,7 +25,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col items-center justify-center p-4 overflow-x-hidden">
-      <div className="absolute inset-0 bg-white dark:bg-black bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+      <div className="absolute inset-0 bg-white dark:bg-black bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
       <main className="w-full max-w-5xl mx-auto text-center z-10">
         <div className="mb-12">
           <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
@@ -38,7 +38,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
 
         <div className="bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl px-8 pb-5 pt-6 border border-gray-200 dark:border-gray-700/50 shadow-lg dark:shadow-2xl dark:shadow-purple-500/10">
           <div
-            className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${isDragging ? 'border-purple-500 bg-gray-200 dark:bg-gray-900' : 'border-gray-300 dark:border-gray-600/50 hover:border-purple-500/50'}`}
+            className={`border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${isDragging ? 'border-purple-500 bg-gray-200 dark:bg-gray-900' : 'border-gray-300 dark:border-gray-600/50 hover:border-purple-500/50'}`}
             onClick={() => !isProcessing && fileInputRef.current?.click()}
             onDrop={onDrop}
             onDragEnter={onDragEvents}
