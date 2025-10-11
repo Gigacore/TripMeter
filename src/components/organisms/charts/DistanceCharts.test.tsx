@@ -81,7 +81,7 @@ const mockProps = {
   rows: [{ status: 'completed', distance: '10' }],
   distanceUnit: 'miles' as DistanceUnit,
   activeCurrency: 'USD',
-  onShowTripList: vi.fn(),
+  onFocusOnTrips: vi.fn(),
   convertDistance: (m: number) => m,
 };
 
@@ -112,23 +112,23 @@ describe('DistanceCharts', () => {
     expect(costStat).not.toBeInTheDocument();
   });
 
-  it('should call onShowTripList when longest trip stat is clicked', async () => {
+  it('should call onFocusOnTrips when farthest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<DistanceCharts {...mockProps} />);
-    const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest'));
-    if (longestStat) {
-      await user.click(longestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockLongestTripRow['Request id']}`);
+    const farthestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Farthest'));
+    if (farthestStat) {
+      await user.click(farthestStat);
+      expect(mockProps.onFocusOnTrips).toHaveBeenCalledWith([mockLongestTripRow], 'Farthest Trip');
     }
   });
 
-  it('should call onShowTripList when shortest trip stat is clicked', async () => {
+  it('should call onFocusOnTrips when shortest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<DistanceCharts {...mockProps} />);
     const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest'));
     if (shortestStat) {
       await user.click(shortestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockShortestTripRow['Request id']}`);
+      expect(mockProps.onFocusOnTrips).toHaveBeenCalledWith([mockShortestTripRow], 'Shortest Trip');
     }
   });
 

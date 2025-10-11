@@ -87,7 +87,7 @@ const mockProps = {
   rows: [
     { status: 'completed', request_time: '2023-01-01T10:00:00Z', begin_trip_time: '2023-01-01T10:10:00Z' },
   ],
-  onShowTripList: vi.fn(),
+  onFocusOnTrips: vi.fn(),
 };
 
 describe('WaitingTimeCharts', () => {
@@ -116,23 +116,23 @@ describe('WaitingTimeCharts', () => {
     expect(screen.queryByText('Waited Longer Than Rode')).not.toBeInTheDocument();
   });
 
-  it('should call onShowTripList when longest waiting time stat is clicked', async () => {
+  it('should call onFocusOnTrips when longest waiting time stat is clicked', async () => {
     const user = userEvent.setup();
     render(<WaitingTimeCharts {...mockProps} />);
     const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest Wait'));
     if (longestStat) {
       await user.click(longestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockLongestWaitRow['Request id']}`);
+      expect(mockProps.onFocusOnTrips).toHaveBeenCalledWith([mockLongestWaitRow], 'Longest Wait Time');
     }
   });
 
-  it('should call onShowTripList when shortest waiting time stat is clicked', async () => {
+  it('should call onFocusOnTrips when shortest waiting time stat is clicked', async () => {
     const user = userEvent.setup();
     render(<WaitingTimeCharts {...mockProps} />);
     const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest Wait'));
     if (shortestStat) {
       await user.click(shortestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockShortestWaitRow['Request id']}`);
+      expect(mockProps.onFocusOnTrips).toHaveBeenCalledWith([mockShortestWaitRow], 'Shortest Wait Time');
     }
   });
 });

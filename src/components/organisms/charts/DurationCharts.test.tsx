@@ -71,7 +71,7 @@ const mockProps = {
   rows: [
     { status: 'completed', begin_trip_time: '2023-01-01T10:00:00Z', dropoff_time: '2023-01-01T10:30:00Z' },
   ],
-  onShowTripList: vi.fn(),
+  onFocusOnTrips: vi.fn(),
 };
 
 describe('DurationCharts', () => {
@@ -88,23 +88,23 @@ describe('DurationCharts', () => {
     expect(stats.some(s => s.textContent?.includes('Average Duration'))).toBe(true);
   });
 
-  it('should call onShowTripList when longest trip stat is clicked', async () => {
+  it('should call onFocusOnTrips when longest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<DurationCharts {...mockProps} />);
     const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest'));
     if (longestStat) {
       await user.click(longestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockLongestTripRow['Request id']}`);
+      expect(mockProps.onFocusOnTrips).toHaveBeenCalledWith([mockLongestTripRow], 'Longest Trip');
     }
   });
 
-  it('should call onShowTripList when shortest trip stat is clicked', async () => {
+  it('should call onFocusOnTrips when shortest trip stat is clicked', async () => {
     const user = userEvent.setup();
     render(<DurationCharts {...mockProps} />);
     const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest'));
     if (shortestStat) {
       await user.click(shortestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockShortestTripRow['Request id']}`);
+      expect(mockProps.onFocusOnTrips).toHaveBeenCalledWith([mockShortestTripRow], 'Shortest Trip');
     }
   });
 });

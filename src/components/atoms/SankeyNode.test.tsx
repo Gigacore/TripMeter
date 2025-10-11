@@ -45,27 +45,27 @@ describe('SankeyNode', () => {
       await user.click(rect);
     }
 
-    expect(mockProps.onShowTripList).toHaveBeenCalledWith('successful');
+    expect(mockProps.onShowTripList).toHaveBeenCalledWith('successful-map');
   });
 
-  it('should not be clickable if the name is "Total Requests"', async () => {
+  it('should be clickable if the name is "Total Requests"', async () => {
     const user = userEvent.setup();
-    const nonClickableProps = {
+    const clickableProps = {
       ...mockProps,
       payload: { name: 'Total Requests', value: 200 },
     };
     const { container } = render(
       <svg>
-        <SankeyNode {...nonClickableProps} />
+        <SankeyNode {...clickableProps} />
       </svg>
     );
 
     const rect = container.querySelector('rect');
     if (rect) {
-        await user.click(rect);
+      await user.click(rect);
     }
 
-    expect(mockProps.onShowTripList).not.toHaveBeenCalled();
+    expect(mockProps.onShowTripList).toHaveBeenCalledWith('all-map');
   });
 
   it('should have a pointer cursor when clickable', () => {
@@ -79,9 +79,9 @@ describe('SankeyNode', () => {
 
   it('should have a default cursor when not clickable', () => {
     const nonClickableProps = {
-        ...mockProps,
-        payload: { name: 'Total Requests', value: 200 },
-      };
+      ...mockProps,
+      payload: { name: 'Unfulfilled', value: 0 },
+    };
     const { container } = render(
       <svg>
         <SankeyNode {...nonClickableProps} />

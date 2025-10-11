@@ -50,7 +50,7 @@ describe('StreaksAndPauses', () => {
     expect(screen.getByText('Driver-Cancellation-Free Streak')).toBeInTheDocument();
     expect(screen.getByText(/20 rides/)).toBeInTheDocument();
 
-    expect(screen.getByText('Longest Driver Cancellation Streak')).toBeInTheDocument();
+    expect(screen.getByText('Driver Cancellation Streak')).toBeInTheDocument();
     expect(screen.getByText(/1 cancellation/)).toBeInTheDocument();
   });
 

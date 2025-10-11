@@ -3,17 +3,22 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import TripSummaryChart from './TripSummaryChart';
 import { TripStats } from '../../../hooks/useTripData';
+import React from 'react';
 
 // Mock child components and dependencies
-vi.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
-  Sankey: ({ data, node }: { data: any, node: any }) => (
-    <div data-testid="sankey-chart" data-data={JSON.stringify(data)} data-node-is-fn={typeof node === 'function'}>
-      {data.nodes.map(({ key, ...rest }: any) => node({ key, payload: rest }))}
-    </div>
-  ),
-  Tooltip: () => <div />,
-}));
+vi.mock('recharts', async () => {
+  const originalModule = await vi.importActual('recharts');
+  return {
+    ...originalModule,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
+    Sankey: ({ data, node }: { data: any, node: React.ReactElement }) => (
+      <div data-testid="sankey-chart" data-data={JSON.stringify(data)} data-node-is-fn={typeof node === 'function'}>
+        {data.nodes.map((n: any, index: number) => React.cloneElement(node, { key: index, payload: n }))}
+      </div>
+    ),
+    Tooltip: () => <div />,
+  };
+});
 
 vi.mock('../../atoms/Stat', () => ({
   default: ({ label, value, onClick }: { label: string; value: string | number; onClick?: () => void }) => (
@@ -114,7 +119,7 @@ describe('TripSummaryChart', () => {
     const totalRequestsStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Total Requests'));
     if (totalRequestsStat) {
       await user.click(totalRequestsStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith('all');
+      expect(mockProps.onShowTripList).toHaveBeenCalledWith('all-map');
     }
   });
 
@@ -124,9 +129,4 @@ describe('TripSummaryChart', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('should pass a function to the node prop of Sankey', () => {
-    render(<TripSummaryChart {...mockProps} />);
-    const sankeyChart = screen.getByTestId('sankey-chart');
-    expect(sankeyChart).toHaveAttribute('data-node-is-fn', 'true');
-  });
 });

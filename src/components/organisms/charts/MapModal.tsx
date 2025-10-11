@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import Map from '../Map';
 import { CSVRow } from '@/services/csvParser';
 import { DistanceUnit } from '@/App';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { CheckCircle2, HelpCircle, ShieldX, UserX } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -41,7 +41,7 @@ const MapModal: React.FC<MapModalProps> = ({
   title,
 }) => {
   const getTripDate = (trip: CSVRow): Date | null => {
-    const dateKeys = ['Request timestamp', 'Request Time', 'request_time_utc'];
+    const dateKeys = ['Request timestamp', 'Request Time', 'request_time', 'request_time_utc'];
     for (const key of dateKeys) {
       if (trip[key]) {
         const date = new Date(trip[key] as string);
@@ -63,7 +63,11 @@ const MapModal: React.FC<MapModalProps> = ({
     })[0];
   }, [rows, isOpen]); // getTripDate is stable, no need to include
 
-  const [selectedTrip, setSelectedTrip] = useState<CSVRow | null>(mostRecentTrip);
+  const [selectedTrip, setSelectedTrip] = useState<CSVRow | null>(null);
+
+  useEffect(() => {
+    setSelectedTrip(mostRecentTrip);
+  }, [mostRecentTrip]);
 
   if (!isOpen) {
     return null;
