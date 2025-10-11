@@ -6,7 +6,7 @@ const Footer: React.FC = () => (
     <div className="w-full max-w-4xl mx-auto px-4">
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
         <p className="text-sm text-gray-500 dark:text-gray-400 order-2 sm:order-1">
-          &copy; {new Date().getFullYear()} TripMeter. Built with ❤️.
+          &copy; {new Date().getFullYear()} TripMeter.
         </p>
         <a
           href="https://github.com/sansunda/trip-visualizer"

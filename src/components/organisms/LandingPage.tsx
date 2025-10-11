@@ -32,7 +32,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
             Visualize Your Rides
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            From raw data to rich insights. Upload your Uber ride history to see your trips like never before.
+            From raw data to rich insights. See your trips like never before.
           </p>
         </div>
 
@@ -56,7 +56,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
                   <UploadCloud className="text-gray-500 dark:text-gray-400 h-8 w-8" />
                 </div>
                 <p className="text-gray-600 dark:text-gray-400">Drag & drop your <code className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-sm px-1 py-0.5 font-mono text-xs">trips_data-0.csv</code> file here</p>
-                <p className="text-xs text-gray-500 mt-2">or click to select a file</p>
+                <p className="text-xs text-gray-500 mt-2">or click to select the file</p>
               </>
             )}
             <input
