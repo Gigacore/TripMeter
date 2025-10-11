@@ -1,11 +1,12 @@
-import React, { useRef, DragEvent, ChangeEvent } from 'react';
+import React, { useRef, DragEvent, ChangeEvent, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, TrendingUp, Wallet, Info, ArrowRight, GitMerge, Route, Sparkles } from 'lucide-react';
+import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Info, ArrowRight, GitMerge, Route, Sparkles, FileText } from 'lucide-react';
 import Footer from './Footer';
 
 interface LandingPageProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
+  onSampleFileLoad?: (file: File) => void; // Make this prop optional
   isProcessing: boolean;
   error: string;
   isDragging: boolean;
@@ -13,14 +14,30 @@ interface LandingPageProps {
   onDrop: (event: DragEvent<HTMLDivElement>) => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, error, isDragging, onDragEvents, onDrop }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoad, isProcessing, error, isDragging, onDragEvents, onDrop }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSampleLoading, setIsSampleLoading] = useState(false);
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    onFileSelect(e);
-    if (e.target) {
-      (e.target as HTMLInputElement).value = '';
+  // This function will handle both user-selected files and the sample file.
+  const loadSampleFile = async () => {
+    setIsSampleLoading(true);
+    const response = await fetch('/sample_trips_data_fares_randomized.csv');
+    const data = await response.blob();
+    const file = new File([data], 'sample_trips_data_fares_randomized.csv', { type: 'text/csv' });
+
+    if (onSampleFileLoad) {
+      // If the parent provides a specific handler, use it.
+      onSampleFileLoad(file);
+    } else {
+      // Otherwise, simulate a file input event to use the existing handler.
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      const syntheticEvent = { target: { files: dataTransfer.files } } as unknown as ChangeEvent<HTMLInputElement>;
+      onFileSelect(syntheticEvent);
     }
+    // The parent's isProcessing will take over, but we can reset our local state.
+    // It will be disabled by isProcessing anyway.
+    setIsSampleLoading(false);
   };
 
   return (
@@ -63,7 +80,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
               ref={fileInputRef}
               type="file"
               accept=".csv"
-              onChange={handleFileSelect}
+              onChange={onFileSelect}
               disabled={isProcessing}
               className="hidden"
               aria-label="File uploader"
@@ -85,19 +102,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
           </div>
         </div>
 
-        <div className="my-12 bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 text-left border border-gray-200 dark:border-gray-700/50 shadow-lg">
-          <div className="flex items-start gap-4">
-            <Info className="h-5 w-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-lg text-black dark:text-white">How to get your Uber data</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Request your personal data archive from Uber. You'll find the <code className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-sm px-1 py-0.5 font-mono text-xs">trips_data-0.csv</code> file inside the Rider folder.
-                <a href="https://help.uber.com/en/riders/article/request-a-copy-of-your-personal-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11" target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-500 dark:text-blue-400 hover:underline ml-2">
-                  Learn more <ArrowRight className="inline h-3 w-3" />
-                </a>
-              </p>
-            </div>
-          </div>
+        <div className="my-12 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Need your data file?{' '}
+            <a href="https://help.uber.com/en/riders/article/request-a-copy-of-your-personal-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11" target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-800 dark:text-gray-200 hover:underline">
+              Learn how to get it from Uber
+            </a>
+            <span className="mx-2 text-gray-300 dark:text-gray-700">|</span>
+            <button onClick={loadSampleFile} disabled={isProcessing || isSampleLoading} className="font-semibold text-gray-800 dark:text-gray-200 hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed">
+              Try with a sample file
+            </button>
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
