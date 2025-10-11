@@ -1,19 +1,19 @@
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import './App.css';
 import 'leaflet/dist/leaflet.css';
 import { useTripData } from './hooks/useTripData';
 import { CSVRow } from './services/csvParser';
 import { downloadKML } from './services/kmlService';
 import { KM_PER_MILE } from './constants';
-import InitialView from './components/organisms/InitialView';
 import { Spinner } from '@/components/ui/spinner';
 import Header from './components/organisms/Header';
 import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
-import MapModal from './components/organisms/charts/MapModal';
-import MainView from './components/organisms/MainView';
-import LandingPage from './components/organisms/LandingPage';
+
+const LandingPage = lazy(() => import('./components/organisms/LandingPage'));
+const MainView = lazy(() => import('./components/organisms/MainView'));
+const MapModal = lazy(() => import('./components/organisms/charts/MapModal'));
 
 export type DistanceUnit = 'miles' | 'km';
 
@@ -180,43 +180,45 @@ function App() {
         toggleMenu={toggleSettings}
       />
 
-      <MapModal
-        isOpen={isMapModalOpen}
-        onClose={() => setIsMapModalOpen(false)}
-        rows={mapModalRows}
-        title={mapModalTitle}
-        distanceUnit={distanceUnit}
-        convertDistance={convertDistance}
-      />
-      {rows.length === 0 ? (
-        <LandingPage
-          onFileSelect={handleFileSelect}
-          isProcessing={showSpinner}
-          error={error}
-          isDragging={isDragging}
-          onDragEvents={handleDragEvents}
-          onDrop={handleDrop}
-        />
-      ) : (
-        <MainView
-          rows={rows}
-          focusedTrip={focusedTrip}
+      <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"><Spinner /></div>}>
+        <MapModal
+          isOpen={isMapModalOpen}
+          onClose={() => setIsMapModalOpen(false)}
+          rows={mapModalRows}
+          title={mapModalTitle}
           distanceUnit={distanceUnit}
           convertDistance={convertDistance}
-          tripData={tripData}
-          sidebarView={sidebarView}
-          error={error}
-          isProcessing={showSpinner}
-          tripList={tripList}
-          tripListTitle={tripListTitle}
-          onShowAll={handleShowAll}
-          onFocusOnTrip={handleFocusOnTrip}
-          onFocusOnTrips={handleFocusOnTrips}
-          onShowTripList={handleShowTripList}
-          onFileSelect={handleFileSelect}
-          onBackToStats={() => setSidebarView('stats')}
         />
-      )}
+        {rows.length === 0 ? (
+          <LandingPage
+            onFileSelect={handleFileSelect}
+            isProcessing={showSpinner}
+            error={error}
+            isDragging={isDragging}
+            onDragEvents={handleDragEvents}
+            onDrop={handleDrop}
+          />
+        ) : (
+          <MainView
+            rows={rows}
+            focusedTrip={focusedTrip}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            tripData={tripData}
+            sidebarView={sidebarView}
+            error={error}
+            isProcessing={showSpinner}
+            tripList={tripList}
+            tripListTitle={tripListTitle}
+            onShowAll={handleShowAll}
+            onFocusOnTrip={handleFocusOnTrip}
+            onFocusOnTrips={handleFocusOnTrips}
+            onShowTripList={handleShowTripList}
+            onFileSelect={handleFileSelect}
+            onBackToStats={() => setSidebarView('stats')}
+          />
+        )}
+      </Suspense>
     </ThemeProvider>
   );
 }
