@@ -15,7 +15,7 @@ const mockProps = {
 describe('LandingPage', () => {
   it('should render the initial state correctly', () => {
     render(<LandingPage {...mockProps} />);
-    expect(screen.getByRole('heading', { name: 'Trip Visualizer' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'TripMeter' })).toBeInTheDocument();
     expect(screen.getByText('Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.')).toBeInTheDocument();
     expect(screen.getByText('Drag & drop your CSV file here, or click to select')).toBeInTheDocument();
   });

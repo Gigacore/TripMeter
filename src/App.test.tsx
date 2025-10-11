@@ -34,7 +34,7 @@ const defaultTripDataState: [any, boolean] = [
   false, // isAnalyzing
 ];
 
-describe('App', () => {
+describe('TripMeter App', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

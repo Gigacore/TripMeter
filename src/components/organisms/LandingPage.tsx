@@ -1,7 +1,7 @@
 import React, { useRef, DragEvent, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, TrendingUp, Wallet } from 'lucide-react';
+import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, TrendingUp, Wallet, Info } from 'lucide-react';
 import Footer from './Footer';
 
 interface LandingPageProps {
@@ -27,13 +27,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <main className="w-full max-w-4xl mx-auto text-center">
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Trip Visualizer</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Visualize Your Uber Rides</h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.
+            Upload your ride history CSV to generate an interactive map and detailed analytics of your trips.
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800/50 rounded-xl p-8 mb-8 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="bg-white dark:bg-gray-800/50 rounded-xl px-8 pb-5 pt-6 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div
             className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center transition-colors duration-200 ease-in-out cursor-pointer ${isDragging ? 'border-primary bg-gray-50 dark:bg-gray-900/50' : 'border-gray-300 dark:border-gray-600'}`}
             onClick={() => !isProcessing && fileInputRef.current?.click()}
@@ -53,6 +53,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
                   <UploadCloud className="text-gray-500 dark:text-gray-400 h-8 w-8" />
                 </div>
                 <p className="text-gray-600 dark:text-gray-400">Drag & drop your CSV file here, or click to select</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Look for the <code className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-sm px-1 py-0.5 font-mono text-xs">trips_data-0.csv</code> file inside the <code className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-sm px-1 py-0.5 font-mono text-xs">Rider</code> folder.
+                </p>
               </>
             )}
             <input
@@ -73,15 +76,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
               </Alert>
             </div>
           )}
+          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            <p>
+              <span className="font-semibold text-gray-700 dark:text-gray-300">100% Private:</span> All processing is done in your browser.
+            </p>
+          </div>
         </div>
 
-        <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-6 flex items-center mb-12 border border-gray-200 dark:border-gray-700">
-          <div className="bg-primary/20 p-3 rounded-full mr-4">
-            <ShieldCheck className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white text-left">100% Private and Secure</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-left">All processing is done directly in your browser. Your data never leaves your computer.</p>
+        <div className="my-8 bg-white/80 dark:bg-gray-800/50 rounded-xl p-6 text-left border border-gray-200 dark:border-gray-700 shadow-lg backdrop-blur-md">
+          <div className="flex items-start gap-4">
+            <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-white">How to get your Uber data</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Follow the instructions on Uber's <a href="https://help.uber.com/en/riders/article/request-a-copy-of-your-personal-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline decoration-dotted underline-offset-2 hover:decoration-solid">help page</a> to download your 'trips' data as a CSV file.</p>
+            </div>
           </div>
         </div>
 
@@ -100,9 +109,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, isProcessing, e
 };
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
-  <div className="bg-white dark:bg-gray-800/50 rounded-lg p-6 text-left border border-gray-200 dark:border-gray-700 shadow-sm">
+  <div className="bg-white/80 dark:bg-gray-800/50 rounded-xl p-6 text-left border border-gray-200 dark:border-gray-700 shadow-lg backdrop-blur-md transition-all duration-300 hover:border-primary/50 hover:shadow-primary/20 hover:-translate-y-1">
     {icon}
-    <h3 className="font-semibold mb-1 text-gray-900 dark:text-white">{title}</h3>
+    <h3 className="font-semibold text-lg mb-1 text-gray-900 dark:text-white">{title}</h3>
     <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
   </div>
 );

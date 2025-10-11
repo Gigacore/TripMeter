@@ -23,7 +23,7 @@ const mockProps = {
 describe('Header', () => {
   it('should render the header title', () => {
     render(<Header {...mockProps} />);
-    expect(screen.getByText('Trip Visualizer')).toBeInTheDocument();
+    expect(screen.getByText('TripMeter')).toBeInTheDocument();
   });
 
   it('should render the settings and mode toggle buttons', () => {

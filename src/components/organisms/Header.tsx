@@ -32,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, error, toggleS
           <div className="mr-4 flex">
             <a href="/" className="mr-6 flex items-center space-x-2">
               <Route className="h-6 w-6 text-primary" />
-              <span className="font-bold">Trip Visualizer</span>
+              <span className="font-bold">TripMeter</span>
             </a>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
