@@ -1,7 +1,7 @@
 import { ModeToggle } from '../molecules/ModeToggle';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Settings, Trash2, Download, Github, Route } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Settings, Trash2, Download, Gauge } from 'lucide-react';
 import { downloadKML } from '@/services/kmlService';
 import { CSVRow } from '@/services/csvParser';
 import {
@@ -20,19 +20,19 @@ interface HeaderProps {
   rows: CSVRow[];
 }
 
-const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, error, toggleSettings, rows }) => {
+const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, toggleSettings, rows }) => {
   const handleDownloadKML = (which: 'both' | 'begin' | 'drop') => {
     downloadKML(rows, which);
   };
 
   return (
     <TooltipProvider>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-black/50 backdrop-blur-sm">
         <div className="container mx-auto flex h-14 items-center">
           <div className="mr-4 flex">
             <a href="/" className="mr-6 flex items-center space-x-2">
-              <Route className="h-6 w-6 text-primary" />
-              <span className="font-bold">TripMeter</span>
+              <Gauge className="h-6 w-6 text-purple-500 dark:text-purple-400" />
+              <span className="font-bold text-black dark:text-white">TripMeter</span>
             </a>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">

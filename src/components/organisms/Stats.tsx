@@ -266,6 +266,6 @@ const Stats: React.FC<StatsProps> = ({
       </div>
     </div>
   );
-};
+}
 
 export default Stats;
