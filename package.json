@@ -1,5 +1,5 @@
 {
-  "name": "trip-meter",
+  "name": "tripmeter",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "predeploy": "npm run build",
+    "build:workers": "tsc -p tsconfig.worker.json && VITE_BASE=/ vite build --mode workers"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -43,6 +45,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251011.0",
     "@eslint/js": "^9.36.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
