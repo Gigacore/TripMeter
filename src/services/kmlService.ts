@@ -12,20 +12,29 @@ type Which = 'both' | 'begin' | 'drop';
 
 export const makeParts = (rows: CSVRow[], { which = 'both' }: { which?: Which } = {}): KMLPart[] => {
     const parts: KMLPart[] = [];
+    const esc = (s: string | number | boolean) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
     rows.forEach((r, idx) => {
       const rowNo = idx + 1;
+      const desc = `<![CDATA[
+        <h3>Trip #${rowNo}</h3>
+        <table border="1" style="border-collapse:collapse; width:100%;">
+          ${Object.entries(r).map(([key, value]) => `<tr><td style="padding:4px;"><b>${esc(key)}</b></td><td style="padding:4px;">${esc(value ?? '')}</td></tr>`).join('')}
+        </table>
+      ]]>`;
+
       if (which === 'both' || which === 'begin') {
         if (r.begintrip_lat != null && r.begintrip_lng != null) {
           const lat = toNumber(r.begintrip_lat);
           const lng = toNumber(r.begintrip_lng);
-          parts.push({ name: `Begintrip #${rowNo}`, styleUrl: 'beginStyle', coords: [lng, lat] });
+          parts.push({ name: `Begintrip #${rowNo}`, styleUrl: 'beginStyle', desc, coords: [lng, lat] });
         }
       }
       if (which === 'both' || which === 'drop') {
         if (r.dropoff_lat != null && r.dropoff_lng != null) {
           const lat = toNumber(r.dropoff_lat);
           const lng = toNumber(r.dropoff_lng);
-          parts.push({ name: `Dropoff #${rowNo}`, styleUrl: 'dropStyle', coords: [lng, lat] });
+          parts.push({ name: `Dropoff #${rowNo}`, styleUrl: 'dropStyle', desc, coords: [lng, lat] });
         }
       }
     });
@@ -35,7 +44,7 @@ export const makeParts = (rows: CSVRow[], { which = 'both' }: { which?: Which } 
 export const buildKML = (parts: KMLPart[]): string => {
     const esc = (s: string | number) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const style = (id: string, href: string) => `\n  <Style id="${id}">\n    <IconStyle>\n      <scale>1.1</scale>\n      <Icon><href>${href}</href></Icon>\n    </IconStyle>\n  </Style>`;
-    const items = parts.map(p => `\n  <Placemark>\n    <name>${esc(p.name)}</name>\n    ${p.styleUrl ? `<styleUrl>#${p.styleUrl}</styleUrl>` : ''}\n    ${p.desc ? `<description>${esc(p.desc)}</description>` : ''}\n    <Point><coordinates>${p.coords[0]},${p.coords[1]},0</coordinates></Point>\n  </Placemark>`).join('');
+    const items = parts.map(p => `\n  <Placemark>\n    <name>${esc(p.name)}</name>\n    ${p.styleUrl ? `<styleUrl>#${p.styleUrl}</styleUrl>` : ''}\n    ${p.desc ? `<description>${p.desc}</description>` : ''}\n    <Point><coordinates>${p.coords[0]},${p.coords[1]},0</coordinates></Point>\n  </Placemark>`).join('');
     const kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n  <name>Trips (Begin/Dropoff)</name>`
       + style('beginStyle','https://maps.google.com/mapfiles/ms/icons/green-dot.png')
       + style('dropStyle','https://maps.google.com/mapfiles/ms/icons/red-dot.png')

@@ -29,11 +29,11 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, toggleSettings
     <TooltipProvider>
       <header className="sticky top-0 z-50 w-full border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-black/50 backdrop-blur-sm">
         <div className="container mx-auto flex h-14 items-center">
-          <div className="mr-4 flex">
-            <a href="/" className="mr-6 flex items-center space-x-2">
+          <div className="mr-4 flex items-center">
+            <div className="mr-6 flex items-center space-x-2">
               <Gauge className="h-6 w-6 text-purple-500 dark:text-purple-400" />
               <span className="font-bold text-black dark:text-white">TripMeter</span>
-            </a>
+            </div>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
             {actionsEnabled && (
