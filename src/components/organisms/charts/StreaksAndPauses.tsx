@@ -1,9 +1,7 @@
 import React from 'react';
-import { Flame, Pause } from 'lucide-react';
+import { Flame, Pause, CalendarDays, Link2, Zap, Award, Ban, ShieldCheck, UserX } from 'lucide-react';
 import { TripStats } from '../../../hooks/useTripData';
 import { CSVRow } from '@/services/csvParser';
-import MostTripsInADay from '../MostTripsInADay';
-import ConsecutiveTrips from '../ConsecutiveTrips';
 
 const formatDateRange = (start: number | null, end: number | null): string | null => {
   if (!start || !end) return null;
@@ -12,6 +10,11 @@ const formatDateRange = (start: number | null, end: number | null): string | nul
   if (startDate === endDate) return startDate;
   return `${startDate} - ${endDate}`;
 };
+
+const formatDate = (date: number | null): string | null => {
+  if (!date) return null;
+  return new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+}
 
 interface StreaksAndPausesProps {
   longestStreak: TripStats['longestStreak'];
@@ -37,11 +40,39 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
   onFocusOnTrip,
 }) => {
   return (
-    <div className="flex flex-col gap-4">
-      <MostTripsInADay mostTripsInADay={mostTripsInADay} />
-      <ConsecutiveTrips tripChain={longestConsecutiveTripsChain} onFocusOnTrip={onFocusOnTrip} />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
+          <div className="rounded-full bg-purple-500/20 p-2 text-purple-400">
+            <Zap size={24} />
+          </div>
+          <div>
+            <div className="text-muted-foreground">Busiest Day</div>
+            <p className="text-xs text-muted-foreground/80 -mt-1 mb-1">Most trips taken in a single day.</p>
+            <div className="text-2xl font-bold text-foreground">{mostTripsInADay.count} {mostTripsInADay.count === 1 ? 'trip' : 'trips'}</div>
+            <div className="text-xs text-muted-foreground">{formatDate(mostTripsInADay.date)}</div>
+          </div>
+        </div>
+        <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
+          <div className="rounded-full bg-blue-500/20 p-2 text-blue-400">
+            <Link2 size={24} />
+          </div>
+          <div>
+            <div className="text-muted-foreground">Longest Trip Chain</div>
+            <p className="text-xs text-muted-foreground/80 -mt-1 mb-1">Most consecutive back-to-back trips.</p>
+            <div className="text-2xl font-bold text-foreground">{longestConsecutiveTripsChain.length} {longestConsecutiveTripsChain.length === 1 ? 'trip' : 'trips'}</div>
+            <div className="text-xs text-muted-foreground">
+              {longestConsecutiveTripsChain.length > 0 && (
+                <button
+                  onClick={() => onFocusOnTrip(longestConsecutiveTripsChain[0])}
+                  className="text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+                  aria-label={`Focus on the start of the longest trip chain of ${longestConsecutiveTripsChain.length} trips`}
+                >
+                  View on map
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
           <div className="rounded-full bg-emerald-500/20 p-2 text-emerald-400">
             <Flame size={24} />
@@ -65,8 +96,8 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
           </div>
         </div>
         <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
-          <div className="rounded-full bg-green-500/20 p-2 text-green-400">
-            <Flame size={24} />
+          <div className="rounded-full bg-yellow-500/20 p-2 text-yellow-400">
+            <Award size={24} />
           </div>
           <div>
             <div className="text-muted-foreground">Uninterrupted Ride Streak</div>
@@ -80,12 +111,12 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
           </div>
         </div>
         <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
-          <div className="rounded-full bg-orange-500/20 p-2 text-orange-400">
-            <Flame size={24} />
+          <div className="rounded-full bg-red-500/20 p-2 text-red-400">
+            <Ban size={24} />
           </div>
           <div>
-            <div className="text-muted-foreground">Cancellation Streak</div>
-            <p className="text-xs text-muted-foreground/80 -mt-1 mb-1">Most consecutive cancellations (rider or driver).</p>
+            <div className="text-muted-foreground">Rider Cancellation Streak</div>
+            <p className="text-xs text-muted-foreground/80 -mt-1 mb-1">Most consecutive rider cancellations.</p>
             <div className="text-2xl font-bold text-foreground">
               {longestCancellationStreak.count} {longestCancellationStreak.count === 1 ? 'cancellation' : 'cancellations'}
             </div>
@@ -95,8 +126,8 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
           </div>
         </div>
         <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
-          <div className="rounded-full bg-green-500/20 p-2 text-green-400">
-            <Flame size={24} />
+          <div className="rounded-full bg-emerald-500/20 p-2 text-emerald-400">
+            <ShieldCheck size={24} />
           </div>
           <div>
             <div className="text-muted-foreground">Driver-Cancellation-Free Streak</div>
@@ -110,8 +141,8 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
           </div>
         </div>
         <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
-          <div className="rounded-full bg-red-500/20 p-2 text-red-400">
-            <Flame size={24} />
+          <div className="rounded-full bg-orange-500/20 p-2 text-orange-400">
+            <UserX size={24} />
           </div>
           <div>
             <div className="text-muted-foreground">Driver Cancellation Streak</div>
@@ -124,7 +155,6 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

@@ -229,8 +229,11 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
   return (
     <div className="grid grid-cols-1 gap-6 @container">
       <div className="stats-group">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <h3 className="text-lg font-semibold"></h3>
+        <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
+          <div>
+            <h3 className="text-lg font-semibold">Daily Activity</h3>
+            <p className="text-sm text-muted-foreground -mt-1">Shows your trip contributions over time.</p>
+          </div>
           <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1">
             <button
               onClick={() => setContributionView('last-12-months')}
