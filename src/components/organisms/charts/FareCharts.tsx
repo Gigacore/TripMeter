@@ -270,6 +270,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
           />
         ) : null}
       </div>
+
     </div>
   );
 };

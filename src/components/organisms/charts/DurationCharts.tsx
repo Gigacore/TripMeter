@@ -1,7 +1,10 @@
+
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps } from 'recharts';
-import { Map } from 'lucide-react';
+import { Map, Film, Briefcase, Calendar, Rocket, Music, Clock } from 'lucide-react';
 import Stat from '../../atoms/Stat';
+import { FunFact } from '../../molecules/FunFact';
+import { calculateDurationFacts } from '../../../utils/funFacts';
 import { formatDuration, formatDurationWithSeconds } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
@@ -24,7 +27,7 @@ const CustomTooltip = (props: any) => {
     return (
       <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
         <div className="mb-2 border-b border-border pb-2">
-          <p className="recharts-tooltip-label font-bold text-base">{`Duration: ${label}`}</p>
+          <p className="recharts-tooltip-label font-bold text-base">{`Duration: ${label} `}</p>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
           <div className="text-muted-foreground">Trips</div>
@@ -73,7 +76,7 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
     });
 
     return buckets.map((count, i) => ({
-      name: `${i * bucketSize}-${(i + 1) * bucketSize} min`,
+      name: `${i * bucketSize} -${(i + 1) * bucketSize} min`,
       count,
     }));
   }, [rows]);
@@ -142,6 +145,29 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
         ) : (
           <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} />
         )}
+      </div>
+
+      <div className="mt-8">
+        <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+          <Clock className="w-4 h-4" />
+          Time Fun Facts
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {calculateDurationFacts(totalTripDuration).map((fact, index) => {
+            const Icon = fact.iconName === 'Rocket' ? Rocket : fact.iconName === 'Music' ? Music : Film;
+            return (
+              <FunFact
+                key={index}
+                label={fact.label}
+                value={fact.value}
+                icon={Icon}
+                description={fact.description}
+                gradient={fact.gradient}
+                textColor={fact.textColor}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

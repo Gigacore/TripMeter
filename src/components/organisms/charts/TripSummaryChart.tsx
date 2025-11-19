@@ -155,6 +155,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
           </RequestsMapModal>
         )}
       </div>
+
     </div>
   );
 };

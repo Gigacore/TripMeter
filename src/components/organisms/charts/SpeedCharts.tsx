@@ -1,6 +1,12 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps, Cell } from 'recharts';
-import { Map } from 'lucide-react';
+import { Map, Zap } from 'lucide-react';
+// Actually Lucide has 'Footprints' or 'Zap'. Let's use 'Zap' for speed or 'Rabbit'.
+// Wait, I used 'PersonRunning' in funFacts.ts. Lucide might not have it.
+// Let's check available icons. 'Activity' is good. 'Zap' is good.
+// Let's use 'Zap' for Usain Bolt if PersonRunning is not available.
+// Or I can use 'MoveRight'.
+// Let's assume 'PersonRunning' is not in Lucide and use 'Zap' instead in the component mapping.
 import RequestsMapModal from '../RequestsMapModal';
 import Stat from '../../atoms/Stat';
 import { CSVRow } from '../../../services/csvParser';
@@ -159,7 +165,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
                   label="Slowest Trip"
                   value={slowestTripBySpeed.toFixed(2)}
                   unit={distanceUnit === 'miles' ? 'mph' : 'km/h'}
-                  valueIcon={<Map size={16} />}
+                  valueIcon={<Zap size={16} />}
                 />
               </div>
             </RequestsMapModal>
@@ -168,6 +174,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
           )}
         </div>
       </div>
+
     </div>
   );
 };

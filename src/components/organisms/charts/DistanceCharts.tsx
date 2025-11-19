@@ -8,7 +8,9 @@ import { formatCurrency } from '../../../utils/currency';
 import { DistanceUnit } from '../../../App';
 
 import RequestsMapModal from '../RequestsMapModal';
-import { Map } from 'lucide-react';
+import { Map, Globe, Moon, Sun, Landmark, Rocket } from 'lucide-react';
+import { FunFact } from '../../molecules/FunFact';
+import { calculateDistanceFacts } from '../../../utils/funFacts';
 
 interface DistanceChartsProps {
   data: TripStats;
@@ -191,6 +193,29 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
             value={`${formatCurrency(costPerDistanceByCurrency[activeCurrency]!, activeCurrency)}/${distanceUnit}`}
           />
         )}
+      </div>
+
+      <div className="mt-8">
+        <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+          <Globe className="w-4 h-4" />
+          Distance Fun Facts
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {calculateDistanceFacts(distanceUnit === 'miles' ? totalCompletedDistance : convertDistance(totalCompletedDistance)).map((fact, index) => {
+            const Icon = fact.iconName === 'Landmark' ? Landmark : fact.iconName === 'Rocket' ? Rocket : Map;
+            return (
+              <FunFact
+                key={index}
+                label={fact.label}
+                value={fact.value}
+                icon={Icon}
+                description={fact.description}
+                gradient={fact.gradient}
+                textColor={fact.textColor}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );
