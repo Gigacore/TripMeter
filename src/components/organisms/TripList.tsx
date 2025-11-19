@@ -2,7 +2,7 @@ import React from 'react';
 import { CSVRow } from '../../services/csvParser';
 import { formatCurrency } from '../../utils/currency';
 import { toNumber } from '../../utils/formatters';
-import { X, MapPin, Calendar, Clock, DollarSign } from 'lucide-react';
+import { X, MapPin, Calendar, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TripListProps {
@@ -102,7 +102,6 @@ const TripList: React.FC<TripListProps> = ({ list, title, onBack, onFocusOnTrip,
 
               <div className="pt-3 mt-1 border-t flex items-center justify-between text-sm">
                 <div className="font-semibold flex items-center gap-1 text-foreground">
-                  <DollarSign size={14} className="text-muted-foreground" />
                   {formatCurrency(toNumber(trip.fare_amount), trip.fare_currency)}
                 </div>
                 {renderTripStat ? (

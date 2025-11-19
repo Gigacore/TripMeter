@@ -147,6 +147,7 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
         )}
       </div>
 
+      <div className="my-8 border-t border-border" />
       <div className="mt-8">
         <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
           <Clock className="w-4 h-4" />

@@ -195,7 +195,8 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
         )}
       </div>
 
-      <div className="mt-8">
+      <div className="my-8 border-t border-border" />
+      <div className="mt-2">
         <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
           <Globe className="w-4 h-4" />
           Distance Fun Facts

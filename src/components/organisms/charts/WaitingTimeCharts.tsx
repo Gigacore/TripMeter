@@ -146,6 +146,23 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
     }));
   }, [rows]);
 
+  const waitedLongerThanRodeTrips = React.useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+    return rows.filter(r => {
+      if (r.status?.toLowerCase() !== 'completed' || !r.request_time || !r.begin_trip_time || !r.dropoff_time) return false;
+      const requestTime = new Date(r.request_time);
+      const beginTripTime = new Date(r.begin_trip_time);
+      const dropoffTime = new Date(r.dropoff_time);
+
+      if (isNaN(requestTime.getTime()) || isNaN(beginTripTime.getTime()) || isNaN(dropoffTime.getTime())) return false;
+
+      const waitingTime = (beginTripTime.getTime() - requestTime.getTime()) / (1000 * 60);
+      const ridingTime = (dropoffTime.getTime() - beginTripTime.getTime()) / (1000 * 60);
+
+      return waitingTime > ridingTime;
+    });
+  }, [rows]);
+
   const waitingVsRidingData = [
     { name: 'Riding Time', value: totalTripDuration, fill: '#34d399' },
     { name: 'Waiting Time', value: totalWaitingTime, fill: '#a78bfa' },
@@ -210,7 +227,34 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         <div className="stats-group rounded-lg bg-muted/50 p-4 mt-4">
           <h4 className="flex items-center gap-2 text-card-foreground">
             Waited Longer Than Rode
-            <span className="inline-flex items-center justify-center rounded-full bg-muted-foreground/20 px-2.5 py-1 text-xs font-medium text-foreground">{waitingLongerThanTripCount} Rides</span>
+            <RequestsMapModal
+              rows={waitedLongerThanRodeTrips}
+              distanceUnit={distanceUnit}
+              convertDistance={convertDistance}
+              title="Waited Longer Than Rode"
+              renderTripStat={(trip) => {
+                const requestTime = new Date(trip.request_time!);
+                const beginTripTime = new Date(trip.begin_trip_time!);
+                const dropoffTime = new Date(trip.dropoff_time!);
+                const waitingTime = (beginTripTime.getTime() - requestTime.getTime()) / (1000 * 60);
+                const ridingTime = (dropoffTime.getTime() - beginTripTime.getTime()) / (1000 * 60);
+                return (
+                  <div className="flex flex-col gap-0.5">
+                    <div className="text-xs font-medium text-red-500">
+                      Wait: {formatDurationWithSeconds(waitingTime)}
+                    </div>
+                    <div className="text-xs font-medium text-green-500">
+                      Ride: {formatDurationWithSeconds(ridingTime)}
+                    </div>
+                  </div>
+                );
+              }}
+            >
+              <span className="inline-flex items-center justify-center rounded-full bg-muted-foreground/20 px-2.5 py-1 text-xs font-medium text-foreground cursor-pointer hover:bg-muted-foreground/30 transition-colors">
+                {waitingLongerThanTripCount} Rides
+                <Map size={12} className="ml-1.5 opacity-70" />
+              </span>
+            </RequestsMapModal>
           </h4>
           <p className="text-xs text-muted-foreground mt-1 mb-3">For these trips, you spent more time waiting for your ride than riding in it.</p>
           <ResponsiveContainer width="100%" height={100}>
@@ -223,6 +267,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <XAxis type="number" hide domain={[0, 1]} />
               <YAxis type="category" dataKey="name" hide />
               <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              {/* @ts-ignore */}
               <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }] as any} />
               <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
                 <LabelList dataKey="waiting" position="center" formatter={(value: any) => formatDuration(value as number, true)} className="fill-white font-semibold" />
@@ -287,6 +332,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         )}
       </div>
 
+      <div className="my-8 border-t border-border" />
       <div className="mt-8">
         <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
           <Timer className="w-4 h-4" />
