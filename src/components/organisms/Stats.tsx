@@ -218,6 +218,9 @@ const Stats: React.FC<StatsProps> = ({
               longestDriverCancellationStreak={longestDriverCancellationStreak}
               longestConsecutiveTripsChain={longestConsecutiveTripsChain}
               mostTripsInADay={data.mostSuccessfulTripsInADay}
+              rows={rows}
+              distanceUnit={distanceUnit}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>
