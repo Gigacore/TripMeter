@@ -116,12 +116,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-          <FeatureCard icon={<Route className="text-blue-500 dark:text-blue-400 h-8 w-8 mb-3" />} title="Interactive Trip Map" description="Visualize your entire ride history on a global map." />
-          <FeatureCard icon={<BarChart className="text-purple-500 dark:text-purple-400 h-8 w-8 mb-3" />} title="In-depth Analytics" description="Get insights on fares, distance, duration, and cancellations." />
-          <FeatureCard icon={<Clock className="text-pink-500 dark:text-pink-400 h-8 w-8 mb-3" />} title="Activity Patterns" description="Discover your travel habits by time of day, week, and year." />
-          <FeatureCard icon={<GitMerge className="text-blue-500 dark:text-blue-400 h-8 w-8 mb-3" />} title="Streaks & Layovers" description="Analyze consecutive trips and the pauses in between." />
-          <FeatureCard icon={<Sparkles className="text-purple-500 dark:text-purple-400 h-8 w-8 mb-3" />} title="Cost Efficiency" description="Compare cost-efficiency across different Uber services." />
-          <FeatureCard icon={<FileDown className="text-pink-500 dark:text-pink-400 h-8 w-8 mb-3" />} title="KML Export" description="Export your trips to KML for use in Google Earth or other tools." />
+          <FeatureCard icon={<Route className="text-blue-500 dark:text-blue-400 h-8 w-8 mb-3" />} title="Interactive Trip Map" description="Visualize your entire ride history on a global map." delay={100} />
+          <FeatureCard icon={<BarChart className="text-purple-500 dark:text-purple-400 h-8 w-8 mb-3" />} title="In-depth Analytics" description="Get insights on fares, distance, duration, and cancellations." delay={200} />
+          <FeatureCard icon={<Clock className="text-pink-500 dark:text-pink-400 h-8 w-8 mb-3" />} title="Activity Patterns" description="Discover your travel habits by time of day, week, and year." delay={300} />
+          <FeatureCard icon={<GitMerge className="text-blue-500 dark:text-blue-400 h-8 w-8 mb-3" />} title="Streaks & Layovers" description="Analyze consecutive trips and the pauses in between." delay={400} />
+          <FeatureCard icon={<Sparkles className="text-purple-500 dark:text-purple-400 h-8 w-8 mb-3" />} title="Cost Efficiency" description="Compare cost-efficiency across different Uber services." delay={500} />
+          <FeatureCard icon={<FileDown className="text-pink-500 dark:text-pink-400 h-8 w-8 mb-3" />} title="KML Export" description="Export your trips to KML for use in Google Earth or other tools." delay={600} />
         </div>
       </main>
       <Footer />
@@ -129,8 +129,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
   );
 };
 
-const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
-  <div className="bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-lg transition-all duration-300 hover:border-purple-500/60 hover:shadow-purple-500/20 hover:-translate-y-1">
+const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string; delay: number }> = ({ icon, title, description, delay }) => (
+  <div
+    className={`bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-lg 
+    transition-all duration-300 hover:border-purple-500/60 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-1 
+    animate-fade-in opacity-0`}
+    style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
+  >
     {icon}
     <h3 className="font-semibold text-lg mb-1 text-black dark:text-white">{title}</h3>
     <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>

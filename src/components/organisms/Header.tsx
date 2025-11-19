@@ -27,11 +27,11 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, toggleSettings
 
   return (
     <TooltipProvider>
-      <header className="sticky top-0 z-50 w-full border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-black/50 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-black/70 backdrop-blur-md shadow-sm">
         <div className="container mx-auto flex h-14 items-center">
           <div className="mr-4 flex items-center">
-            <div className="mr-6 flex items-center space-x-2">
-              <Gauge className="h-6 w-6 text-purple-500 dark:text-purple-400" />
+            <div className="mr-6 flex items-center space-x-2 group">
+              <Gauge className="h-6 w-6 text-purple-500 dark:text-purple-400 transition-transform duration-300 group-hover:rotate-12" />
               <span className="font-bold text-black dark:text-white">TripMeter</span>
             </div>
           </div>
@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, toggleSettings
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" className="smooth-transition hover:bg-purple-500/10">
                           <Download className="h-4 w-4" />
                           <span className="sr-only">Download</span>
                         </Button>
@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, toggleSettings
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={onReset}>
+                    <Button variant="ghost" size="icon" onClick={onReset} className="smooth-transition hover:bg-red-500/10">
                       <Trash2 className="h-4 w-4" />
                       <span className="sr-only">Clear Data</span>
                     </Button>
@@ -70,7 +70,7 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, toggleSettings
             )}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={toggleSettings}>
+                <Button variant="ghost" size="icon" onClick={toggleSettings} className="smooth-transition hover:bg-purple-500/10">
                   <Settings className="h-4 w-4" />
                   <span className="sr-only">Settings</span>
                 </Button>

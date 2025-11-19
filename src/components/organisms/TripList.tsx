@@ -59,11 +59,11 @@ const TripList: React.FC<TripListProps> = ({ list, title, onBack, onFocusOnTrip,
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-xs">
                     <Calendar size={12} />
-                    {formatDate(trip.request_time)}
+                    {formatDate(trip.begin_trip_time || trip.request_time)}
                   </span>
                   <span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-xs">
                     <Clock size={12} />
-                    {formatTime(trip.request_time)}
+                    {formatTime(trip.begin_trip_time || trip.request_time)}
                   </span>
                 </div>
                 <div className={cn(

@@ -23,6 +23,7 @@ import FareSplitStats from './FareSplitStats';
 import TopLocations from './TopLocations';
 import MostTripsInADay from './MostTripsInADay';
 import ConsecutiveTrips from './ConsecutiveTrips';
+import LazySection from '../molecules/LazySection';
 
 interface StatsProps {
   data: TripStats;
@@ -55,229 +56,261 @@ const Stats: React.FC<StatsProps> = ({
     <div className="flex flex-col gap-4 overflow-y-auto pr-2">
       <TopStats tripData={data} distanceUnit={distanceUnit} />
       <div className="grid grid-cols-1 gap-4">
-        <Card>
-          {/* Fare Insights */}
-          <CardHeader>
-            <CardTitle>Fare Insights</CardTitle>
-            <CardDescription>Insights into your spending, including fare distribution and yearly totals.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FareCharts
-              data={data}
-              rows={rows}
-              activeCurrency={activeCurrency}
-              setActiveCurrency={setActiveCurrency}
-              onFocusOnTrips={onFocusOnTrips}
-              distanceUnit={distanceUnit}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Fare vs. Distance</CardTitle>
-            <CardDescription>The relationship between trip cost and distance for the selected currency.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FareDistanceScatterPlot
-              rows={rows}
-              distanceUnit={distanceUnit}
-              activeCurrency={activeCurrency}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
+        <LazySection id="fare-insights">
+          <Card>
+            {/* Fare Insights */}
+            <CardHeader>
+              <CardTitle>Fare Insights</CardTitle>
+              <CardDescription>Insights into your spending, including fare distribution and yearly totals.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FareCharts
+                data={data}
+                rows={rows}
+                activeCurrency={activeCurrency}
+                setActiveCurrency={setActiveCurrency}
+                onFocusOnTrips={onFocusOnTrips}
+                distanceUnit={distanceUnit}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="fare-distance">
+          <Card>
+            <CardHeader>
+              <CardTitle>Fare vs. Distance</CardTitle>
+              <CardDescription>The relationship between trip cost and distance for the selected currency.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FareDistanceScatterPlot
+                rows={rows}
+                distanceUnit={distanceUnit}
+                activeCurrency={activeCurrency}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
 
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Trip Summary</CardTitle>
-            <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TripSummaryChart
-              data={data}
-              onShowTripList={onShowTripList}
-              rows={rows}
-              distanceUnit={distanceUnit}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
+        <LazySection id="trip-summary">
+          <Card>
+            <CardHeader>
+              <CardTitle>Trip Summary</CardTitle>
+              <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TripSummaryChart
+                data={data}
+                onShowTripList={onShowTripList}
+                rows={rows}
+                distanceUnit={distanceUnit}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
 
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Completed Trips by Year</CardTitle>
-            <CardDescription>The trend of your completed trips over the years.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TripsByYearChart data={data} rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
-          </CardContent>
-        </Card>
+        <LazySection id="trips-by-year">
+          <Card>
+            <CardHeader>
+              <CardTitle>Completed Trips by Year</CardTitle>
+              <CardDescription>The trend of your completed trips over the years.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TripsByYearChart data={data} rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
+            </CardContent>
+          </Card>
+        </LazySection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Duration</CardTitle>
-            <CardDescription>Analysis of how long your trips typically take.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DurationCharts
-              data={data}
-              rows={rows}
-              onFocusOnTrips={onFocusOnTrips}
-              onShowTripList={onShowTripList}
-              distanceUnit={distanceUnit}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Distance</CardTitle>
-            <CardDescription>A look at the distances of your trips.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DistanceCharts
-              data={data}
-              rows={rows}
-              distanceUnit={distanceUnit}
-              activeCurrency={activeCurrency}
-              onFocusOnTrips={onFocusOnTrips}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
+        <LazySection id="duration">
+          <Card>
+            <CardHeader>
+              <CardTitle>Duration</CardTitle>
+              <CardDescription>Analysis of how long your trips typically take.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DurationCharts
+                data={data}
+                rows={rows}
+                onFocusOnTrips={onFocusOnTrips}
+                onShowTripList={onShowTripList}
+                distanceUnit={distanceUnit}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="distance">
+          <Card>
+            <CardHeader>
+              <CardTitle>Distance</CardTitle>
+              <CardDescription>A look at the distances of your trips.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DistanceCharts
+                data={data}
+                rows={rows}
+                distanceUnit={distanceUnit}
+                activeCurrency={activeCurrency}
+                onFocusOnTrips={onFocusOnTrips}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Speed</CardTitle>
-            <CardDescription>Distribution and records of your average trip speeds.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SpeedCharts
-              data={data}
-              rows={rows}
-              distanceUnit={distanceUnit}
-              activeCurrency={activeCurrency}
-              onFocusOnTrips={onFocusOnTrips}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Waiting Time</CardTitle>
-            <CardDescription>Analysis of the time spent waiting for a driver to arrive.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <WaitingTimeCharts
-              data={data}
-              rows={rows}
-              onFocusOnTrips={onFocusOnTrips}
-              onShowTripList={onShowTripList}
-              distanceUnit={distanceUnit}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Cumulative Stats Over Time</CardTitle>
-            <CardDescription>Track the progression of your trips, distance, and spending over time. Click and drag to select a range.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CumulativeStatsChart rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} convertDistance={data.convertDistance} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Cancellation Breakdown</CardTitle>
-            <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CancellationBreakdownChart
-              rows={rows}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Ride Activity</CardTitle>
-            <CardDescription>Patterns in your trip activity over time, by day, and by hour.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ActivityCharts
-              data={data}
-              rows={rows}
-              distanceUnit={distanceUnit}
-              activeCurrency={activeCurrency}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Streaks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StreaksAndPauses
-              onFocusOnTrip={onFocusOnTrip}
-              longestStreak={longestStreak}
-              longestGap={longestGap}
-              longestSuccessfulStreakBeforeCancellation={longestSuccessfulStreakBeforeCancellation}
-              longestCancellationStreak={longestCancellationStreak}
-              longestSuccessfulStreakBeforeDriverCancellation={longestSuccessfulStreakBeforeDriverCancellation}
-              longestDriverCancellationStreak={longestDriverCancellationStreak}
-              longestConsecutiveTripsChain={longestConsecutiveTripsChain}
-              mostTripsInADay={data.mostSuccessfulTripsInADay}
-              rows={rows}
-              distanceUnit={distanceUnit}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
+        <LazySection id="speed">
+          <Card>
+            <CardHeader>
+              <CardTitle>Speed</CardTitle>
+              <CardDescription>Distribution and records of your average trip speeds.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SpeedCharts
+                data={data}
+                rows={rows}
+                distanceUnit={distanceUnit}
+                activeCurrency={activeCurrency}
+                onFocusOnTrips={onFocusOnTrips}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="waiting-time">
+          <Card>
+            <CardHeader>
+              <CardTitle>Waiting Time</CardTitle>
+              <CardDescription>Analysis of the time spent waiting for a driver to arrive.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WaitingTimeCharts
+                data={data}
+                rows={rows}
+                onFocusOnTrips={onFocusOnTrips}
+                onShowTripList={onShowTripList}
+                distanceUnit={distanceUnit}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="cumulative-stats">
+          <Card>
+            <CardHeader>
+              <CardTitle>Cumulative Stats Over Time</CardTitle>
+              <CardDescription>Track the progression of your trips, distance, and spending over time. Click and drag to select a range.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CumulativeStatsChart rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} convertDistance={data.convertDistance} />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="cancellation-breakdown">
+          <Card>
+            <CardHeader>
+              <CardTitle>Cancellation Breakdown</CardTitle>
+              <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CancellationBreakdownChart
+                rows={rows}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="ride-activity">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ride Activity</CardTitle>
+              <CardDescription>Patterns in your trip activity over time, by day, and by hour.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ActivityCharts
+                data={data}
+                rows={rows}
+                distanceUnit={distanceUnit}
+                activeCurrency={activeCurrency}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="streaks">
+          <Card>
+            <CardHeader>
+              <CardTitle>Streaks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StreaksAndPauses
+                onFocusOnTrip={onFocusOnTrip}
+                longestStreak={longestStreak}
+                longestGap={longestGap}
+                longestSuccessfulStreakBeforeCancellation={longestSuccessfulStreakBeforeCancellation}
+                longestCancellationStreak={longestCancellationStreak}
+                longestSuccessfulStreakBeforeDriverCancellation={longestSuccessfulStreakBeforeDriverCancellation}
+                longestDriverCancellationStreak={longestDriverCancellationStreak}
+                longestConsecutiveTripsChain={longestConsecutiveTripsChain}
+                mostTripsInADay={data.mostSuccessfulTripsInADay}
+                rows={rows}
+                distanceUnit={distanceUnit}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Types</CardTitle>
-            <CardDescription>A breakdown of your trips by the type of service used.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProductTypesChart
-              rows={rows}
-              distanceUnit={distanceUnit}
-              activeCurrency={activeCurrency}
-              convertDistance={data.convertDistance}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Cities</CardTitle>
-            <CardDescription>Discover which cities you travel in the most.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TopCities rows={rows} distanceUnit={distanceUnit} convertDistance={data.convertDistance} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Location Hotspots</CardTitle>
-            <CardDescription>Identify your most frequent pickup and drop-off areas.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TopLocations rows={rows} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Fare Split Rides</CardTitle>
-            <CardDescription>Summary of rides where the fare was split.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FareSplitStats rows={rows} />
-          </CardContent>
-        </Card>
+        <LazySection id="product-types">
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Types</CardTitle>
+              <CardDescription>A breakdown of your trips by the type of service used.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProductTypesChart
+                rows={rows}
+                distanceUnit={distanceUnit}
+                activeCurrency={activeCurrency}
+                convertDistance={data.convertDistance}
+              />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="top-cities">
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Cities</CardTitle>
+              <CardDescription>Discover which cities you travel in the most.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TopCities rows={rows} distanceUnit={distanceUnit} convertDistance={data.convertDistance} />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="location-hotspots">
+          <Card>
+            <CardHeader>
+              <CardTitle>Location Hotspots</CardTitle>
+              <CardDescription>Identify your most frequent pickup and drop-off areas.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TopLocations rows={rows} />
+            </CardContent>
+          </Card>
+        </LazySection>
+        <LazySection id="fare-split">
+          <Card>
+            <CardHeader>
+              <CardTitle>Fare Split Rides</CardTitle>
+              <CardDescription>Summary of rides where the fare was split.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FareSplitStats rows={rows} />
+            </CardContent>
+          </Card>
+        </LazySection>
       </div>
     </div>
   );
