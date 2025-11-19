@@ -1,7 +1,9 @@
 import React from 'react';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, TooltipProps, BarChart, Bar, LabelList, Legend } from 'recharts';
-import { Map } from 'lucide-react';
+import { Map, Timer, Ship, Plane, Moon } from 'lucide-react';
 import Stat from '../../atoms/Stat';
+import { FunFact } from '../../molecules/FunFact';
+import { calculateWaitingTimeFacts } from '../../../utils/funFacts';
 import { formatDuration, formatDurationWithSeconds } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
@@ -283,6 +285,30 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
         ) : (
           <Stat label="Shortest Wait" value={formatDurationWithSeconds(shortestWaitingTime)} />
         )}
+      </div>
+
+      <div className="mt-8">
+        <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+          <Timer className="w-4 h-4" />
+          Waiting Time Fun Facts
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {calculateWaitingTimeFacts(totalWaitingTime).map((fact, index) => {
+            const Icon = fact.iconName === 'Ship' ? Ship : fact.iconName === 'Plane' ? Plane : Moon;
+            return (
+              <FunFact
+                key={index}
+                label={fact.label}
+                value={fact.value}
+                icon={Icon}
+                description={fact.description}
+                gradient={fact.gradient}
+                textColor={fact.textColor}
+                baseFact={fact.baseFact}
+              />
+            );
+          })}
+        </div>
       </div>
     </>
   );

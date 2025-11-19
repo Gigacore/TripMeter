@@ -1,52 +1,63 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { LucideIcon } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "../ui/tooltip";
 
 interface FunFactProps {
     label: string;
-    value: string | number;
+    value: string;
     icon: LucideIcon;
+    description: string;
     gradient?: string;
     textColor?: string;
-    description?: string;
-    className?: string;
+    baseFact?: string;
 }
 
 export const FunFact: React.FC<FunFactProps> = ({
     label,
     value,
     icon: Icon,
-    gradient = "from-gray-100 to-gray-200",
-    textColor = "text-gray-900",
     description,
-    className
+    gradient = "from-blue-500/20 to-purple-500/20",
+    textColor = "text-blue-700 dark:text-blue-300",
+    baseFact
 }) => {
     return (
-        <div className={cn("relative overflow-hidden rounded-xl p-6 border border-border/50", className)}>
-            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", gradient)} />
-
-            <div className="relative z-10 flex flex-col h-full justify-between">
-                <div className="flex items-start justify-between mb-4">
-                    <div className={cn("p-3 rounded-lg bg-background/60 backdrop-blur-sm shadow-sm", textColor)}>
-                        <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-wider opacity-60 mix-blend-multiply dark:mix-blend-screen">
-                        Did you know?
-                    </span>
+        <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${gradient} p-4 border border-white/10 shadow-sm transition-all duration-300`}>
+            <div className="flex items-start justify-between mb-2">
+                <div className={`p-2 rounded-lg bg-white/40 dark:bg-black/20 backdrop-blur-sm ${textColor}`}>
+                    <Icon size={20} strokeWidth={2.5} />
                 </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 bg-white/30 dark:bg-black/10 px-2 py-1 rounded-full cursor-help hover:bg-white/50 dark:hover:bg-black/30 transition-colors">
+                                Did you know?
+                            </span>
+                        </TooltipTrigger>
+                        {baseFact && (
+                            <TooltipContent>
+                                <p>{baseFact}</p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
 
-                <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">{label}</h4>
-                    <div className={cn("text-3xl font-black tracking-tight mb-2", textColor)}>
-                        {value}
-                    </div>
-                    {description && (
-                        <p className="text-xs text-muted-foreground/80 font-medium leading-relaxed">
-                            {description}
-                        </p>
-                    )}
-                </div>
+            <div className="space-y-1">
+                <h3 className={`text-2xl font-black tracking-tight ${textColor}`}>
+                    {value}
+                </h3>
+                <p className="text-xs font-medium text-muted-foreground/90 leading-tight">
+                    {description}
+                </p>
+                <p className="text-[10px] font-semibold opacity-60 uppercase tracking-widest pt-1">
+                    {label}
+                </p>
             </div>
         </div>
     );

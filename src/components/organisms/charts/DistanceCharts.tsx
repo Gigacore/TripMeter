@@ -212,6 +212,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
                 description={fact.description}
                 gradient={fact.gradient}
                 textColor={fact.textColor}
+                baseFact={fact.baseFact}
               />
             );
           })}

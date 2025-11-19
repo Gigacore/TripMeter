@@ -164,6 +164,7 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
                 description={fact.description}
                 gradient={fact.gradient}
                 textColor={fact.textColor}
+                baseFact={fact.baseFact}
               />
             );
           })}

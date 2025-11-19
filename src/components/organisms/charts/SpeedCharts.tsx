@@ -1,14 +1,10 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps, Cell } from 'recharts';
-import { Map, Zap } from 'lucide-react';
-// Actually Lucide has 'Footprints' or 'Zap'. Let's use 'Zap' for speed or 'Rabbit'.
-// Wait, I used 'PersonRunning' in funFacts.ts. Lucide might not have it.
-// Let's check available icons. 'Activity' is good. 'Zap' is good.
-// Let's use 'Zap' for Usain Bolt if PersonRunning is not available.
-// Or I can use 'MoveRight'.
-// Let's assume 'PersonRunning' is not in Lucide and use 'Zap' instead in the component mapping.
+import { Map, Zap, Cat, Snail } from 'lucide-react';
 import RequestsMapModal from '../RequestsMapModal';
 import Stat from '../../atoms/Stat';
+import { FunFact } from '../../molecules/FunFact';
+import { calculateSpeedFacts } from '../../../utils/funFacts';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
 import { formatCurrency } from '../../../utils/currency';
@@ -172,6 +168,44 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
           ) : (
             <Stat label="Slowest Trip" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
           )}
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+          <Zap className="w-4 h-4" />
+          Speed Fun Facts
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {(() => {
+            let slowestTripDurationHours = 0;
+            if (slowestTripBySpeedRow && slowestTripBySpeedRow.begin_trip_time && slowestTripBySpeedRow.dropoff_time) {
+              const begin = new Date(slowestTripBySpeedRow.begin_trip_time);
+              const dropoff = new Date(slowestTripBySpeedRow.dropoff_time);
+              if (!isNaN(begin.getTime()) && !isNaN(dropoff.getTime())) {
+                slowestTripDurationHours = (dropoff.getTime() - begin.getTime()) / (1000 * 60 * 60);
+              }
+            }
+
+            return calculateSpeedFacts(
+              distanceUnit === 'miles' ? avgSpeed : convertDistance(avgSpeed),
+              slowestTripDurationHours
+            ).map((fact, index) => {
+              const Icon = fact.iconName === 'Cat' ? Cat : fact.iconName === 'Snail' ? Snail : Zap;
+              return (
+                <FunFact
+                  key={index}
+                  label={fact.label}
+                  value={fact.value}
+                  icon={Icon}
+                  description={fact.description}
+                  gradient={fact.gradient}
+                  textColor={fact.textColor}
+                  baseFact={fact.baseFact}
+                />
+              );
+            });
+          })()}
         </div>
       </div>
 
