@@ -221,12 +221,9 @@ const FareCharts: React.FC<FareChartsProps> = ({
                 subValue={
                   lowestFareTripsCount > 1 ? (
                     `(${lowestFareTripsCount} trips)`
-                  ) : (
-                    <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                      <Map size={12} /> View on map
-                    </span>
-                  )
+                  ) : undefined
                 }
+                valueIcon={lowestFareTripsCount === 1 ? <Map size={16} /> : undefined}
               />
             </div>
           </RequestsMapModal>
@@ -258,12 +255,9 @@ const FareCharts: React.FC<FareChartsProps> = ({
                 subValue={
                   highestFareTripsCount > 1 ? (
                     `(${highestFareTripsCount} trips)`
-                  ) : (
-                    <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                      <Map size={12} /> View on map
-                    </span>
-                  )
+                  ) : undefined
                 }
+                valueIcon={highestFareTripsCount === 1 ? <Map size={16} /> : undefined}
               />
             </div>
           </RequestsMapModal>

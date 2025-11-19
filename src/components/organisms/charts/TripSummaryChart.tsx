@@ -88,11 +88,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             <Stat
               label="Total Requests"
               value={totalTrips}
-              subValue={
-                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                  <Map size={12} /> View on map
-                </span>
-              }
+              valueIcon={<Map size={16} />}
             />
           </div>
         </RequestsMapModal>
@@ -107,11 +103,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             <Stat
               label="Successful"
               value={successfulTrips}
-              subValue={
-                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                  <Map size={12} /> View on map
-                </span>
-              }
+              valueIcon={<Map size={16} />}
             />
           </div>
         </RequestsMapModal>
@@ -126,11 +118,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             <Stat
               label="Rider Canceled"
               value={riderCanceledTrips}
-              subValue={
-                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                  <Map size={12} /> View on map
-                </span>
-              }
+              valueIcon={<Map size={16} />}
             />
           </div>
         </RequestsMapModal>
@@ -145,11 +133,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             <Stat
               label="Driver Canceled"
               value={driverCanceledTrips}
-              subValue={
-                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                  <Map size={12} /> View on map
-                </span>
-              }
+              valueIcon={<Map size={16} />}
             />
           </div>
         </RequestsMapModal>
@@ -165,11 +149,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
               <Stat
                 label="Unfulfilled"
                 value={unfulfilledTrips}
-                subValue={
-                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                    <Map size={12} /> View on map
-                  </span>
-                }
+                valueIcon={<Map size={16} />}
               />
             </div>
           </RequestsMapModal>

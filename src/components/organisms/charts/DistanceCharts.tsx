@@ -152,11 +152,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
                 label="Farthest"
                 value={longestTripByDist.toFixed(2)}
                 unit={distanceUnit}
-                subValue={
-                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                    <Map size={12} /> View on map
-                  </span>
-                }
+                valueIcon={<Map size={16} />}
               />
             </div>
           </RequestsMapModal>
@@ -181,11 +177,7 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
                 label="Shortest"
                 value={shortestTripByDist.toFixed(2)}
                 unit={distanceUnit}
-                subValue={
-                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                    <Map size={12} /> View on map
-                  </span>
-                }
+                valueIcon={<Map size={16} />}
               />
             </div>
           </RequestsMapModal>

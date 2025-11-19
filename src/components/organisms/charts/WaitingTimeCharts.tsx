@@ -252,11 +252,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <Stat
                 label="Longest Wait"
                 value={formatDurationWithSeconds(longestWaitingTime)}
-                subValue={
-                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                    <Map size={12} /> View on map
-                  </span>
-                }
+                valueIcon={<Map size={16} />}
               />
             </div>
           </RequestsMapModal>
@@ -280,11 +276,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <Stat
                 label="Shortest Wait"
                 value={formatDurationWithSeconds(shortestWaitingTime)}
-                subValue={
-                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                    <Map size={12} /> View on map
-                  </span>
-                }
+                valueIcon={<Map size={16} />}
               />
             </div>
           </RequestsMapModal>

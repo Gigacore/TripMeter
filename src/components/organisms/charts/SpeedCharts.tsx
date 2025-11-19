@@ -120,11 +120,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
                   label="Fastest Trip"
                   value={fastestTripBySpeed.toFixed(2)}
                   unit={distanceUnit === 'miles' ? 'mph' : 'km/h'}
-                  subValue={
-                    <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                      <Map size={12} /> View on map
-                    </span>
-                  }
+                  valueIcon={<Map size={16} />}
                 />
               </div>
             </RequestsMapModal>
@@ -163,11 +159,7 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
                   label="Slowest Trip"
                   value={slowestTripBySpeed.toFixed(2)}
                   unit={distanceUnit === 'miles' ? 'mph' : 'km/h'}
-                  subValue={
-                    <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                      <Map size={12} /> View on map
-                    </span>
-                  }
+                  valueIcon={<Map size={16} />}
                 />
               </div>
             </RequestsMapModal>

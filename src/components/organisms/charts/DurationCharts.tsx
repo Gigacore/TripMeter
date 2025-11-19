@@ -111,11 +111,7 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
               <Stat
                 label="Longest"
                 value={formatDurationWithSeconds(longestTrip)}
-                subValue={
-                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                    <Map size={12} /> View on map
-                  </span>
-                }
+                valueIcon={<Map size={16} />}
               />
             </div>
           </RequestsMapModal>
@@ -139,11 +135,7 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
               <Stat
                 label="Shortest"
                 value={formatDurationWithSeconds(shortestTrip)}
-                subValue={
-                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
-                    <Map size={12} /> View on map
-                  </span>
-                }
+                valueIcon={<Map size={16} />}
               />
             </div>
           </RequestsMapModal>

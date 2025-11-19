@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Pause, Link2, Zap, Award, Ban, ShieldCheck, UserX } from 'lucide-react';
+import { Flame, Pause, Link2, Zap, Award, Ban, ShieldCheck, UserX, Map } from 'lucide-react';
 import { TripStats } from '../../../hooks/useTripData';
 import { CSVRow } from '@/services/csvParser';
 import RequestsMapModal from '../RequestsMapModal';
@@ -84,10 +84,10 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
         title="Trips in Streak"
       >
         <button
-          className="text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded ml-2"
+          className="text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded ml-2 inline-flex items-center justify-center"
           aria-label={`View ${label} on map`}
         >
-          View on map
+          <Map size={16} />
         </button>
       </RequestsMapModal>
     );
@@ -125,10 +125,10 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
                 convertDistance={convertDistance}
               >
                 <button
-                  className="text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+                  className="text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded inline-flex items-center justify-center"
                   aria-label={`View Longest Trip Chain on map`}
                 >
-                  View on map
+                  <Map size={16} />
                 </button>
               </RequestsMapModal>
             )}
