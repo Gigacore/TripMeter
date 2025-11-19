@@ -28,6 +28,14 @@ vi.mock('../../atoms/SankeyNode', () => ({
   default: ({ payload }: { payload: { name: string } }) => <div data-testid="sankey-node">{payload.name}</div>,
 }));
 
+vi.mock('../RequestsMapModal', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('lucide-react', () => ({
+  Map: () => <div>Map Icon</div>,
+}));
+
 const mockTripData: TripStats = {
   totalTrips: 100,
   successfulTrips: 70,
@@ -65,7 +73,7 @@ const mockTripData: TripStats = {
   tripsByHour: [],
   tripsByDay: [],
   fareByDistance: [],
-  convertDistance: (m:number) => m,
+  convertDistance: (m: number) => m,
   longestStreak: { days: 0, startDate: null, endDate: null },
   longestGap: { days: 0, startDate: null, endDate: null },
   longestSuccessfulStreakBeforeCancellation: { count: 0, startDate: null, endDate: null },
@@ -77,6 +85,9 @@ const mockTripData: TripStats = {
 const mockProps = {
   data: mockTripData,
   onShowTripList: vi.fn(),
+  rows: [],
+  distanceUnit: 'mi' as const,
+  convertDistance: (m: number) => m,
 };
 
 describe('TripSummaryChart', () => {

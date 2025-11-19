@@ -68,6 +68,8 @@ const Stats: React.FC<StatsProps> = ({
               activeCurrency={activeCurrency}
               setActiveCurrency={setActiveCurrency}
               onFocusOnTrips={onFocusOnTrips}
+              distanceUnit={distanceUnit}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>
@@ -93,7 +95,13 @@ const Stats: React.FC<StatsProps> = ({
             <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
           </CardHeader>
           <CardContent>
-            <TripSummaryChart data={data} onShowTripList={onShowTripList} />
+            <TripSummaryChart
+              data={data}
+              onShowTripList={onShowTripList}
+              rows={rows}
+              distanceUnit={distanceUnit}
+              convertDistance={data.convertDistance}
+            />
           </CardContent>
         </Card>
 
@@ -119,6 +127,8 @@ const Stats: React.FC<StatsProps> = ({
               rows={rows}
               onFocusOnTrips={onFocusOnTrips}
               onShowTripList={onShowTripList}
+              distanceUnit={distanceUnit}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>

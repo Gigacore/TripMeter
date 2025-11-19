@@ -1,12 +1,19 @@
 import React from 'react';
 import { ResponsiveContainer, Sankey, Tooltip, TooltipProps } from 'recharts';
+import { Map } from 'lucide-react';
 import Stat from '../../atoms/Stat';
 import SankeyNode from '../../atoms/SankeyNode';
 import { TripStats } from '../../../hooks/useTripData';
+import RequestsMapModal from '../RequestsMapModal';
+import { DistanceUnit } from '../../../App';
+import { CSVRow } from '../../../services/csvParser';
 
 interface TripSummaryChartProps {
   data: TripStats;
   onShowTripList: (type: string) => void;
+  rows: CSVRow[];
+  distanceUnit: DistanceUnit;
+  convertDistance: (miles: number) => number;
 }
 
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -32,7 +39,7 @@ const statusColors: { [key: string]: string } = {
   'Unfulfilled': '#64748b', // slate-500
 };
 
-const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripList }) => {
+const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripList, rows, distanceUnit, convertDistance }) => {
   const { totalTrips, successfulTrips, riderCanceledTrips, driverCanceledTrips } = data;
 
   const unfulfilledTrips = totalTrips - successfulTrips - riderCanceledTrips - driverCanceledTrips;
@@ -71,11 +78,102 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
         </ResponsiveContainer>
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-        <Stat label="Total Requests" value={totalTrips} onClick={() => onShowTripList('all-map')} />
-        <Stat label="Successful" value={successfulTrips} onClick={() => onShowTripList('successful-map')} />
-        <Stat label="Rider Canceled" value={riderCanceledTrips} onClick={() => onShowTripList('rider_canceled-map')} />
-        <Stat label="Driver Canceled" value={driverCanceledTrips} onClick={() => onShowTripList('driver_canceled-map')} />
-        {unfulfilledTrips > 0 && <Stat label="Unfulfilled" value={unfulfilledTrips} onClick={() => onShowTripList('unfulfilled-map')} />}
+        <RequestsMapModal
+          rows={rows}
+          distanceUnit={distanceUnit}
+          convertDistance={convertDistance}
+          title="All Trip Requests"
+        >
+          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+            <Stat
+              label="Total Requests"
+              value={totalTrips}
+              subValue={
+                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                  <Map size={12} /> View on map
+                </span>
+              }
+            />
+          </div>
+        </RequestsMapModal>
+
+        <RequestsMapModal
+          rows={rows.filter(r => r.status?.toLowerCase() === 'completed')}
+          distanceUnit={distanceUnit}
+          convertDistance={convertDistance}
+          title="Successful Trips"
+        >
+          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+            <Stat
+              label="Successful"
+              value={successfulTrips}
+              subValue={
+                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                  <Map size={12} /> View on map
+                </span>
+              }
+            />
+          </div>
+        </RequestsMapModal>
+
+        <RequestsMapModal
+          rows={rows.filter(r => r.status?.toLowerCase() === 'rider_canceled' || r.status?.toLowerCase() === 'canceled')}
+          distanceUnit={distanceUnit}
+          convertDistance={convertDistance}
+          title="Rider Canceled Trips"
+        >
+          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+            <Stat
+              label="Rider Canceled"
+              value={riderCanceledTrips}
+              subValue={
+                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                  <Map size={12} /> View on map
+                </span>
+              }
+            />
+          </div>
+        </RequestsMapModal>
+
+        <RequestsMapModal
+          rows={rows.filter(r => r.status?.toLowerCase() === 'driver_canceled')}
+          distanceUnit={distanceUnit}
+          convertDistance={convertDistance}
+          title="Driver Canceled Trips"
+        >
+          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+            <Stat
+              label="Driver Canceled"
+              value={driverCanceledTrips}
+              subValue={
+                <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                  <Map size={12} /> View on map
+                </span>
+              }
+            />
+          </div>
+        </RequestsMapModal>
+
+        {unfulfilledTrips > 0 && (
+          <RequestsMapModal
+            rows={rows.filter(r => !['completed', 'rider_canceled', 'canceled', 'driver_canceled'].includes(r.status?.toLowerCase() || ''))}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            title="Unfulfilled Requests"
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+              <Stat
+                label="Unfulfilled"
+                value={unfulfilledTrips}
+                subValue={
+                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                    <Map size={12} /> View on map
+                  </span>
+                }
+              />
+            </div>
+          </RequestsMapModal>
+        )}
       </div>
     </div>
   );

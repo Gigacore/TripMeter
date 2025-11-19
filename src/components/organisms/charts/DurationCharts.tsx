@@ -1,15 +1,20 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps } from 'recharts';
+import { Map } from 'lucide-react';
 import Stat from '../../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
+import RequestsMapModal from '../RequestsMapModal';
+import { DistanceUnit } from '../../../App';
 
 interface DurationChartsProps {
   data: TripStats;
   rows: CSVRow[];
   onShowTripList: (type: string, trips?: CSVRow[]) => void;
   onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
+  distanceUnit: DistanceUnit;
+  convertDistance: (miles: number) => number;
 }
 
 // HACK: Using `any` to bypass a type issue with recharts TooltipProps.
@@ -37,6 +42,8 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
   rows,
   onShowTripList,
   onFocusOnTrips,
+  distanceUnit,
+  convertDistance,
 }) => {
   const {
     totalTripDuration,
@@ -87,8 +94,62 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
         <Stat label="Total Duration" value={formatDuration(totalTripDuration, true)} />
         <Stat label="Average Duration" value={formatDurationWithSeconds(avgTripDuration)} />
-        <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} onClick={() => longestTripRow && onFocusOnTrips([longestTripRow], 'Longest Trip')} />
-        <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} onClick={() => shortestTripRow && onFocusOnTrips([shortestTripRow], 'Shortest Trip')} />
+
+        {longestTripRow ? (
+          <RequestsMapModal
+            rows={[longestTripRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            title="Longest Ride Duration"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                Duration: {formatDurationWithSeconds((new Date(trip.dropoff_time!).getTime() - new Date(trip.begin_trip_time!).getTime()) / (1000 * 60))}
+              </div>
+            )}
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+              <Stat
+                label="Longest"
+                value={formatDurationWithSeconds(longestTrip)}
+                subValue={
+                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                    <Map size={12} /> View on map
+                  </span>
+                }
+              />
+            </div>
+          </RequestsMapModal>
+        ) : (
+          <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} />
+        )}
+
+        {shortestTripRow ? (
+          <RequestsMapModal
+            rows={[shortestTripRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            title="Shortest Ride Duration"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                Duration: {formatDurationWithSeconds((new Date(trip.dropoff_time!).getTime() - new Date(trip.begin_trip_time!).getTime()) / (1000 * 60))}
+              </div>
+            )}
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+              <Stat
+                label="Shortest"
+                value={formatDurationWithSeconds(shortestTrip)}
+                subValue={
+                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                    <Map size={12} /> View on map
+                  </span>
+                }
+              />
+            </div>
+          </RequestsMapModal>
+        ) : (
+          <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} />
+        )}
       </div>
     </div>
   );

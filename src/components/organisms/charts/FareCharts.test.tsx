@@ -35,6 +35,14 @@ vi.mock('../../../utils/currency', () => ({
   formatCurrency: (amount: number, currency: string) => `${amount.toFixed(2)} ${currency}`,
 }));
 
+vi.mock('../RequestsMapModal', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('lucide-react', () => ({
+  Map: () => <div>Map Icon</div>,
+}));
+
 const mockRow: CSVRow = { id: 1 };
 const mockTripData: TripStats = {
   totalFareByCurrency: { USD: 100, EUR: 50 },
@@ -52,7 +60,7 @@ const mockTripData: TripStats = {
   tripsByHour: [],
   tripsByDay: [],
   fareByDistance: [],
-  convertDistance: (m:number) => m,
+  convertDistance: (m: number) => m,
   longestStreak: 0,
   longestGap: 0,
   longestSuccessfulStreakBeforeCancellation: 0,
@@ -64,12 +72,14 @@ const mockTripData: TripStats = {
 const mockProps = {
   data: mockTripData,
   rows: [
-    { fare_currency: 'USD', fare_amount: '10' },
-    { fare_currency: 'USD', fare_amount: '40' },
+    { fare_currency: 'USD', fare_amount: '10', status: 'completed' },
+    { fare_currency: 'USD', fare_amount: '40', status: 'completed' },
   ],
   activeCurrency: 'USD',
   setActiveCurrency: vi.fn(),
-  onFocusOnTrip: vi.fn(),
+  onFocusOnTrips: vi.fn(),
+  distanceUnit: 'mi' as const,
+  convertDistance: (m: number) => m,
 };
 
 describe('FareCharts', () => {

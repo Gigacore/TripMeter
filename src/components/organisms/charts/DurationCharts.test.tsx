@@ -57,7 +57,7 @@ const mockTripData: TripStats = {
   tripsByHour: [],
   tripsByDay: [],
   fareByDistance: [],
-  convertDistance: (m:number) => m,
+  convertDistance: (m: number) => m,
   longestStreak: 0,
   longestGap: 0,
   longestSuccessfulStreakBeforeCancellation: 0,
@@ -72,6 +72,9 @@ const mockProps = {
     { status: 'completed', begin_trip_time: '2023-01-01T10:00:00Z', dropoff_time: '2023-01-01T10:30:00Z' },
   ],
   onShowTripList: vi.fn(),
+  onFocusOnTrips: vi.fn(),
+  distanceUnit: 'mi' as const,
+  convertDistance: (m: number) => m,
 };
 
 describe('DurationCharts', () => {

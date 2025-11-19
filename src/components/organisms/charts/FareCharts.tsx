@@ -1,9 +1,12 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, TooltipProps } from 'recharts';
+import { Map } from 'lucide-react';
 import { formatCurrency } from '../../../utils/currency';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
 import Stat from '../../atoms/Stat';
+import RequestsMapModal from '../RequestsMapModal';
+import { DistanceUnit } from '../../../App';
 
 interface FareChartsProps {
   data: TripStats;
@@ -11,6 +14,8 @@ interface FareChartsProps {
   activeCurrency: string | null;
   setActiveCurrency: (currency: string) => void;
   onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
+  distanceUnit: DistanceUnit;
+  convertDistance: (miles: number) => number;
 }
 
 const CustomBarTooltip = ({ active, payload, label, activeCurrency }: TooltipProps<number, string> & { activeCurrency: string | null }) => {
@@ -53,7 +58,9 @@ const FareCharts: React.FC<FareChartsProps> = ({
   rows,
   activeCurrency,
   setActiveCurrency,
-  onFocusOnTrips = () => {}, // Add a default empty function
+  onFocusOnTrips = () => { }, // Add a default empty function
+  distanceUnit,
+  convertDistance,
 }) => {
   const {
     totalFareByCurrency,
@@ -69,19 +76,24 @@ const FareCharts: React.FC<FareChartsProps> = ({
     return rows.filter(row => row.status?.toLowerCase() === 'completed');
   }, [rows]);
 
-  const { lowestFare, highestFare } = React.useMemo(() => {
-    if (!activeCurrency) return { lowestFare: null, highestFare: null };
+  const { lowestFare, highestFare, lowestFareRow, highestFareRow } = React.useMemo(() => {
+    if (!activeCurrency) return { lowestFare: null, highestFare: null, lowestFareRow: null, highestFareRow: null };
 
     const faresInCurrency = completedTrips
       .filter(row => row.fare_currency === activeCurrency && row.fare_amount)
-      .map(row => parseFloat(row.fare_amount!));
+      .map(row => ({ row, amount: parseFloat(row.fare_amount!) }));
 
-    if (faresInCurrency.length === 0) return { lowestFare: null, highestFare: null };
+    if (faresInCurrency.length === 0) return { lowestFare: null, highestFare: null, lowestFareRow: null, highestFareRow: null };
 
-    const min = Math.min(...faresInCurrency);
-    const max = Math.max(...faresInCurrency);
+    const minEntry = faresInCurrency.reduce((min, current) => current.amount < min.amount ? current : min);
+    const maxEntry = faresInCurrency.reduce((max, current) => current.amount > max.amount ? current : max);
 
-    return { lowestFare: { amount: min }, highestFare: { amount: max } };
+    return {
+      lowestFare: { amount: minEntry.amount },
+      highestFare: { amount: maxEntry.amount },
+      lowestFareRow: minEntry.row,
+      highestFareRow: maxEntry.row,
+    };
   }, [completedTrips, activeCurrency]);
 
   const fareDistributionData = React.useMemo(() => {
@@ -138,11 +150,10 @@ const FareCharts: React.FC<FareChartsProps> = ({
               <button
                 key={currency}
                 onClick={() => setActiveCurrency(currency)}
-                className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-                   activeCurrency === currency
-                    ? 'border-emerald-400 text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+                className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${activeCurrency === currency
+                  ? 'border-emerald-400 text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
               >
                 <div className="flex flex-col">
                   <span className="text-xs font-normal">{currency}</span>
@@ -174,7 +185,7 @@ const FareCharts: React.FC<FareChartsProps> = ({
       {activeCurrency && tripsByYear && tripsByYear.length > 0 && (
         <div className="stats-group">
           <h3 className="text-lg font-semibold">Total Fare by Year ({activeCurrency})</h3>
-           <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={tripsByYear} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="year" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
@@ -185,28 +196,86 @@ const FareCharts: React.FC<FareChartsProps> = ({
           </ResponsiveContainer>
         </div>
       )}
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-            <Stat
-              label="Avg. Fare"
-              value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
-            />
-            {lowestFare && (
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+        <Stat
+          label="Avg. Fare"
+          value={formatCurrency(avgFareByCurrency[activeCurrency], activeCurrency)}
+        />
+
+        {lowestFare && lowestFareRow ? (
+          <RequestsMapModal
+            rows={[lowestFareRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            title="Lowest Fare"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-green-600 dark:text-green-400">
+                Fare: {formatCurrency(parseFloat(trip.fare_amount!), trip.fare_currency!)}
+              </div>
+            )}
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
               <Stat
                 label="Lowest Fare"
                 value={formatCurrency(lowestFare.amount, activeCurrency)}
-                subValue={lowestFareTripsCount > 1 ? `(${lowestFareTripsCount} trips)` : undefined}
-                onClick={() => handleFocusOnTripsByFare(lowestFare.amount)}
+                subValue={
+                  lowestFareTripsCount > 1 ? (
+                    `(${lowestFareTripsCount} trips)`
+                  ) : (
+                    <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                      <Map size={12} /> View on map
+                    </span>
+                  )
+                }
               />
+            </div>
+          </RequestsMapModal>
+        ) : lowestFare ? (
+          <Stat
+            label="Lowest Fare"
+            value={formatCurrency(lowestFare.amount, activeCurrency)}
+            subValue={lowestFareTripsCount > 1 ? `(${lowestFareTripsCount} trips)` : undefined}
+            onClick={() => handleFocusOnTripsByFare(lowestFare.amount)}
+          />
+        ) : null}
+
+        {highestFare && highestFareRow ? (
+          <RequestsMapModal
+            rows={[highestFareRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            title="Highest Fare"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-green-600 dark:text-green-400">
+                Fare: {formatCurrency(parseFloat(trip.fare_amount!), trip.fare_currency!)}
+              </div>
             )}
-            {highestFare && (
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
               <Stat
                 label="Highest Fare"
                 value={formatCurrency(highestFare.amount, activeCurrency)}
-                subValue={highestFareTripsCount > 1 ? `(${highestFareTripsCount} trips)` : undefined}
-                onClick={() => handleFocusOnTripsByFare(highestFare.amount)}
+                subValue={
+                  highestFareTripsCount > 1 ? (
+                    `(${highestFareTripsCount} trips)`
+                  ) : (
+                    <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                      <Map size={12} /> View on map
+                    </span>
+                  )
+                }
               />
-            )}
-          </div>
+            </div>
+          </RequestsMapModal>
+        ) : highestFare ? (
+          <Stat
+            label="Highest Fare"
+            value={formatCurrency(highestFare.amount, activeCurrency)}
+            subValue={highestFareTripsCount > 1 ? `(${highestFareTripsCount} trips)` : undefined}
+            onClick={() => handleFocusOnTripsByFare(highestFare.amount)}
+          />
+        ) : null}
+      </div>
     </div>
   );
 };
