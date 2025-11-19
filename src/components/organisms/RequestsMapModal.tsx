@@ -10,9 +10,11 @@ interface RequestsMapModalProps {
   distanceUnit: DistanceUnit;
   convertDistance: (miles: number) => number;
   children: React.ReactNode;
+  title?: string;
+  renderTripStat?: (trip: CSVRow) => React.ReactNode;
 }
 
-const RequestsMapModal: React.FC<RequestsMapModalProps> = ({ rows, distanceUnit, convertDistance, children }) => {
+const RequestsMapModal: React.FC<RequestsMapModalProps> = ({ rows, distanceUnit, convertDistance, children, title = "Trips", renderTripStat }) => {
   const [focusedTrip, setFocusedTrip] = useState<CSVRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -33,10 +35,11 @@ const RequestsMapModal: React.FC<RequestsMapModalProps> = ({ rows, distanceUnit,
           <div className="lg:col-span-1 h-full overflow-hidden border-r bg-background">
             <TripList
               list={rows}
-              title="Trips in Streak"
+              title={title}
               onBack={handleClose}
               onFocusOnTrip={handleFocusOnTrip}
               focusedTrip={focusedTrip}
+              renderTripStat={renderTripStat}
             />
           </div>
           <div className="lg:col-span-2 h-full relative bg-muted/10">

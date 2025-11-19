@@ -11,9 +11,10 @@ interface TripListProps {
   onBack: () => void;
   onFocusOnTrip: (trip: CSVRow) => void;
   focusedTrip?: CSVRow | null;
+  renderTripStat?: (trip: CSVRow) => React.ReactNode;
 }
 
-const TripList: React.FC<TripListProps> = ({ list, title, onBack, onFocusOnTrip, focusedTrip }) => {
+const TripList: React.FC<TripListProps> = ({ list, title, onBack, onFocusOnTrip, focusedTrip, renderTripStat }) => {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'N/A';
     return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -104,9 +105,13 @@ const TripList: React.FC<TripListProps> = ({ list, title, onBack, onFocusOnTrip,
                   <DollarSign size={14} className="text-muted-foreground" />
                   {formatCurrency(toNumber(trip.fare_amount), trip.fare_currency)}
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {trip.product_type}
-                </div>
+                {renderTripStat ? (
+                  renderTripStat(trip)
+                ) : (
+                  <div className="text-xs text-muted-foreground">
+                    {trip.product_type}
+                  </div>
+                )}
               </div>
             </div>
           );

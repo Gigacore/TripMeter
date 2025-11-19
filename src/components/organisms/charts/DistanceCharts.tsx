@@ -5,7 +5,10 @@ import Stat from '../../atoms/Stat';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
 import { formatCurrency } from '../../../utils/currency';
-import { DistanceUnit } from '../../../App'; 
+import { DistanceUnit } from '../../../App';
+
+import RequestsMapModal from '../RequestsMapModal';
+import { Map } from 'lucide-react';
 
 interface DistanceChartsProps {
   data: TripStats;
@@ -129,17 +132,74 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
         </div>
       )}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-          <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
-          <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
-          <Stat label="Farthest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => longestTripByDistRow && onFocusOnTrips([longestTripByDistRow], 'Farthest Trip')} />
-          <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} onClick={() => shortestTripByDistRow && onFocusOnTrips([shortestTripByDistRow], 'Shortest Trip')} />
-          {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
-            <Stat
-              label={`Cost per ${distanceUnit}`}
-              value={`${formatCurrency(costPerDistanceByCurrency[activeCurrency]!, activeCurrency)}/${distanceUnit}`}
-            />
-          )}
-        </div>
+        <Stat label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit} />
+        <Stat label="Avg. Distance" value={avgCompletedDistance.toFixed(2)} unit={distanceUnit} />
+
+        {longestTripByDistRow ? (
+          <RequestsMapModal
+            rows={[longestTripByDistRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            title="Farthest Trip"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-orange-600 dark:text-orange-400">
+                Distance: {convertDistance(parseFloat(trip.distance || '0')).toFixed(2)} {distanceUnit}
+              </div>
+            )}
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+              <Stat
+                label="Farthest"
+                value={longestTripByDist.toFixed(2)}
+                unit={distanceUnit}
+                subValue={
+                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                    <Map size={12} /> View on map
+                  </span>
+                }
+              />
+            </div>
+          </RequestsMapModal>
+        ) : (
+          <Stat label="Farthest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} />
+        )}
+
+        {shortestTripByDistRow ? (
+          <RequestsMapModal
+            rows={[shortestTripByDistRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+            title="Shortest Trip"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-orange-600 dark:text-orange-400">
+                Distance: {convertDistance(parseFloat(trip.distance || '0')).toFixed(2)} {distanceUnit}
+              </div>
+            )}
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+              <Stat
+                label="Shortest"
+                value={shortestTripByDist.toFixed(2)}
+                unit={distanceUnit}
+                subValue={
+                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                    <Map size={12} /> View on map
+                  </span>
+                }
+              />
+            </div>
+          </RequestsMapModal>
+        ) : (
+          <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} />
+        )}
+
+        {activeCurrency && costPerDistanceByCurrency[activeCurrency] !== undefined && (
+          <Stat
+            label={`Cost per ${distanceUnit}`}
+            value={`${formatCurrency(costPerDistanceByCurrency[activeCurrency]!, activeCurrency)}/${distanceUnit}`}
+          />
+        )}
+      </div>
     </div>
   );
 };

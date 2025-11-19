@@ -192,6 +192,7 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <XAxis type="number" hide domain={[0, 1]} />
               <YAxis type="category" dataKey="name" hide />
               <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
+              {/* @ts-ignore */}
               <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }] as any} />
               <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
                 <LabelList dataKey="waiting" position="center" formatter={(value: any) => formatDuration(value as number, true)} className="fill-white font-semibold" />
@@ -240,6 +241,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
             rows={[longestWaitingTimeRow]}
             distanceUnit={distanceUnit}
             convertDistance={convertDistance}
+            title="Longest Wait Time"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                Wait: {formatDurationWithSeconds((new Date(trip.begin_trip_time!).getTime() - new Date(trip.request_time!).getTime()) / (1000 * 60))}
+              </div>
+            )}
           >
             <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
               <Stat
@@ -262,6 +269,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
             rows={[shortestWaitingTimeRow]}
             distanceUnit={distanceUnit}
             convertDistance={convertDistance}
+            title="Shortest Wait Time"
+            renderTripStat={(trip) => (
+              <div className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                Wait: {formatDurationWithSeconds((new Date(trip.begin_trip_time!).getTime() - new Date(trip.request_time!).getTime()) / (1000 * 60))}
+              </div>
+            )}
           >
             <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
               <Stat

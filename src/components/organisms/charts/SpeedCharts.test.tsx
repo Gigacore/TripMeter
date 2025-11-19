@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SpeedCharts from './SpeedCharts';
 import { TripStats } from '../../../hooks/useTripData';
 import { CSVRow } from '../../../services/csvParser';
@@ -27,6 +27,14 @@ vi.mock('../../atoms/Stat', () => ({
   ),
 }));
 
+vi.mock('../RequestsMapModal', () => ({
+  default: ({ children, title, rows }: any) => (
+    <div data-testid="requests-map-modal" data-title={title} data-rows={JSON.stringify(rows)}>
+      {children}
+    </div>
+  ),
+}));
+
 const mockFastestTripRow: CSVRow = { 'Request id': 'fastest' };
 const mockSlowestTripRow: CSVRow = { 'Request id': 'slowest' };
 
@@ -44,10 +52,7 @@ const mockTripData: TripStats = {
   lowestFareByCurrency: {},
   highestFareByCurrency: {},
   tripsByYear: [],
-  totalDistance: 0,
   totalTrips: 0,
-  averageDistance: 0,
-  averageFare: 0,
   totalTripDuration: 0,
   avgTripDuration: 0,
   longestTrip: 0,
@@ -59,13 +64,15 @@ const mockTripData: TripStats = {
   tripsByHour: [],
   tripsByDay: [],
   fareByDistance: [],
-  convertDistance: (m:number) => m,
-  longestStreak: 0,
-  longestGap: 0,
-  longestSuccessfulStreakBeforeCancellation: 0,
-  longestCancellationStreak: 0,
-  longestSuccessfulStreakBeforeDriverCancellation: 0,
-  longestDriverCancellationStreak: 0,
+  convertDistance: (m: number) => m,
+  longestStreak: { days: 0, startDate: null, endDate: null },
+  longestGap: { days: 0, startDate: null, endDate: null },
+  longestSuccessfulStreakBeforeCancellation: { count: 0, startDate: null, endDate: null },
+  longestCancellationStreak: { count: 0, startDate: null, endDate: null },
+  longestSuccessfulStreakBeforeDriverCancellation: { count: 0, startDate: null, endDate: null },
+  longestDriverCancellationStreak: { count: 0, startDate: null, endDate: null },
+  longestConsecutiveTripsChain: [],
+  mostSuccessfulTripsInADay: { count: 0, date: null, trips: [] },
 };
 
 const mockProps = {
@@ -73,7 +80,8 @@ const mockProps = {
   rows: [],
   distanceUnit: 'miles' as DistanceUnit,
   activeCurrency: 'USD',
-  onShowTripList: vi.fn(),
+  onFocusOnTrips: vi.fn(),
+  convertDistance: (m: number) => m,
 };
 
 describe('SpeedCharts', () => {
@@ -90,23 +98,19 @@ describe('SpeedCharts', () => {
     expect(stats.some(s => s.textContent?.includes('Fastest Trip'))).toBe(true);
   });
 
-  it('should call onShowTripList when fastest trip stat is clicked', async () => {
-    const user = userEvent.setup();
+  it('should wrap fastest trip stat with RequestsMapModal', () => {
     render(<SpeedCharts {...mockProps} />);
-    const fastestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Fastest Trip'));
-    if (fastestStat) {
-      await user.click(fastestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockFastestTripRow['Request id']}`);
-    }
+    const modals = screen.getAllByTestId('requests-map-modal');
+    const fastestModal = modals.find(m => m.getAttribute('data-title') === 'Fastest Trip');
+    expect(fastestModal).toBeInTheDocument();
+    expect(fastestModal).toHaveAttribute('data-rows', JSON.stringify([mockFastestTripRow]));
   });
 
-  it('should call onShowTripList when slowest trip stat is clicked', async () => {
-    const user = userEvent.setup();
+  it('should wrap slowest trip stat with RequestsMapModal', () => {
     render(<SpeedCharts {...mockProps} />);
-    const slowestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Slowest Trip'));
-    if (slowestStat) {
-      await user.click(slowestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockSlowestTripRow['Request id']}`);
-    }
+    const modals = screen.getAllByTestId('requests-map-modal');
+    const slowestModal = modals.find(m => m.getAttribute('data-title') === 'Slowest Trip');
+    expect(slowestModal).toBeInTheDocument();
+    expect(slowestModal).toHaveAttribute('data-rows', JSON.stringify([mockSlowestTripRow]));
   });
 });

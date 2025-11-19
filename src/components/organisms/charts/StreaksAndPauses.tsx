@@ -81,6 +81,7 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
         rows={trips}
         distanceUnit={distanceUnit}
         convertDistance={convertDistance}
+        title="Trips in Streak"
       >
         <button
           className="text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded ml-2"
