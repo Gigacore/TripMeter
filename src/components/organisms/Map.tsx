@@ -12,11 +12,11 @@ import { DistanceUnit } from '../../App';
 let mapIdCounter = 0;
 
 interface Location {
-  lat: number;
-  lng: number;
-  count: number;
-  commonAddress: string;
-  type?: 'pickup' | 'dropoff';
+    lat: number;
+    lng: number;
+    count: number;
+    commonAddress: string;
+    type?: 'pickup' | 'dropoff';
 }
 interface MapProps {
     rows: CSVRow[];
@@ -186,14 +186,14 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             });
         }
 
-        if ((rows.length > 0 || (locations && locations.length > 0)) && !focusedTrip) {
+        if (rows.length > 0 || (locations && locations.length > 0)) {
             fitToLayers();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rows, focusedTrip, convertDistance, distanceUnit, locations]);
 
     return (
-    <div className="flex-shrink-0 map-hero">
+        <div className="flex-shrink-0 map-hero">
             <main id={mapIdRef.current} style={{ width: '100%', height: '100%' }}></main>
         </div>
     );
