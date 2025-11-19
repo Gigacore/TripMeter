@@ -55,7 +55,7 @@ const Stats: React.FC<StatsProps> = ({
     <div className="flex flex-col gap-4 overflow-y-auto pr-2">
       <TopStats tripData={data} distanceUnit={distanceUnit} />
       <div className="grid grid-cols-1 gap-4">
-                <Card>
+        <Card>
           {/* Fare Insights */}
           <CardHeader>
             <CardTitle>Fare Insights</CardTitle>
@@ -85,7 +85,7 @@ const Stats: React.FC<StatsProps> = ({
             />
           </CardContent>
         </Card>
-        
+
 
         <Card>
           <CardHeader>
@@ -97,15 +97,15 @@ const Stats: React.FC<StatsProps> = ({
           </CardContent>
         </Card>
 
-       
-                <Card>
+
+        <Card>
           <CardHeader>
             <CardTitle>Completed Trips by Year</CardTitle>
             <CardDescription>The trend of your completed trips over the years.</CardDescription>
           </CardHeader>
-          <CardContent> 
-            <TripsByYearChart data={{...data, rows}} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
-          </CardContent> 
+          <CardContent>
+            <TripsByYearChart data={data} rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} />
+          </CardContent>
         </Card>
 
         <Card>
@@ -164,6 +164,9 @@ const Stats: React.FC<StatsProps> = ({
               data={data}
               rows={rows}
               onFocusOnTrips={onFocusOnTrips}
+              onShowTripList={onShowTripList}
+              distanceUnit={distanceUnit}
+              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>
@@ -176,7 +179,7 @@ const Stats: React.FC<StatsProps> = ({
             <CumulativeStatsChart rows={rows} distanceUnit={distanceUnit} activeCurrency={activeCurrency} convertDistance={data.convertDistance} />
           </CardContent>
         </Card>
-         <Card>
+        <Card>
           <CardHeader>
             <CardTitle>Cancellation Breakdown</CardTitle>
             <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
@@ -184,8 +187,6 @@ const Stats: React.FC<StatsProps> = ({
           <CardContent>
             <CancellationBreakdownChart
               rows={rows}
-              distanceUnit={distanceUnit}
-              convertDistance={data.convertDistance}
             />
           </CardContent>
         </Card>

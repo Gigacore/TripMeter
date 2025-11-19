@@ -2,7 +2,7 @@ import React from 'react';
 import { CSVRow } from '../../services/csvParser';
 import { formatCurrency } from '../../utils/currency';
 import { toNumber } from '../../utils/formatters';
-import { ArrowLeft, MapPin, Calendar, Clock, DollarSign } from 'lucide-react';
+import { X, MapPin, Calendar, Clock, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TripListProps {
@@ -30,9 +30,9 @@ const TripList: React.FC<TripListProps> = ({ list, title, onBack, onFocusOnTrip,
         <button
           onClick={onBack}
           className="p-2 hover:bg-muted rounded-full transition-colors"
-          aria-label="Go back"
+          aria-label="Close modal"
         >
-          <ArrowLeft size={20} className="text-muted-foreground" />
+          <X size={20} className="text-muted-foreground" />
         </button>
         <div>
           <h3 className="font-semibold text-lg leading-none">{title}</h3>

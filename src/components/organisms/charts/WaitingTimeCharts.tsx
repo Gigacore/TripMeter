@@ -1,17 +1,23 @@
 import React from 'react';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, TooltipProps, BarChart, Bar, LabelList, Legend } from 'recharts';
+import { Map } from 'lucide-react';
 import Stat from '../../atoms/Stat';
 import { formatDuration, formatDurationWithSeconds } from '../../../utils/formatters';
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
+import RequestsMapModal from '../RequestsMapModal';
+import { DistanceUnit } from '../../../App';
 
 interface WaitingTimeChartsProps {
   data: TripStats;
   rows: CSVRow[];
   onFocusOnTrips: (tripRows: CSVRow[], title?: string) => void;
+  onShowTripList: (type: string) => void;
+  distanceUnit: DistanceUnit;
+  convertDistance: (miles: number) => number;
 }
 
-const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomDistributionTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
@@ -29,7 +35,7 @@ const CustomDistributionTooltip = ({ active, payload, label }: TooltipProps<numb
   return null;
 };
 
-const CustomDayOfWeekTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomDayOfWeekTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
@@ -48,7 +54,7 @@ const CustomDayOfWeekTooltip = ({ active, payload, label }: TooltipProps<number,
   return null;
 };
 
-const CustomBarTooltip = ({ active, payload, activeCurrency }: TooltipProps<number, string> & { activeCurrency?: string | null }) => {
+const CustomBarTooltip = ({ active, payload, activeCurrency }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-slate-200 dark:border-slate-700">
@@ -67,6 +73,9 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
   data,
   rows,
   onFocusOnTrips,
+  onShowTripList,
+  distanceUnit,
+  convertDistance,
 }) => {
   const {
     totalWaitingTime,
@@ -183,12 +192,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <XAxis type="number" hide domain={[0, 1]} />
               <YAxis type="category" dataKey="name" hide />
               <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }]} />
+              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }] as any} />
               <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
-                <LabelList dataKey="waiting" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
+                <LabelList dataKey="waiting" position="center" formatter={(value: any) => formatDuration(value as number, true)} className="fill-white font-semibold" />
               </Bar>
               <Bar dataKey="riding" stackId="a" fill="#34d399" name="Riding Time">
-                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
+                <LabelList dataKey="riding" position="center" formatter={(value: any) => formatDuration(value as number, true)} className="fill-white font-semibold" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -211,23 +220,65 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               <XAxis type="number" hide domain={[0, 1]} />
               <YAxis type="category" dataKey="name" hide />
               <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }]} />
+              <Legend iconSize={10} layout="horizontal" verticalAlign="top" align="center" payload={[{ value: 'Waiting Time', type: 'square', color: '#ef4444' }, { value: 'Riding Time', type: 'square', color: '#34d399' }] as any} />
               <Bar dataKey="waiting" stackId="a" fill="#ef4444" name="Waiting Time">
-                <LabelList dataKey="waiting" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
+                <LabelList dataKey="waiting" position="center" formatter={(value: any) => formatDuration(value as number, true)} className="fill-white font-semibold" />
               </Bar>
               <Bar dataKey="riding" stackId="a" fill="#34d399" name="Riding Time">
-                <LabelList dataKey="riding" position="center" formatter={(value: number) => formatDuration(value, true)} className="fill-white font-semibold" />
+                <LabelList dataKey="riding" position="center" formatter={(value: any) => formatDuration(value as number, true)} className="fill-white font-semibold" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
-       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
-          <Stat label="Total Wait" value={formatDuration(totalWaitingTime, true)} onClick={() => onShowTripList('completed-map')} />
-          <Stat label="Average Wait" value={formatDurationWithSeconds(avgWaitingTime)} onClick={() => onShowTripList('completed-map')} />
-          <Stat label="Longest Wait" value={formatDurationWithSeconds(longestWaitingTime)} onClick={() => longestWaitingTimeRow && onFocusOnTrips([longestWaitingTimeRow], 'Longest Wait Time')} />
-          <Stat label="Shortest Wait" value={formatDurationWithSeconds(shortestWaitingTime)} onClick={() => shortestWaitingTimeRow && onFocusOnTrips([shortestWaitingTimeRow], 'Shortest Wait Time')} />
-        </div>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
+        <Stat label="Total Wait" value={formatDuration(totalWaitingTime, true)} onClick={() => onShowTripList('completed-map')} />
+        <Stat label="Average Wait" value={formatDurationWithSeconds(avgWaitingTime)} onClick={() => onShowTripList('completed-map')} />
+
+        {longestWaitingTimeRow ? (
+          <RequestsMapModal
+            rows={[longestWaitingTimeRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+              <Stat
+                label="Longest Wait"
+                value={formatDurationWithSeconds(longestWaitingTime)}
+                subValue={
+                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                    <Map size={12} /> View on map
+                  </span>
+                }
+              />
+            </div>
+          </RequestsMapModal>
+        ) : (
+          <Stat label="Longest Wait" value={formatDurationWithSeconds(longestWaitingTime)} />
+        )}
+
+        {shortestWaitingTimeRow ? (
+          <RequestsMapModal
+            rows={[shortestWaitingTimeRow]}
+            distanceUnit={distanceUnit}
+            convertDistance={convertDistance}
+          >
+            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
+              <Stat
+                label="Shortest Wait"
+                value={formatDurationWithSeconds(shortestWaitingTime)}
+                subValue={
+                  <span className="flex items-center justify-center gap-1 text-blue-500 hover:underline">
+                    <Map size={12} /> View on map
+                  </span>
+                }
+              />
+            </div>
+          </RequestsMapModal>
+        ) : (
+          <Stat label="Shortest Wait" value={formatDurationWithSeconds(shortestWaitingTime)} />
+        )}
+      </div>
     </>
   );
 };

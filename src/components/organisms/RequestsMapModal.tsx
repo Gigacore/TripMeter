@@ -14,17 +14,19 @@ interface RequestsMapModalProps {
 
 const RequestsMapModal: React.FC<RequestsMapModalProps> = ({ rows, distanceUnit, convertDistance, children }) => {
   const [focusedTrip, setFocusedTrip] = useState<CSVRow | null>(null);
+  const [open, setOpen] = useState(false);
 
   const handleFocusOnTrip = (trip: CSVRow) => {
     setFocusedTrip(trip);
   };
 
-  const handleBack = () => {
+  const handleClose = () => {
+    setOpen(false);
     setFocusedTrip(null);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="flex flex-col max-w-[90vw] w-full h-[90vh] p-0 gap-0 overflow-hidden sm:rounded-xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
@@ -32,7 +34,7 @@ const RequestsMapModal: React.FC<RequestsMapModalProps> = ({ rows, distanceUnit,
             <TripList
               list={rows}
               title="Trips in Streak"
-              onBack={handleBack}
+              onBack={handleClose}
               onFocusOnTrip={handleFocusOnTrip}
               focusedTrip={focusedTrip}
             />

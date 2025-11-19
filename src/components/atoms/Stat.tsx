@@ -6,19 +6,20 @@ interface StatProps {
   onClick?: () => void;
   unit?: string;
   unitClassName?: string;
-  subValue?: string | null;
+  subValue?: React.ReactNode;
+  className?: string;
 }
 
-const Stat: React.FC<StatProps> = ({ label, value, onClick, unit, unitClassName, subValue }) => {
+const Stat: React.FC<StatProps> = ({ label, value, onClick, unit, unitClassName, subValue, className }) => {
   const clickableClasses = onClick
     ? 'cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg'
     : '';
 
   return (
     <div
-      className={`flex flex-col items-center justify-center text-center p-2 ${clickableClasses}`}
+      className={`flex flex-col items-center justify-center text-center p-2 ${clickableClasses} ${className || ''}`}
       onClick={onClick}
-      title={subValue ?? undefined}
+      title={typeof subValue === 'string' ? subValue : undefined}
     >
       <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
         {label}
