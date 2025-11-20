@@ -15,12 +15,13 @@ export interface DailyContribution {
 interface ContributionGraphProps {
   data: { [key: string]: DailyContribution };
   view: 'last-12-months' | number;
+  onDayClick?: (date: string) => void;
 }
 
 const LABEL_COLUMN_WIDTH = 'clamp(36px, 4vw, 64px)';
 const WEEKDAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
-const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => {
+const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view, onDayClick }) => {
   // TODO: This is a temporary solution. Ideally, distanceUnit and activeCurrency should be passed as props.
   const distanceUnit: DistanceUnit = 'miles';
   const [tooltip, setTooltip] = useState<{
@@ -54,7 +55,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
     const count = dayStats?.count ?? 0;
     const date = new Date(dateStr);
     const formattedDate = date.toLocaleDateString(undefined, { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
-    
+
     const content = (
       <div className="min-w-[250px] text-sm">
         <div className="mb-2 border-b border-slate-700 pb-2">
@@ -87,6 +88,12 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
     }
   };
 
+  const handleClick = (day: WeekCell) => {
+    if (!day.isPlaceholder && day.date && day.count && onDayClick) {
+      onDayClick(day.date);
+    }
+  };
+
   const today = new Date();
   let startDate: Date;
   let endDate: Date;
@@ -111,6 +118,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
       date: dateStr,
       count,
       level: getLevel(count),
+      stats: data[dateStr] || null,
     });
     currentDate.setDate(currentDate.getDate() + 1);
   }
@@ -219,11 +227,11 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view }) => 
               <div
                 key={day.key}
                 data-testid={day.isPlaceholder ? 'placeholder-cell' : 'contribution-cell'}
-                className={`aspect-square rounded-sm ${
-                  day.isPlaceholder ? 'bg-transparent' : `transition-transform duration-200 ease-in-out hover:scale-125 hover:shadow-lg hover:z-10 ${levelColorMap[day.level ?? 0]}`
-                } `}
+                className={`aspect-square rounded-sm ${day.isPlaceholder ? 'bg-transparent' : `transition-transform duration-200 ease-in-out hover:scale-125 hover:shadow-lg hover:z-10 cursor-pointer ${levelColorMap[day.level ?? 0]}`
+                  } `}
                 onMouseEnter={(e) => handleMouseEnter(e, day)}
                 onMouseLeave={handleMouseLeave}
+                onClick={() => handleClick(day)}
               />
             ))}
           </div>

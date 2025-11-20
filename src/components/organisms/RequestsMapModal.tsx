@@ -9,14 +9,29 @@ interface RequestsMapModalProps {
   rows: CSVRow[];
   distanceUnit: DistanceUnit;
   convertDistance: (miles: number) => number;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title?: string;
   renderTripStat?: (trip: CSVRow) => React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const RequestsMapModal: React.FC<RequestsMapModalProps> = ({ rows, distanceUnit, convertDistance, children, title = "Trips", renderTripStat }) => {
+const RequestsMapModal: React.FC<RequestsMapModalProps> = ({
+  rows,
+  distanceUnit,
+  convertDistance,
+  children,
+  title = "Trips",
+  renderTripStat,
+  isOpen,
+  onOpenChange
+}) => {
   const [focusedTrip, setFocusedTrip] = useState<CSVRow | null>(null);
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const isControlled = isOpen !== undefined;
+  const open = isControlled ? isOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange! : setInternalOpen;
 
   const handleFocusOnTrip = (trip: CSVRow) => {
     setFocusedTrip(trip);
@@ -29,7 +44,7 @@ const RequestsMapModal: React.FC<RequestsMapModalProps> = ({ rows, distanceUnit,
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="flex flex-col max-w-[90vw] w-full h-[90vh] p-0 gap-0 overflow-hidden sm:rounded-xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
           <div className="lg:col-span-1 h-full overflow-hidden border-r bg-background">

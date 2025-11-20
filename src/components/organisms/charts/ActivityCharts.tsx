@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import { Moon, Sunrise, Sun, Sunset } from 'lucide-react';
 import ContributionGraph, { DailyContribution } from '../ContributionGraph';
+import RequestsMapModal from '../RequestsMapModal';
 
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
@@ -228,8 +229,65 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
   const [contributionView, setContributionView] = React.useState<'last-12-months' | number>('last-12-months');
 
+  const [mapModalState, setMapModalState] = React.useState<{
+    isOpen: boolean;
+    title: string;
+    trips: CSVRow[];
+  }>({
+    isOpen: false,
+    title: '',
+    trips: [],
+  });
+
+  const handleDayClick = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const formattedDate = date.toLocaleDateString(undefined, { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const tripsOnDay = rows.filter(row => {
+      if (!row.request_time) return false;
+      const rowDate = new Date(row.request_time);
+      return !isNaN(rowDate.getTime()) && rowDate.toISOString().split('T')[0] === dateStr && row.status?.toLowerCase() === 'completed';
+    });
+
+    if (tripsOnDay.length > 0) {
+      setMapModalState({
+        isOpen: true,
+        title: `Trips on ${formattedDate}`,
+        trips: tripsOnDay,
+      });
+    }
+  };
+
+  const handleHourClick = (data: any) => {
+    if (!data || typeof data.hour !== 'number') return;
+    const hour = data.hour;
+
+    const tripsInHour = rows.filter(row => {
+      if (!row.request_time || row.status?.toLowerCase() !== 'completed') return false;
+      const date = new Date(row.request_time);
+      return !isNaN(date.getTime()) && date.getHours() === hour;
+    });
+
+    if (tripsInHour.length > 0) {
+      setMapModalState({
+        isOpen: true,
+        title: `Trips at ${hour}:00 - ${hour}:59`,
+        trips: tripsInHour,
+      });
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6 @container">
+      <RequestsMapModal
+        rows={mapModalState.trips}
+        distanceUnit={distanceUnit}
+        convertDistance={(d) => distanceUnit === 'km' ? d * 1.60934 : d}
+        title={mapModalState.title}
+        isOpen={mapModalState.isOpen}
+        onOpenChange={(open) => setMapModalState(prev => ({ ...prev, isOpen: open }))}
+      />
+
       <div className="stats-group">
         <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
           <div>
@@ -257,7 +315,11 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
         {Object.keys(contributionData).length > 0 ? (
           <div>
-            <ContributionGraph data={contributionData} view={contributionView} />
+            <ContributionGraph
+              data={contributionData}
+              view={contributionView}
+              onDayClick={handleDayClick}
+            />
           </div>
         ) : <p className="text-muted-foreground text-sm mt-2">No trip data with dates to display.</p>}
       </div>
@@ -275,7 +337,13 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
               <YAxis type="number" dataKey="count" name="Trips" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
               <ZAxis type="number" range={[60, 60]} />
               <Tooltip cursor={{ strokeDasharray: '3 3', fill: 'rgba(100, 116, 139, 0.1)' }} content={<CustomScatterTooltip />} />
-              <Scatter name="Trips" data={tripsByHourData} fill="#818cf8" />
+              <Scatter
+                name="Trips"
+                data={tripsByHourData}
+                fill="#818cf8"
+                onClick={handleHourClick}
+                cursor="pointer"
+              />
             </ScatterChart>
           </ResponsiveContainer>
           <div className="flex justify-between text-xs text-muted-foreground mt-2 px-[30px]">
