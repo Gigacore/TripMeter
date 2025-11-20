@@ -3,12 +3,18 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { ModeToggle } from './ModeToggle';
 import { useTheme } from '../ThemeProvider';
+import { assertAccessible } from '../../tests/utils';
 
 vi.mock('../ThemeProvider', () => ({
   useTheme: vi.fn(),
 }));
 
 describe('ModeToggle', () => {
+  it('should be accessible', async () => {
+    (useTheme as vi.Mock).mockReturnValue({ theme: 'light', setTheme: vi.fn() });
+    await assertAccessible(<ModeToggle />);
+  });
+
   it('should call setTheme with "dark" when the current theme is "light"', async () => {
     const user = userEvent.setup();
     const setTheme = vi.fn();

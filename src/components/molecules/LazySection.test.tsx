@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import LazySection from './LazySection';
+import { assertAccessible } from '../../tests/utils';
 
 // Mock IntersectionObserver
 const mockIntersectionObserver = vi.fn();
@@ -12,8 +13,44 @@ mockIntersectionObserver.mockReturnValue({
 window.IntersectionObserver = mockIntersectionObserver as any;
 
 describe('LazySection', () => {
+    let intersectionObserverCallback: (entries: Partial<IntersectionObserverEntry>[]) => void;
+
     beforeEach(() => {
+        mockIntersectionObserver.mockImplementation((callback) => {
+            intersectionObserverCallback = callback;
+            return {
+                observe: () => null,
+                unobserve: () => null,
+                disconnect: () => null,
+            };
+        });
         mockIntersectionObserver.mockClear();
+    });
+
+    it('should be accessible when showing the skeleton', async () => {
+        await assertAccessible(
+            <LazySection id="test-section">
+                <div>Actual Content</div>
+            </LazySection>
+        );
+    });
+
+    it('should be accessible when showing the content', async () => {
+        render(
+            <LazySection id="test-section">
+                <div>Actual Content</div>
+            </LazySection>
+        );
+
+        act(() => {
+            intersectionObserverCallback([{ isIntersecting: true }]);
+        });
+
+        await assertAccessible(
+            <LazySection id="test-section">
+                <div>Actual Content</div>
+            </LazySection>
+        );
     });
 
     it('renders skeleton initially', () => {

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import TopCities from './TopCities';
+import { assertAccessible } from '../../tests/utils';
 import { CSVRow } from '../../services/csvParser';
 import { DistanceUnit } from '../../App';
 
@@ -32,6 +33,10 @@ const mockProps = {
 };
 
 describe('TopCities', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<TopCities {...mockProps} />);
+  });
+
   it('should render top cities sorted by trip count', async () => {
     render(<TopCities {...mockProps} />);
     const cityButtons = await screen.findAllByRole('button');

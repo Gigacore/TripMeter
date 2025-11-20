@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MainView from './MainView';
+import { assertAccessible } from '../../tests/utils';
 import { DistanceUnit } from '../../App';
 import Map from './Map';
 import Stats from './Stats';
@@ -52,6 +53,10 @@ const mockProps = {
 describe('MainView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('should be accessible', async () => {
+    await assertAccessible(<MainView {...mockProps} />);
   });
 
   it('should render the Map and Stats components', () => {

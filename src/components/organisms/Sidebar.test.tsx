@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Sidebar from './Sidebar';
+import { assertAccessible } from '../../tests/utils';
 import { CSVRow } from '../../services/csvParser';
 
 // Mock child components
@@ -45,6 +46,10 @@ const mockProps = {
 describe('Sidebar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('should be accessible', async () => {
+    await assertAccessible(<Sidebar {...mockProps} />);
   });
 
   it('should not render FocusedTripInfo when no trip is focused', () => {

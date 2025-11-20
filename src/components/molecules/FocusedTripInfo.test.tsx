@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import FocusedTripInfo from './FocusedTripInfo';
+import { assertAccessible } from '../../tests/utils';
 
 const mockTrip = {
   status: 'Completed',
@@ -10,6 +11,10 @@ const mockTrip = {
 };
 
 describe('FocusedTripInfo', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<FocusedTripInfo trip={mockTrip} onShowAll={() => {}} />);
+  });
+
   it('should render the trip information', () => {
     render(<FocusedTripInfo trip={mockTrip} onShowAll={() => {}} />);
 

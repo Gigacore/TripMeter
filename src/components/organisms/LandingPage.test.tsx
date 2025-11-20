@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import * as userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import LandingPage from './LandingPage';
+import { assertAccessible } from '../../tests/utils';
 
 const mockProps = {
   onFileSelect: vi.fn(),
@@ -13,29 +14,33 @@ const mockProps = {
 };
 
 describe('LandingPage', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<LandingPage {...mockProps} />);
+  });
+
   it('should render the initial state correctly', () => {
     render(<LandingPage {...mockProps} />);
-    expect(screen.getByRole('heading', { name: 'TripMeter' })).toBeInTheDocument();
-    expect(screen.getByText('Upload your ride history CSV to generate an interactive map and detailed analytics of your trips. See your travel patterns come to life.')).toBeInTheDocument();
-    expect(screen.getByText('Drag & drop your CSV file here, or click to select')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Visualize Your Rides' })).toBeInTheDocument();
+    expect(screen.getByText('From raw data to rich insights. See your trips like never before.')).toBeInTheDocument();
+    expect(screen.getByText((content, element) => content.startsWith('Drag & drop your'))).toBeInTheDocument();
   });
 
   it('should display the processing state', () => {
     render(<LandingPage {...mockProps} isProcessing={true} />);
-    expect(screen.getByText('Processing...')).toBeInTheDocument();
-    expect(screen.queryByText('Drag & drop your CSV file here, or click to select')).not.toBeInTheDocument();
+    expect(screen.getByText('Processing your data...')).toBeInTheDocument();
+    expect(screen.queryByText('Drag & drop your trips_data-0.csv file here')).not.toBeInTheDocument();
   });
 
   it('should display an error message', () => {
     render(<LandingPage {...mockProps} error="Test Error" />);
-    expect(screen.getByText('Error')).toBeInTheDocument();
+    expect(screen.getByText('Analysis Failed')).toBeInTheDocument();
     expect(screen.getByText('Test Error')).toBeInTheDocument();
   });
 
   it('should change style when dragging', () => {
     const { container } = render(<LandingPage {...mockProps} isDragging={true} />);
     const dropZone = container.querySelector('.border-2');
-    expect(dropZone).toHaveClass('border-primary');
+    expect(dropZone).toHaveClass('border-purple-500');
   });
 
   it('should call onFileSelect when a file is chosen', async () => {
