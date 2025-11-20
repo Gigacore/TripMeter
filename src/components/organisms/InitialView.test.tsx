@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import InitialView from './InitialView';
+import { assertAccessible } from '../../tests/utils';
 
 const mockProps = {
   onFileSelect: vi.fn(),
@@ -13,6 +14,10 @@ const mockProps = {
 };
 
 describe('InitialView', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<InitialView {...mockProps} />);
+  });
+
   it('should render the initial state correctly', () => {
     render(<InitialView {...mockProps} />);
     expect(screen.getByText('Upload your CSV file')).toBeInTheDocument();

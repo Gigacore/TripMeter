@@ -30,7 +30,7 @@ const defaultFileHandlerState = {
 };
 
 const defaultTripDataState: [any, boolean] = [
-  { /* mock trip data */ },
+  null,
   false, // isAnalyzing
 ];
 
@@ -40,7 +40,7 @@ describe('TripMeter App', () => {
   });
 
   it('should render LandingPage when there are no rows', () => {
-    useFileHandlerMock.mockReturnValue(defaultFileHandlerState);
+    useFileHandlerMock.mockReturnValue({ ...defaultFileHandlerState, rows: [] });
     useTripDataMock.mockReturnValue(defaultTripDataState);
     render(<App />);
     expect(screen.getByTestId('landing-page')).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('TripMeter App', () => {
 
   it('should render MainView when there are rows', () => {
     useFileHandlerMock.mockReturnValue({ ...defaultFileHandlerState, rows: [{ id: 1 }] });
-    useTripDataMock.mockReturnValue(defaultTripDataState);
+    useTripDataMock.mockReturnValue([{ totalTrips: 1 }, false]);
     render(<App />);
     expect(screen.getByTestId('main-view')).toBeInTheDocument();
     expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();

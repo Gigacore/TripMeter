@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { featureCollection, point } from '@turf/helpers';
 import clustersDbscan from '@turf/clusters-dbscan';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import Map from './Map';
 
 interface TopLocationsProps {
@@ -136,9 +137,10 @@ const TopLocations: React.FC<TopLocationsProps> = ({ rows }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end items-center gap-2">
+        <Label htmlFor="city-filter">City</Label>
         <Select value={selectedCity} onValueChange={setSelectedCity}>
-          <SelectTrigger id="city-filter" className="w-full md:w-[200px]">
+          <SelectTrigger id="city-filter" className="w-full md:w-[200px]" aria-label="Select city">
             <SelectValue placeholder="Select a city" />
           </SelectTrigger>
           <SelectContent>

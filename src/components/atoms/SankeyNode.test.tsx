@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SankeyNode from './SankeyNode';
+import { assertAccessible } from '../../tests/utils';
 
 vi.mock('recharts', () => ({
-  Layer: ({ children }: { children: React.ReactNode }) => <g>{children}</g>,
   Rectangle: (props: any) => <rect {...props} />,
 }));
 
@@ -21,6 +21,14 @@ const mockProps = {
 describe('SankeyNode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('should be accessible', async () => {
+    await assertAccessible(
+      <svg>
+        <SankeyNode {...mockProps} />
+      </svg>
+    );
   });
 
   it('should render the node with the correct text', () => {
@@ -40,9 +48,9 @@ describe('SankeyNode', () => {
       </svg>
     );
 
-    const rect = container.querySelector('rect');
-    if (rect) {
-      await user.click(rect);
+    const layer = container.querySelector('g');
+    if (layer) {
+      await user.click(layer);
     }
 
     expect(mockProps.onShowTripList).toHaveBeenCalledWith('successful');
@@ -60,9 +68,9 @@ describe('SankeyNode', () => {
       </svg>
     );
 
-    const rect = container.querySelector('rect');
-    if (rect) {
-        await user.click(rect);
+    const layer = container.querySelector('g');
+    if (layer) {
+        await user.click(layer);
     }
 
     expect(mockProps.onShowTripList).not.toHaveBeenCalled();
@@ -74,7 +82,7 @@ describe('SankeyNode', () => {
         <SankeyNode {...mockProps} />
       </svg>
     );
-    expect(container.querySelector('rect')).toHaveAttribute('cursor', 'pointer');
+    expect(container.querySelector('g')).toHaveAttribute('cursor', 'pointer');
   });
 
   it('should have a default cursor when not clickable', () => {
@@ -87,6 +95,6 @@ describe('SankeyNode', () => {
         <SankeyNode {...nonClickableProps} />
       </svg>
     );
-    expect(container.querySelector('rect')).toHaveAttribute('cursor', 'default');
+    expect(container.querySelector('g')).toHaveAttribute('cursor', 'default');
   });
 });

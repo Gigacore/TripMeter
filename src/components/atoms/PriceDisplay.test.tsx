@@ -2,12 +2,18 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import PriceDisplay from './PriceDisplay';
 import * as currencyUtils from '../../utils/currency';
+import { assertAccessible } from '../../tests/utils';
 
 vi.mock('../../utils/currency', () => ({
   formatCurrency: vi.fn(),
 }));
 
 describe('PriceDisplay', () => {
+  it('should be accessible', async () => {
+    (currencyUtils.formatCurrency as vi.Mock).mockReturnValue('$123.45');
+    await assertAccessible(<PriceDisplay amount={123.45} currency="USD" />);
+  });
+
   it('should render the formatted price', () => {
     (currencyUtils.formatCurrency as vi.Mock).mockReturnValue('$123.45');
 

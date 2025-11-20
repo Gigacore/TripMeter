@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import CustomizedContent from './CustomizedContent';
+import { assertAccessible } from '../../tests/utils';
 
 const mockProps = {
   root: {},
@@ -15,6 +16,14 @@ const mockProps = {
 };
 
 describe('CustomizedContent', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(
+      <svg>
+        <CustomizedContent {...mockProps} />
+      </svg>
+    );
+  });
+
   it('should render the name when depth is 1', () => {
     render(
       <svg>

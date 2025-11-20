@@ -1,10 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import Stats from './Stats';
+import { assertAccessible } from '../../tests/utils';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
 
 // Mock all child components
+vi.mock('../molecules/LazySection', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div data-testid="lazy-section">{children}</div>,
+}));
 vi.mock('./charts/FareCharts', () => ({
   default: ({ activeCurrency, setActiveCurrency }: { activeCurrency: string | null, setActiveCurrency: (c: string) => void }) => (
     <div data-testid="fare-charts" data-active-currency={activeCurrency} onClick={() => setActiveCurrency('USD')} />
@@ -32,6 +36,16 @@ vi.mock('@/components/ui/card', () => ({
   CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
   CardDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+}));
+
+vi.mock('@/components/ui/select', () => ({
+  Select: ({ children }: { children: React.ReactNode }) => <div data-testid="select">{children}</div>,
+  SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectGroup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectItem: ({ children, value }: { children: React.ReactNode, value: string }) => <div data-value={value}>{children}</div>,
+  SelectLabel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectTrigger: ({ children }: { children: React.ReactNode }) => <button>{children || 'Select'}</button>,
+  SelectValue: ({ placeholder }: { placeholder: string }) => <div>{placeholder}</div>,
 }));
 
 const mockTripData: TripStats = {
@@ -65,6 +79,10 @@ const mockProps = {
 };
 
 describe('Stats', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<Stats {...mockProps} />);
+  });
+
   it('should render all child components', () => {
     render(<Stats {...mockProps} />);
     expect(screen.getByTestId('top-stats')).toBeInTheDocument();
