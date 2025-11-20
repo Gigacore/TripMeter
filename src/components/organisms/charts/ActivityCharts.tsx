@@ -7,15 +7,17 @@ import {
   YAxis,
   CartesianGrid,
   ZAxis,
-  ScatterChart, 
+  ScatterChart,
   Scatter,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
   Radar,
-  PolarRadiusAxis } from 'recharts';
+  PolarRadiusAxis
+} from 'recharts';
 import { Moon, Sunrise, Sun, Sunset } from 'lucide-react';
-import ContributionGraph, { DailyContribution } from '../ContributionGraph'; 
+import ContributionGraph, { DailyContribution } from '../ContributionGraph';
+
 import { CSVRow } from '../../../services/csvParser';
 import { TripStats } from '../../../hooks/useTripData';
 import { formatCurrency } from '../../../utils/currency';
@@ -237,21 +239,19 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1">
             <button
               onClick={() => setContributionView('last-12-months')}
-              className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                contributionView === 'last-12-months' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              }`}
+              className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${contributionView === 'last-12-months' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                }`}
             >
               Last 12 Months
             </button>
             {availableYears.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => setContributionView(year)}
-                  className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                    contributionView === year ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+              <button
+                key={year}
+                onClick={() => setContributionView(year)}
+                className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${contributionView === year ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   }`}
-                >{year}</button>
-              ))}
+              >{year}</button>
+            ))}
           </div>
         </div>
 
@@ -261,6 +261,8 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
           </div>
         ) : <p className="text-muted-foreground text-sm mt-2">No trip data with dates to display.</p>}
       </div>
+
+
 
       {tripsByHourData.length > 0 && (
         <div className="stats-group">

@@ -20,9 +20,10 @@ import CancellationBreakdownChart from './CancellationBreakdownChart';
 import StreaksAndPauses from './charts/StreaksAndPauses';
 import CumulativeStatsChart from './charts/CumulativeStatsChart';
 import FareSplitStats from './FareSplitStats';
-import TopLocations from './TopLocations';
+
 import MostTripsInADay from './MostTripsInADay';
 import ConsecutiveTrips from './ConsecutiveTrips';
+import TripDurationDistribution from './charts/TripDurationDistribution';
 import LazySection from '../molecules/LazySection';
 
 interface StatsProps {
@@ -140,6 +141,10 @@ const Stats: React.FC<StatsProps> = ({
                 distanceUnit={distanceUnit}
                 convertDistance={data.convertDistance}
               />
+              <div className="mt-6 pt-6 border-t border-border">
+                <h4 className="text-sm font-semibold mb-4">Trip Duration Distribution</h4>
+                <TripDurationDistribution rows={rows} />
+              </div>
             </CardContent>
           </Card>
         </LazySection>
@@ -286,17 +291,6 @@ const Stats: React.FC<StatsProps> = ({
             </CardHeader>
             <CardContent>
               <TopCities rows={rows} distanceUnit={distanceUnit} convertDistance={data.convertDistance} />
-            </CardContent>
-          </Card>
-        </LazySection>
-        <LazySection id="location-hotspots">
-          <Card>
-            <CardHeader>
-              <CardTitle>Location Hotspots</CardTitle>
-              <CardDescription>Identify your most frequent pickup and drop-off areas.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TopLocations rows={rows} />
             </CardContent>
           </Card>
         </LazySection>

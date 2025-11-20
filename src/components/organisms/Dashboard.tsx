@@ -30,7 +30,7 @@ const sections = [
   { id: 'streaks', title: 'Streaks' },
   { id: 'product-types', title: 'Product Types' },
   { id: 'top-cities', title: 'Top Cities' },
-  { id: 'location-hotspots', title: 'Location Hotspots' },
+
   { id: 'fare-split-rides', title: 'Fare Split Rides' },
 ];
 const sectionIds = sections.map(s => s.id);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar, TooltipProps } from 'recharts';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar, TooltipProps, LineChart, Line } from 'recharts';
 import Stat from '../atoms/Stat';
 import { CSVRow } from '../../services/csvParser';
 
@@ -29,6 +29,26 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
   return null;
 };
 
+const CustomTrendTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="min-w-[200px] rounded-lg border bg-background/80 p-4 text-sm text-foreground shadow-lg backdrop-blur-sm border-border">
+        <p className="recharts-tooltip-label font-bold text-base mb-2 border-b border-border pb-2">{label}</p>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="text-red-500">Cancellation Rate</div>
+          <div className="font-medium text-right text-red-500">{(data.rate * 100).toFixed(1)}%</div>
+          <div className="text-muted-foreground">Total Requests</div>
+          <div className="font-medium text-right">{data.total.toLocaleString()}</div>
+          <div className="text-muted-foreground">Canceled</div>
+          <div className="font-medium text-right">{data.canceled.toLocaleString()}</div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({ rows }) => {
   const cancellationData = React.useMemo(() => {
     const hourlyCancellations: { [hour: number]: { rider: number; driver: number } } =
@@ -39,12 +59,12 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
       if ((status === 'rider_canceled' || status === 'driver_canceled') && row.request_time) {
         const date = new Date(row.request_time);
         if (!isNaN(date.getTime())) {
-            const hour = date.getHours();
-            if (status === 'rider_canceled') {
-                hourlyCancellations[hour].rider++;
-            } else {
-                hourlyCancellations[hour].driver++;
-            }
+          const hour = date.getHours();
+          if (status === 'rider_canceled') {
+            hourlyCancellations[hour].rider++;
+          } else {
+            hourlyCancellations[hour].driver++;
+          }
         }
       }
     });
@@ -54,6 +74,36 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
       riderCanceled: counts.rider,
       driverCanceled: counts.driver,
     }));
+  }, [rows]);
+
+  const trendData = React.useMemo(() => {
+    const monthlyStats: { [key: string]: { total: number; canceled: number; date: Date } } = {};
+
+    rows.forEach(row => {
+      if (row.request_time) {
+        const date = new Date(row.request_time);
+        if (!isNaN(date.getTime())) {
+          const key = `${date.getFullYear()}-${date.getMonth()}`;
+          if (!monthlyStats[key]) {
+            monthlyStats[key] = { total: 0, canceled: 0, date };
+          }
+          monthlyStats[key].total++;
+          if (row.status?.toLowerCase().includes('canceled')) {
+            monthlyStats[key].canceled++;
+          }
+        }
+      }
+    });
+
+    return Object.values(monthlyStats)
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .slice(-12) // Last 12 months
+      .map(stat => ({
+        month: stat.date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+        rate: stat.total > 0 ? stat.canceled / stat.total : 0,
+        total: stat.total,
+        canceled: stat.canceled
+      }));
   }, [rows]);
 
   const hasData = cancellationData.some(d => d.riderCanceled > 0 || d.driverCanceled > 0);
@@ -93,6 +143,20 @@ const CancellationBreakdownChart: React.FC<CancellationBreakdownChartProps> = ({
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mt-4">
         <Stat label="Rider Canceled" value={totalRiderCanceled} />
         <Stat label="Driver Canceled" value={totalDriverCanceled} />
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-border">
+        <h4 className="text-sm font-semibold mb-4">Cancellation Rate Trend (Last 12 Months)</h4>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+            <XAxis dataKey="month" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${(val * 100).toFixed(0)}%`} />
+            <Tooltip content={<CustomTrendTooltip />} cursor={{ strokeDasharray: '3 3' }} />
+            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+            <Line type="monotone" dataKey="rate" stroke="#ef4444" name="Cancellation Rate" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </>
   );
