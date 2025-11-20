@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Map from './Map';
+import { assertAccessible } from '../../tests/utils';
 import L from 'leaflet';
 import { DistanceUnit } from '../../App';
 
@@ -82,6 +83,10 @@ const mockProps = {
 describe('Map', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('should be accessible', async () => {
+    await assertAccessible(<Map {...mockProps} />);
   });
 
   it('should initialize the map when rows are provided', () => {

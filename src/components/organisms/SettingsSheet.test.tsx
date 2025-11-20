@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import SettingsSheet from './SettingsSheet';
+import { assertAccessible } from '../../tests/utils';
 import { DistanceUnit } from '../../App';
 
 vi.mock('@/components/ui/sheet', () => ({
@@ -33,6 +34,10 @@ const mockProps = {
 };
 
 describe('SettingsSheet', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<SettingsSheet {...mockProps} />);
+  });
+
   it('should render the settings title and description', () => {
     render(<SettingsSheet {...mockProps} />);
     expect(screen.getByText('Settings')).toBeInTheDocument();

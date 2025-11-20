@@ -29,7 +29,12 @@ vi.mock('../../atoms/Stat', () => ({
 }));
 
 vi.mock('../../../utils/currency', () => ({
-  formatCurrency: (amount: number, currency: string) => `${amount.toFixed(2)} ${currency}`,
+  formatCurrency: (amount: number | null | undefined, currency: string) => {
+    if (amount === null || amount === undefined) {
+      return '';
+    }
+    return `${amount.toFixed(2)} ${currency}`;
+  },
 }));
 
 const mockLongestTripRow: CSVRow = { 'Request id': 'longest' };
@@ -82,6 +87,7 @@ const mockProps = {
   distanceUnit: 'miles' as DistanceUnit,
   activeCurrency: 'USD',
   onShowTripList: vi.fn(),
+  onFocusOnTrips: vi.fn(),
   convertDistance: (m: number) => m,
 };
 

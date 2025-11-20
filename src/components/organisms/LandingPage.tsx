@@ -114,7 +114,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
             </button>
           </p>
         </div>
-
+        <h2 className="sr-only">Features</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
           <FeatureCard icon={<Route className="text-blue-500 dark:text-blue-400 h-8 w-8 mb-3" />} title="Interactive Trip Map" description="Visualize your entire ride history on a global map." delay={100} />
           <FeatureCard icon={<BarChart className="text-purple-500 dark:text-purple-400 h-8 w-8 mb-3" />} title="In-depth Analytics" description="Get insights on fares, distance, duration, and cancellations." delay={200} />

@@ -37,6 +37,7 @@ const InitialView: React.FC<InitialViewProps> = ({ onFileSelect, isProcessing, e
             <input
               ref={fileInputRef}
               type="file"
+              aria-label="File upload"
               accept=".csv"
               onChange={(e) => {
                 onFileSelect(e);

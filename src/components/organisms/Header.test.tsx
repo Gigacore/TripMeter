@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import Header from './Header';
 import * as kmlService from '@/services/kmlService';
+import { assertAccessible } from '../../tests/utils';
 
 vi.mock('../molecules/ModeToggle', () => ({
   ModeToggle: () => <div data-testid="mode-toggle"></div>,
@@ -21,6 +22,10 @@ const mockProps = {
 };
 
 describe('Header', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<Header {...mockProps} />);
+  });
+
   it('should render the header title', () => {
     render(<Header {...mockProps} />);
     expect(screen.getByText('TripMeter')).toBeInTheDocument();

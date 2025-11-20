@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import CurrencyList from './CurrencyList';
 import * as currencyUtils from '../../utils/currency';
+import { assertAccessible } from '../../tests/utils';
 
 vi.mock('../../utils/currency', async (importOriginal) => {
     const actual = await importOriginal();
@@ -17,6 +18,11 @@ const mockCurrencies = [
 ];
 
 describe('CurrencyList', () => {
+  it('should be accessible', async () => {
+    (currencyUtils.getAllCurrencies as vi.Mock).mockReturnValue(mockCurrencies);
+    await assertAccessible(<CurrencyList />);
+  });
+
   it('should render a list of currencies', () => {
     (currencyUtils.getAllCurrencies as vi.Mock).mockReturnValue(mockCurrencies);
 

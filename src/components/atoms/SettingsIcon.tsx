@@ -9,7 +9,9 @@ const SettingsIcon: React.FC = () => {
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
+      aria-hidden="true"
     >
+      <title>Settings</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

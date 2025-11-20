@@ -193,8 +193,8 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
     }, [rows, focusedTrip, convertDistance, distanceUnit, locations]);
 
     return (
-        <div className="flex-shrink-0 map-hero">
-            <main id={mapIdRef.current} style={{ width: '100%', height: '100%' }}></main>
+        <div role="application" aria-label="Map of trips" className="flex-shrink-0 map-hero">
+            <div id={mapIdRef.current} style={{ width: '100%', height: '100%' }}></div>
         </div>
     );
 };

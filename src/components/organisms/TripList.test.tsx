@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import TripList from './TripList';
+import { assertAccessible } from '../../tests/utils';
 import { CSVRow } from '../../services/csvParser';
 
 const mockTrips: CSVRow[] = [
@@ -17,21 +18,25 @@ const mockProps = {
 };
 
 describe('TripList', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<TripList {...mockProps} />);
+  });
+
   it('should render the title and the list of trips', () => {
     render(<TripList {...mockProps} />);
 
     expect(screen.getByText('Test Trip List')).toBeInTheDocument();
-    expect(screen.getByText('Trip #1')).toBeInTheDocument();
-    expect(screen.getByText(/From: A/)).toBeInTheDocument();
-    expect(screen.getByText('Trip #2')).toBeInTheDocument();
-    expect(screen.getByText(/From: C/)).toBeInTheDocument();
+    expect(screen.getByText('A')).toBeInTheDocument();
+    expect(screen.getByText('B')).toBeInTheDocument();
+    expect(screen.getByText('C')).toBeInTheDocument();
+    expect(screen.getByText('D')).toBeInTheDocument();
   });
 
   it('should call onBack when the back button is clicked', async () => {
     const user = userEvent.setup();
     render(<TripList {...mockProps} />);
 
-    await user.click(screen.getByRole('button', { name: '← Back' }));
+    await user.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(mockProps.onBack).toHaveBeenCalledTimes(1);
   });
@@ -40,7 +45,7 @@ describe('TripList', () => {
     const user = userEvent.setup();
     render(<TripList {...mockProps} />);
 
-    const tripItem = screen.getByText('Trip #1');
+    const tripItem = screen.getByText('A');
     await user.click(tripItem);
 
     expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockTrips[0]);

@@ -1,8 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import Stat from './Stat';
+import { assertAccessible } from '../../tests/utils';
 
 describe('Stat', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<Stat label="Test Label" value="Test Value" />);
+  });
+
   it('should render the label and value', () => {
     render(<Stat label="Test Label" value="Test Value" />);
 

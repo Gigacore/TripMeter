@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import TopStats from './TopStats';
+import { assertAccessible } from '../../tests/utils';
 import { TripStats } from '../../hooks/useTripData';
 import { DistanceUnit } from '../../App';
 
@@ -66,6 +67,10 @@ const mockProps = {
 };
 
 describe('TopStats', () => {
+  it('should be accessible', async () => {
+    await assertAccessible(<TopStats {...mockProps} />);
+  });
+
   it('should render the top stats correctly', () => {
     render(<TopStats {...mockProps} />);
 
