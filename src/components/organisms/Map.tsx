@@ -8,6 +8,8 @@ import { formatCurrency } from '../../utils/currency';
 import { toNumber } from '../../utils/formatters';
 import { CSVRow } from '../../services/csvParser';
 import { DistanceUnit } from '../../App';
+import { renderToString } from 'react-dom/server';
+import TripPopup from '../molecules/TripPopup';
 
 let mapIdCounter = 0;
 
@@ -99,55 +101,14 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             );
 
         const createPopupContent = (pointType: 'begin' | 'drop', data: CSVRow): string => {
-            const {
-                city, product_type, status, request_time, begin_trip_time,
-                begintrip_address, dropoff_time, dropoff_address, distance,
-                fare_amount, fare_currency, begintrip_lat, begintrip_lng,
-                dropoff_lat, dropoff_lng
-            } = data;
-
-            const lat = pointType === 'begin' ? begintrip_lat : dropoff_lat;
-            const lng = pointType === 'begin' ? begintrip_lng : dropoff_lng;
-            const address = pointType === 'begin' ? begintrip_address : dropoff_address;
-            let speedContent = '';
-            let waitingTimeContent = '';
-
-            const tripDistanceMiles = parseFloat(distance);
-            const displayDistance = convertDistance(tripDistanceMiles);
-
-            if (status === 'completed') {
-                const reqTime = new Date(request_time);
-                const bTime = new Date(begin_trip_time);
-                if (bTime.getTime() && reqTime.getTime() && bTime > reqTime) {
-                    const waitingMinutes = (bTime.getTime() - reqTime.getTime()) / (1000 * 60);
-                    waitingTimeContent = `<b>Waiting Time:</b> ${waitingMinutes.toFixed(2)} minutes<br>`;
-                }
-                const dTime = new Date(dropoff_time);
-
-                if (!isNaN(tripDistanceMiles) && bTime.getTime() && dTime.getTime() && dTime > bTime) {
-                    const durationHours = (dTime.getTime() - bTime.getTime()) / (1000 * 60 * 60);
-                    if (durationHours > 0) {
-                        const speed = displayDistance / durationHours;
-                        speedContent = `<b>Average Speed:</b> ${speed.toFixed(2)} ${distanceUnit === 'miles' ? 'mph' : 'km/h'}<br>`;
-                    }
-                }
-            }
-
-            return `
-                <b>${pointType === 'begin' ? 'Begin Trip' : 'Dropoff'} Details</b><br>
-                <b>City:</b> ${city || 'N/A'}<br>
-                <b>Product Type:</b> ${product_type || 'N/A'}<br>
-                <b>Status:</b> ${status || 'N/A'}<br>
-                <b>Request Time:</b> ${request_time || 'N/A'}<br>
-                <b>Begin Trip Time:</b> ${begin_trip_time || 'N/A'}<br>
-                ${waitingTimeContent}
-                <b>Dropoff Time:</b> ${dropoff_time || 'N/A'}<br>
-                <b>Address:</b> ${address || 'N/A'}<br>
-                <b>Distance:</b> ${!isNaN(displayDistance) ? `${displayDistance.toFixed(2)} ${distanceUnit}` : 'N/A'}<br>
-                ${speedContent}
-                <b>Fare:</b> ${formatCurrency(toNumber(fare_amount), fare_currency)}<br>
-                <b>Coordinates:</b> ${lat}, ${lng}<br>
-            `;
+            return renderToString(
+                <TripPopup
+                    data={data}
+                    pointType={pointType}
+                    distanceUnit={distanceUnit}
+                    convertDistance={convertDistance}
+                />
+            );
         };
 
         tripsToRender.forEach((r: CSVRow) => {
@@ -161,11 +122,25 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
                 heatPoints.push([dlt, dln]);
 
                 const m = L.marker([blt, bln], { icon: greenIcon });
-                m.bindPopup(createPopupContent('begin', r));
+                m.bindPopup(createPopupContent('begin', r), {
+                    className: 'trip-popup-no-hover',
+                    offset: [0, -10],
+                    autoPan: true,
+                    closeButton: true,
+                    autoClose: false,
+                    closeOnClick: false
+                });
                 beginLayerRef.current?.addLayer(m);
 
                 const m2 = L.marker([dlt, dln], { icon: redIcon });
-                m2.bindPopup(createPopupContent('drop', r));
+                m2.bindPopup(createPopupContent('drop', r), {
+                    className: 'trip-popup-no-hover',
+                    offset: [0, -10],
+                    autoPan: true,
+                    closeButton: true,
+                    autoClose: false,
+                    closeOnClick: false
+                });
                 dropLayerRef.current?.addLayer(m2);
             }
         });

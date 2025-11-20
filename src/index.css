@@ -258,3 +258,45 @@
 .smooth-transition {
   @apply transition-all duration-200 ease-in-out;
 }
+
+/* Trip Popup Customization - No Hover Effects */
+.trip-popup-no-hover .leaflet-popup-content-wrapper {
+  background-color: white !important;
+  padding: 12px !important;
+  pointer-events: auto !important;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+.trip-popup-no-hover .leaflet-popup-content-wrapper:hover {
+  background-color: white !important;
+  opacity: 1 !important;
+}
+
+.trip-popup-no-hover .leaflet-popup-content {
+  margin: 0 !important;
+  pointer-events: auto !important;
+  background-color: white !important;
+}
+
+.trip-popup-no-hover * {
+  pointer-events: auto !important;
+  cursor: default !important;
+}
+
+.trip-popup-no-hover *:hover {
+  background-color: inherit !important;
+  color: inherit !important;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+/* Center align popup tip */
+.trip-popup-no-hover .leaflet-popup-tip-container {
+  left: 50% !important;
+  margin-left: -10px !important;
+}
+
+.trip-popup-no-hover .leaflet-popup-tip {
+  background-color: white !important;
+}

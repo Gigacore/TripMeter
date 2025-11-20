@@ -18,14 +18,6 @@ Follow these steps to set up and run the project locally:
     ```bash
     npm run dev
     ```
-3.  **Run Tests**:
-    ```bash
-    npm run test
-    ```
-4.  **Build for Production**:
-    ```bash
-    npm run build
-    ```
 
 ### Development Guidelines
 
@@ -46,7 +38,7 @@ Always adhere to the Atomic Design methodology for structuring components. This 
 Styling:
 -   **Tailwind CSS**: Use Tailwind's utility classes for all styling. Avoid writing custom CSS files.
 -   **Consistency**: Ensure all UI elements, especially tooltips, maintain a consistent design and format. The `CustomTooltip` component in `index.tsx` serves as the standard.
--   **Responsiveness**: All components must be fully responsive and tested on various screen sizes.
+-   **Responsiveness**: All components must be fully responsive.
 
 #### State Management (Redux Toolkit)
 
@@ -59,12 +51,6 @@ Styling:
 -   **TypeScript**: Use TypeScript for all new code. Define clear and specific types for all data structures, especially API responses and processed data.
 -   **Monetary Data**: Use the `currency.js` library for all calculations and formatting of monetary values (fare, cost, etc.) to avoid floating-point inaccuracies.
 -   **Data Transformation**: Place data parsing and transformation logic in dedicated utility files or custom hooks (e.g., `useTripData.ts`) to keep components clean and focused on rendering.
-
-#### Testing
-
--   Write unit and integration tests for all components using **Vitest** and **React Testing Library**.
--   Tests should be co-located with the component files in the same directory.
--   Aim for high test coverage. You can check the current coverage by running `npm run coverage` and viewing the report in the `coverage/` directory.
 
 ### Data Visualization Color System
 
