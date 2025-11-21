@@ -118,7 +118,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
                         <UploadCloud className={`h-12 w-12 ${isDragging ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} />
                       </div>
                       <h3 className="text-2xl font-bold mb-3">
-                        {isDragging ? 'Drop it like it\'s hot!' : 'Upload your data'}
+                        {isDragging ? 'Drop it like it\'s hot!' : 'Drop your file'}
                       </h3>
                       <p className="text-muted-foreground mb-6 max-w-sm text-base">
                         Drag & drop your <code className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 font-mono text-xs text-purple-600 dark:text-purple-400 border border-gray-200 dark:border-gray-700">trips_data.csv</code> file here

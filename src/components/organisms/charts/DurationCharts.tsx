@@ -11,6 +11,8 @@ import { TripStats } from '../../../hooks/useTripData';
 import RequestsMapModal from '../RequestsMapModal';
 import { DistanceUnit } from '../../../App';
 
+import TripDurationDistribution from './TripDurationDistribution';
+
 interface DurationChartsProps {
   data: TripStats;
   rows: CSVRow[];
@@ -145,6 +147,11 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
         ) : (
           <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} />
         )}
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-border">
+        <h4 className="text-sm font-semibold mb-4">Trip Duration Distribution</h4>
+        <TripDurationDistribution rows={rows} />
       </div>
 
       <div className="my-8 border-t border-border" />

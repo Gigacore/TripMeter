@@ -21,7 +21,7 @@ describe('LandingPage', () => {
 
   it('renders the upload section correctly', () => {
     render(<LandingPage {...defaultProps} />);
-    expect(screen.getByText(/Upload your data/i)).toBeInTheDocument();
+    expect(screen.getByText(/Drop your file/i)).toBeInTheDocument();
     expect(screen.getByText(/Drag & drop your/i)).toBeInTheDocument();
   });
 

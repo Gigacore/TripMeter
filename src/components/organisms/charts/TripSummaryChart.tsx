@@ -103,6 +103,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             <Stat
               label="Successful"
               value={successfulTrips}
+              subValue={`${((successfulTrips / totalTrips) * 100).toFixed(1)}%`}
               valueIcon={<Map size={16} />}
             />
           </div>
@@ -118,6 +119,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             <Stat
               label="Rider Canceled"
               value={riderCanceledTrips}
+              subValue={`${((riderCanceledTrips / totalTrips) * 100).toFixed(1)}%`}
               valueIcon={<Map size={16} />}
             />
           </div>
@@ -133,6 +135,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             <Stat
               label="Driver Canceled"
               value={driverCanceledTrips}
+              subValue={`${((driverCanceledTrips / totalTrips) * 100).toFixed(1)}%`}
               valueIcon={<Map size={16} />}
             />
           </div>
@@ -149,6 +152,7 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
               <Stat
                 label="Unfulfilled"
                 value={unfulfilledTrips}
+                subValue={`${((unfulfilledTrips / totalTrips) * 100).toFixed(1)}%`}
                 valueIcon={<Map size={16} />}
               />
             </div>
