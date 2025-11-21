@@ -47,11 +47,13 @@ describe('TripMeter App', () => {
     expect(screen.queryByTestId('main-view')).not.toBeInTheDocument();
   });
 
-  it('should render MainView when there are rows', () => {
+  it('should render MainView when there are rows', async () => {
     useFileHandlerMock.mockReturnValue({ ...defaultFileHandlerState, rows: [{ id: 1 }] });
     useTripDataMock.mockReturnValue([{ totalTrips: 1 }, false]);
     render(<App />);
-    expect(screen.getByTestId('main-view')).toBeInTheDocument();
+    await act(async () => {
+      expect(await screen.findByTestId('main-view')).toBeInTheDocument();
+    });
     expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
   });
 
@@ -59,14 +61,16 @@ describe('TripMeter App', () => {
     useFileHandlerMock.mockReturnValue({ ...defaultFileHandlerState, isProcessing: true });
     useTripDataMock.mockReturnValue(defaultTripDataState);
     render(<App />);
-    expect(screen.getByTestId('spinner')).toBeInTheDocument();
+    const spinners = screen.getAllByTestId('spinner');
+    expect(spinners.length).toBeGreaterThan(0);
   });
 
   it('should show the spinner when analyzing', () => {
     useFileHandlerMock.mockReturnValue(defaultFileHandlerState);
     useTripDataMock.mockReturnValue([null, true]);
     render(<App />);
-    expect(screen.getByTestId('spinner')).toBeInTheDocument();
+    const spinners = screen.getAllByTestId('spinner');
+    expect(spinners.length).toBeGreaterThan(0);
   });
 
   it('should toggle the settings sheet', async () => {

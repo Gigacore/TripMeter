@@ -1,12 +1,11 @@
 import React, { useRef, DragEvent, ChangeEvent, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Info, ArrowRight, GitMerge, Route, Sparkles, FileText } from 'lucide-react';
+import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Route, Sparkles, GitMerge, ArrowRight, Zap, Globe, Activity } from 'lucide-react';
 import Footer from './Footer';
 
 interface LandingPageProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
-  onSampleFileLoad?: (file: File) => void; // Make this prop optional
+  onSampleFileLoad?: (file: File) => void;
   isProcessing: boolean;
   error: string;
   isDragging: boolean;
@@ -18,110 +17,191 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSampleLoading, setIsSampleLoading] = useState(false);
 
-  // This function will handle both user-selected files and the sample file.
   const loadSampleFile = async () => {
     setIsSampleLoading(true);
-    const response = await fetch('/sample_trips_data_fares_randomized.csv');
-    const data = await response.blob();
-    const file = new File([data], 'sample_trips_data_fares_randomized.csv', { type: 'text/csv' });
+    try {
+      const response = await fetch('/sample_trips_data_fares_randomized.csv');
+      const data = await response.blob();
+      const file = new File([data], 'sample_trips_data_fares_randomized.csv', { type: 'text/csv' });
 
-    if (onSampleFileLoad) {
-      // If the parent provides a specific handler, use it.
-      onSampleFileLoad(file);
-    } else {
-      // Otherwise, simulate a file input event to use the existing handler.
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(file);
-      const syntheticEvent = { target: { files: dataTransfer.files } } as unknown as ChangeEvent<HTMLInputElement>;
-      onFileSelect(syntheticEvent);
+      if (onSampleFileLoad) {
+        onSampleFileLoad(file);
+      } else {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        const syntheticEvent = { target: { files: dataTransfer.files } } as unknown as ChangeEvent<HTMLInputElement>;
+        onFileSelect(syntheticEvent);
+      }
+    } catch (err) {
+      console.error("Failed to load sample file", err);
+    } finally {
+      setIsSampleLoading(false);
     }
-    // The parent's isProcessing will take over, but we can reset our local state.
-    // It will be disabled by isProcessing anyway.
-    setIsSampleLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col items-center justify-center p-4 overflow-x-hidden">
-      <div className="absolute inset-0 bg-white dark:bg-black bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
-      <main className="w-full max-w-5xl mx-auto text-center z-10">
-        <div className="mb-12">
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-            Visualize Your Rides
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            From raw data to rich insights. See your trips like never before.
-          </p>
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden font-sans selection:bg-purple-500/30">
+      {/* Background Effects */}
+      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-black">
+        <div className="absolute h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff15_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-purple-500 opacity-20 blur-[100px]"></div>
+        <div className="absolute right-0 bottom-0 -z-10 h-[310px] w-[310px] rounded-full bg-blue-500 opacity-10 blur-[100px]"></div>
+      </div>
+
+      <main className="flex-grow flex flex-col justify-center px-4 py-6 lg:py-12 relative z-10 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-20 items-center mb-12 lg:mb-24">
+          {/* Left Column: Hero & Actions */}
+          <div className="text-center lg:text-left animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 lg:mb-6 leading-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-gray-200 dark:to-gray-500">
+                Visualize Your
+              </span>
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-gradient-x">
+                Uber History
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-6 lg:mb-8">
+              Transform your raw data into stunning, interactive visualizations.
+              Uncover hidden patterns in your travel history with privacy-first analytics.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-sm">
+              <a
+                href="https://help.uber.com/en/riders/article/request-a-copy-of-your-personal-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-105 transition-all duration-300"
+              >
+                <span className="font-medium">How to get your data</span>
+                <ArrowRight className="w-4 h-4 opacity-90 group-hover:translate-x-1 transition-transform duration-300" />
+              </a>
+
+              <button
+                onClick={loadSampleFile}
+                disabled={isProcessing || isSampleLoading}
+                className="px-6 py-3 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSampleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-purple-500" />}
+                <span className="font-medium">Try with sample data</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Upload Section */}
+          <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
+            <div className="relative group">
+              <div className={`absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 ${isDragging ? 'opacity-80' : ''}`}></div>
+              <div className="relative bg-white/80 dark:bg-black/80 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden">
+                <div
+                  className={`p-8 md:p-12 flex flex-col items-center justify-center text-center transition-all duration-300 cursor-pointer min-h-[300px]
+                    ${isDragging ? 'bg-purple-50/50 dark:bg-purple-900/20 scale-[0.99]' : 'hover:bg-gray-50/50 dark:hover:bg-gray-900/20'}
+                  `}
+                  onClick={() => !isProcessing && fileInputRef.current?.click()}
+                  onDrop={onDrop}
+                  onDragEnter={onDragEvents}
+                  onDragOver={onDragEvents}
+                  onDragLeave={onDragEvents}
+                >
+                  {isProcessing ? (
+                    <div className="flex flex-col items-center gap-6">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-purple-500 blur-2xl opacity-20 animate-pulse"></div>
+                        <Loader2 className="h-16 w-16 animate-spin text-purple-600 dark:text-purple-400 relative z-10" />
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse">
+                          Crunching the numbers...
+                        </p>
+                        <p className="text-muted-foreground text-sm">This usually takes a few seconds</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className={`mb-6 p-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-inner transition-transform duration-500 ${isDragging ? 'scale-110 rotate-6 ring-4 ring-purple-500/20' : 'group-hover:scale-105'}`}>
+                        <UploadCloud className={`h-12 w-12 ${isDragging ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-3">
+                        {isDragging ? 'Drop it like it\'s hot!' : 'Upload your data'}
+                      </h3>
+                      <p className="text-muted-foreground mb-6 max-w-sm text-base">
+                        Drag & drop your <code className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 font-mono text-xs text-purple-600 dark:text-purple-400 border border-gray-200 dark:border-gray-700">trips_data.csv</code> file here
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-gray-100/80 dark:bg-gray-800/50 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-700/50">
+                        <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
+                        <span>Processed locally. 100% Private.</span>
+                      </div>
+                    </>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={onFileSelect}
+                    disabled={isProcessing}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mt-6 animate-in fade-in slide-in-from-top-2">
+                <Alert variant="destructive" className="border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400">
+                  <AlertTitle>Oops! Something went wrong</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl px-8 pb-5 pt-6 border border-gray-200 dark:border-gray-700/50 shadow-lg dark:shadow-2xl dark:shadow-purple-500/10">
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${isDragging ? 'border-purple-500 bg-gray-200 dark:bg-gray-900' : 'border-gray-300 dark:border-gray-600/50 hover:border-purple-500/50'}`}
-            onClick={() => !isProcessing && fileInputRef.current?.click()}
-            onDrop={onDrop}
-            onDragEnter={onDragEvents}
-            onDragOver={onDragEvents}
-            onDragLeave={onDragEvents}
-          >
-            {isProcessing ? (
-              <div className="flex flex-col items-center gap-2 text-gray-700 dark:text-gray-300">
-                <Loader2 className="h-12 w-12 animate-spin text-purple-500 dark:text-purple-400" />
-                <p className="font-semibold mt-2">Processing your data...</p>
-              </div>
-            ) : (
-              <>
-                <div className="bg-gray-200 dark:bg-gray-800/80 p-4 rounded-full mb-4 border border-gray-300 dark:border-gray-700">
-                  <UploadCloud className="text-gray-500 dark:text-gray-400 h-8 w-8" />
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">Drag & drop your <code className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-sm px-1 py-0.5 font-mono text-xs">trips_data-0.csv</code> file here</p>
-                <p className="text-xs text-gray-500 mt-2">or click to select the file</p>
-              </>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv"
-              onChange={onFileSelect}
-              disabled={isProcessing}
-              className="hidden"
-              aria-label="File uploader"
-            />
-          </div>
-          {error && (
-            <div className="pt-4">
-              <Alert variant="destructive">
-                <AlertTitle>Analysis Failed</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            </div>
-          )}
-          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-500">
-            <ShieldCheck className="h-4 w-4 text-green-600 dark:text-green-500" />
-            <p>
-              <span className="font-semibold text-gray-700 dark:text-gray-300">100% Private:</span> All processing is done securely in your browser.
+        {/* Features Grid */}
+        <div className="w-full max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-12 duration-700 delay-300">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Everything you need to know</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Dive deep into your data with our comprehensive suite of analytics tools.
             </p>
           </div>
-        </div>
-
-        <div className="my-12 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Need your data file?{' '}
-            <a href="https://help.uber.com/en/riders/article/request-a-copy-of-your-personal-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11" target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-800 dark:text-gray-200 hover:underline">
-              Learn how to get it from Uber
-            </a>
-            <span className="mx-2 text-gray-300 dark:text-gray-700">|</span>
-            <button onClick={loadSampleFile} disabled={isProcessing || isSampleLoading} className="font-semibold text-gray-800 dark:text-gray-200 hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed">
-              Try with a sample file
-            </button>
-          </p>
-        </div>
-        <h2 className="sr-only">Features</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-          <FeatureCard icon={<Route className="text-blue-500 dark:text-blue-400 h-8 w-8 mb-3" />} title="Interactive Trip Map" description="Visualize your entire ride history on a global map." delay={100} />
-          <FeatureCard icon={<BarChart className="text-purple-500 dark:text-purple-400 h-8 w-8 mb-3" />} title="In-depth Analytics" description="Get insights on fares, distance, duration, and cancellations." delay={200} />
-          <FeatureCard icon={<Clock className="text-pink-500 dark:text-pink-400 h-8 w-8 mb-3" />} title="Activity Patterns" description="Discover your travel habits by time of day, week, and year." delay={300} />
-          <FeatureCard icon={<GitMerge className="text-blue-500 dark:text-blue-400 h-8 w-8 mb-3" />} title="Streaks & Layovers" description="Analyze consecutive trips and the pauses in between." delay={400} />
-          <FeatureCard icon={<Sparkles className="text-purple-500 dark:text-purple-400 h-8 w-8 mb-3" />} title="Cost Efficiency" description="Compare cost-efficiency across different Uber services." delay={500} />
-          <FeatureCard icon={<FileDown className="text-pink-500 dark:text-pink-400 h-8 w-8 mb-3" />} title="KML Export" description="Export your trips to KML for use in Google Earth or other tools." delay={600} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard
+              icon={<Globe className="h-6 w-6 text-blue-500" />}
+              title="Interactive Map"
+              description="Visualize every trip on a global map. Filter by date, time, and type to see where you've been."
+              delay={0}
+            />
+            <FeatureCard
+              icon={<Activity className="h-6 w-6 text-purple-500" />}
+              title="Deep Analytics"
+              description="Break down your spending, distance traveled, and time spent in rides with detailed charts."
+              delay={100}
+            />
+            <FeatureCard
+              icon={<Clock className="h-6 w-6 text-pink-500" />}
+              title="Time Patterns"
+              description="Discover your most frequent travel times and seasonal habits to optimize your schedule."
+              delay={200}
+            />
+            <FeatureCard
+              icon={<GitMerge className="h-6 w-6 text-indigo-500" />}
+              title="Streaks & Layovers"
+              description="Analyze your longest streaks and the time between rides to understand your usage patterns."
+              delay={300}
+            />
+            <FeatureCard
+              icon={<Zap className="h-6 w-6 text-amber-500" />}
+              title="Cost Efficiency"
+              description="See how much you're spending per mile and minute to make smarter travel decisions."
+              delay={400}
+            />
+            <FeatureCard
+              icon={<FileDown className="h-6 w-6 text-emerald-500" />}
+              title="Export Data"
+              description="Download your processed data or export trips to KML for use in other applications."
+              delay={500}
+            />
+          </div>
         </div>
       </main>
       <Footer />
@@ -131,14 +211,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string; delay: number }> = ({ icon, title, description, delay }) => (
   <div
-    className={`bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-lg 
-    transition-all duration-300 hover:border-purple-500/60 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-1 
-    animate-fade-in opacity-0`}
-    style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
+    className="group p-8 rounded-3xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 hover:border-purple-500/30 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/5 relative overflow-hidden"
+    style={{ animationDelay: `${delay}ms` }}
   >
-    {icon}
-    <h3 className="font-semibold text-lg mb-1 text-black dark:text-white">{title}</h3>
-    <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+
+    <div className="h-14 w-14 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-sm border border-gray-100 dark:border-gray-700">
+      {icon}
+    </div>
+    <h3 className="text-xl font-bold mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{title}</h3>
+    <p className="text-muted-foreground leading-relaxed">
+      {description}
+    </p>
   </div>
 );
 

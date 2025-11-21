@@ -40,11 +40,11 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
   const activeSection = useScrollSpy(sectionIds, scrollContainerRef, 100);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-3 sm:gap-4">
       <div className="hidden lg:block">
         <DashboardNav activeSection={activeSection} sections={sections} />
       </div>
-      <div ref={scrollContainerRef} className="overflow-y-auto h-[calc(100vh-10rem)] pr-4">
+      <div ref={scrollContainerRef} className="overflow-y-auto h-[calc(100vh-8rem)] sm:h-[calc(100vh-10rem)] pr-2 sm:pr-4">
         <Stats {...props} />
       </div>
     </div>

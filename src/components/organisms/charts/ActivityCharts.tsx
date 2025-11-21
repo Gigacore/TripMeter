@@ -289,15 +289,15 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
       />
 
       <div className="stats-group">
-        <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start justify-between gap-3 mb-4">
           <div>
-            <h3 className="text-lg font-semibold">Daily Activity</h3>
-            <p className="text-sm text-muted-foreground -mt-1">Shows your trip contributions over time.</p>
+            <h3 className="text-base sm:text-lg font-semibold">Daily Activity</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground -mt-1">Shows your trip contributions over time.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 rounded-lg bg-muted p-1 w-full sm:w-auto">
             <button
               onClick={() => setContributionView('last-12-months')}
-              className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${contributionView === 'last-12-months' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+              className={`flex-grow sm:flex-grow-0 px-2 sm:px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${contributionView === 'last-12-months' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
             >
               Last 12 Months
@@ -306,7 +306,7 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
               <button
                 key={year}
                 onClick={() => setContributionView(year)}
-                className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${contributionView === year ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                className={`flex-grow sm:flex-grow-0 px-2 sm:px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${contributionView === year ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   }`}
               >{year}</button>
             ))}
@@ -328,24 +328,26 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
 
       {tripsByHourData.length > 0 && (
         <div className="stats-group">
-          <h3 className="text-lg font-semibold">Trips by Hour of Day</h3>
-          <p className="text-sm text-muted-foreground -mt-2 mb-4">Shows your trip patterns throughout the day.</p>
-          <ResponsiveContainer width="100%" height={300}>
-            <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis type="number" dataKey="count" name="Trips" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <ZAxis type="number" range={[60, 60]} />
-              <Tooltip cursor={{ strokeDasharray: '3 3', fill: 'rgba(100, 116, 139, 0.1)' }} content={<CustomScatterTooltip />} />
-              <Scatter
-                name="Trips"
-                data={tripsByHourData}
-                fill="#818cf8"
-                onClick={handleHourClick}
-                cursor="pointer"
-              />
-            </ScatterChart>
-          </ResponsiveContainer>
+          <h3 className="text-base sm:text-lg font-semibold">Trips by Hour of Day</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground -mt-2 mb-4">Shows your trip patterns throughout the day.</p>
+          <div className="mobile-chart-height">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis type="number" dataKey="hour" name="Hour" unit=":00" domain={[0, 23]} tickCount={12} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis type="number" dataKey="count" name="Trips" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <ZAxis type="number" range={[60, 60]} />
+                <Tooltip cursor={{ strokeDasharray: '3 3', fill: 'rgba(100, 116, 139, 0.1)' }} content={<CustomScatterTooltip />} />
+                <Scatter
+                  name="Trips"
+                  data={tripsByHourData}
+                  fill="#818cf8"
+                  onClick={handleHourClick}
+                  cursor="pointer"
+                />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
           <div className="flex justify-between text-xs text-muted-foreground mt-2 px-[30px]">
             <div className="flex flex-col items-center opacity-70">
               <Moon className="w-4 h-4" />
@@ -367,36 +369,40 @@ const ActivityCharts: React.FC<ActivityChartsProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 @[768px]:grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6">
         {tripsByDayOfWeekData.length > 0 && (
           <div className="stats-group">
-            <h3 className="text-lg font-semibold">Completed Trips by Day</h3>
-            <p className="text-sm text-muted-foreground -mt-2 mb-4">Shows completed trips for each day of the week.</p>
-            <ResponsiveContainer width="100%" height={400}>
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={tripsByDayOfWeekData}>
-                <PolarGrid className="stroke-border" />
-                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />
-                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 5']} stroke="#888" fontSize={10} axisLine={false} tickLine={false} />
-                <Radar name="Trips" dataKey="trips" stroke="#6366f1" fill="#6366f1" fillOpacity={0.6} />
-                <Tooltip cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '3 3' }} content={<CustomRadarTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} />} />
+            <h3 className="text-base sm:text-lg font-semibold">Completed Trips by Day</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground -mt-2 mb-4">Shows completed trips for each day of the week.</p>
+            <div className="mobile-chart-height-lg">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={tripsByDayOfWeekData}>
+                  <PolarGrid className="stroke-border" />
+                  <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />
+                  <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 5']} stroke="#888" fontSize={10} axisLine={false} tickLine={false} />
+                  <Radar name="Trips" dataKey="trips" stroke="#6366f1" fill="#6366f1" fillOpacity={0.6} />
+                  <Tooltip cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '3 3' }} content={<CustomRadarTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} />} />
 
-              </RadarChart>
-            </ResponsiveContainer>
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
         {hasCancellationsData && (
           <div className="stats-group">
-            <h3 className="text-lg font-semibold">Cancellations by Day</h3>
-            <p className="text-sm text-muted-foreground -mt-2 mb-4">Shows canceled trips for each day of the week.</p>
-            <ResponsiveContainer width="100%" height={400}>
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={cancellationsByDayOfWeekData}>
-                <PolarGrid className="stroke-border" />
-                <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />
-                <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 2']} stroke="#888" fontSize={10} axisLine={false} tickLine={false} />
-                <Radar name="Cancellations" dataKey="cancellations" stroke="#dc2626" fill="#dc2626" fillOpacity={0.6} />
-                <Tooltip cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '3 3' }} content={<CustomRadarTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} />} />
-              </RadarChart>
-            </ResponsiveContainer>
+            <h3 className="text-base sm:text-lg font-semibold">Cancellations by Day</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground -mt-2 mb-4">Shows canceled trips for each day of the week.</p>
+            <div className="mobile-chart-height-lg">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={cancellationsByDayOfWeekData}>
+                  <PolarGrid className="stroke-border" />
+                  <PolarAngleAxis dataKey="day" stroke="#888" fontSize={12} tickLine={false} />
+                  <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 2']} stroke="#888" fontSize={10} axisLine={false} tickLine={false} />
+                  <Radar name="Cancellations" dataKey="cancellations" stroke="#dc2626" fill="#dc2626" fillOpacity={0.6} />
+                  <Tooltip cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '3 3' }} content={<CustomRadarTooltip activeCurrency={activeCurrency} distanceUnit={distanceUnit} />} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
       </div>

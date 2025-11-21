@@ -208,6 +208,13 @@
   height: 8px;
 }
 
+@media (max-width: 640px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
 ::-webkit-scrollbar-track {
   @apply bg-gray-100 dark:bg-gray-900;
 }
@@ -218,6 +225,37 @@
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400 dark:bg-gray-600;
+}
+
+/* Mobile Responsive Chart Heights */
+.mobile-chart-height {
+  height: 250px;
+}
+
+@media (min-width: 640px) {
+  .mobile-chart-height {
+    height: 300px;
+  }
+}
+
+.mobile-chart-height-sm {
+  height: 200px;
+}
+
+@media (min-width: 640px) {
+  .mobile-chart-height-sm {
+    height: 250px;
+  }
+}
+
+.mobile-chart-height-lg {
+  height: 300px;
+}
+
+@media (min-width: 640px) {
+  .mobile-chart-height-lg {
+    height: 400px;
+  }
 }
 
 /* Enhanced Card Hover Effect */
@@ -299,4 +337,22 @@
 
 .trip-popup-no-hover .leaflet-popup-tip {
   background-color: white !important;
+}
+
+@keyframes gradient-x {
+
+  0%,
+  100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
 }

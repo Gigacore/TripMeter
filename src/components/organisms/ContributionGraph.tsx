@@ -18,7 +18,7 @@ interface ContributionGraphProps {
   onDayClick?: (date: string) => void;
 }
 
-const LABEL_COLUMN_WIDTH = 'clamp(36px, 4vw, 64px)';
+const LABEL_COLUMN_WIDTH = 'clamp(28px, 3vw, 64px)';
 const WEEKDAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
 const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view, onDayClick }) => {
@@ -181,11 +181,11 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view, onDay
   }, [dayData, firstDay]);
 
   return (
-    <div className="relative p-4 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700" onMouseMove={handleMouseMove}>
+    <div className="relative p-2 sm:p-4 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700" onMouseMove={handleMouseMove}>
       {tooltip.visible && (
         <div
           data-testid="contribution-tooltip"
-          className="fixed rounded-lg border border-slate-700 bg-slate-800/80 p-4 text-slate-100 shadow-lg backdrop-blur-sm pointer-events-none z-20"
+          className="fixed rounded-lg border border-slate-700 bg-slate-800/95 p-3 sm:p-4 text-slate-100 shadow-lg backdrop-blur-sm pointer-events-none z-20 text-xs sm:text-sm max-w-[90vw] sm:max-w-none"
           style={{
             left: tooltip.x + 15,
             top: tooltip.y + 15,
@@ -206,7 +206,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view, onDay
         {monthLabels.map((label) => (
           <div
             key={label.name + label.weekIndex}
-            className="text-xs text-slate-500 dark:text-slate-400"
+            className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400"
             style={{ gridColumn: `${label.weekIndex + 2}` }}
           >
             {label.name}
@@ -216,7 +216,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view, onDay
       <div className="grid gap-1 mt-2" style={{ gridTemplateColumns: `${LABEL_COLUMN_WIDTH} repeat(${weeks.length}, minmax(0, 1fr))` }}>
         <div className="grid grid-rows-7 gap-1">
           {WEEKDAY_LABELS.map((label, index) => (
-            <div key={`weekday-${index}`} className="text-xs text-slate-500 dark:text-slate-400 text-center">
+            <div key={`weekday-${index}`} className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 text-center">
               {label}
             </div>
           ))}

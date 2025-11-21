@@ -54,7 +54,7 @@ const Stats: React.FC<StatsProps> = ({
   }, [currencies, activeCurrency]);
 
   return (
-    <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+    <div className="flex flex-col gap-3 sm:gap-4 overflow-y-auto pr-1 sm:pr-2">
       <TopStats tripData={data} distanceUnit={distanceUnit} />
       <div className="grid grid-cols-1 gap-4">
         <LazySection id="fare-insights">
