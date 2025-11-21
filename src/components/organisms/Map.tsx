@@ -66,7 +66,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             dropLayerRef.current = L.featureGroup().addTo(map);
             heatLayerRef.current = (L as any).heatLayer([], { radius: 25 }).addTo(map);
 
-            L.control.layers(null, {
+            L.control.layers(undefined, {
                 'Begintrip (green)': beginLayerRef.current,
                 'Dropoff (red)': dropLayerRef.current,
                 'Heatmap': heatLayerRef.current
@@ -168,7 +168,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
     }, [rows, focusedTrip, convertDistance, distanceUnit, locations]);
 
     return (
-        <div role="application" aria-label="Map of trips" className="flex-shrink-0 map-hero">
+        <div role="application" aria-label="Map of trips" className="flex-shrink-0 map-hero rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-2xl">
             <div id={mapIdRef.current} style={{ width: '100%', height: '100%' }}></div>
         </div>
     );

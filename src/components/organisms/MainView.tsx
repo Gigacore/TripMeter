@@ -45,16 +45,17 @@ const MainView: React.FC<MainViewProps> = ({
 }) => {
   return (
     <div
-      className="flex flex-col min-h-[calc(100vh-3.5rem)] relative"
+      className="flex flex-col min-h-[calc(100vh-3.5rem)] relative bg-transparent"
       data-testid="main-view"
     >
       <div className="flex-grow main-content grid gap-4 p-4 container mx-auto relative z-0">
         <Map
-            rows={rows}
-            focusedTrip={focusedTrip}
-            distanceUnit={distanceUnit}
-            convertDistance={convertDistance}
-          />
+          rows={rows}
+          focusedTrip={focusedTrip}
+          distanceUnit={distanceUnit}
+          convertDistance={convertDistance}
+          locations={[]}
+        />
         <Stats data={tripData} onFocusOnTrip={onFocusOnTrip} onFocusOnTrips={onFocusOnTrips} onShowTripList={onShowTripList} distanceUnit={distanceUnit} rows={rows} />
         <div className="md:col-span-1 flex flex-col gap-4">
         </div>

@@ -58,7 +58,7 @@ const Stats: React.FC<StatsProps> = ({
       <TopStats tripData={data} distanceUnit={distanceUnit} />
       <div className="grid grid-cols-1 gap-4">
         <LazySection id="fare-insights">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             {/* Fare Insights */}
             <CardHeader>
               <CardTitle>Fare Insights</CardTitle>
@@ -78,7 +78,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="fare-distance">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Fare vs. Distance</CardTitle>
               <CardDescription>The relationship between trip cost and distance for the selected currency.</CardDescription>
@@ -96,7 +96,7 @@ const Stats: React.FC<StatsProps> = ({
 
 
         <LazySection id="trip-summary">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Trip Summary</CardTitle>
               <CardDescription>A breakdown of all trip requests by their final status.</CardDescription>
@@ -115,7 +115,7 @@ const Stats: React.FC<StatsProps> = ({
 
 
         <LazySection id="trips-by-year">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Completed Trips by Year</CardTitle>
               <CardDescription>The trend of your completed trips over the years.</CardDescription>
@@ -127,7 +127,7 @@ const Stats: React.FC<StatsProps> = ({
         </LazySection>
 
         <LazySection id="duration">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Duration</CardTitle>
               <CardDescription>Analysis of how long your trips typically take.</CardDescription>
@@ -149,7 +149,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="distance">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Distance</CardTitle>
               <CardDescription>A look at the distances of your trips.</CardDescription>
@@ -168,7 +168,7 @@ const Stats: React.FC<StatsProps> = ({
         </LazySection>
 
         <LazySection id="speed">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Speed</CardTitle>
               <CardDescription>Distribution and records of your average trip speeds.</CardDescription>
@@ -186,7 +186,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="waiting-time">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Waiting Time</CardTitle>
               <CardDescription>Analysis of the time spent waiting for a driver to arrive.</CardDescription>
@@ -204,7 +204,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="cumulative-stats">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Cumulative Stats Over Time</CardTitle>
               <CardDescription>Track the progression of your trips, distance, and spending over time. Click and drag to select a range.</CardDescription>
@@ -215,7 +215,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="cancellation-breakdown">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Cancellation Breakdown</CardTitle>
               <CardDescription>A look at when rider and driver cancellations occur throughout the day.</CardDescription>
@@ -228,7 +228,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="ride-activity">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Ride Activity</CardTitle>
               <CardDescription>Patterns in your trip activity over time, by day, and by hour.</CardDescription>
@@ -244,7 +244,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="streaks">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Streaks</CardTitle>
             </CardHeader>
@@ -268,7 +268,7 @@ const Stats: React.FC<StatsProps> = ({
         </LazySection>
 
         <LazySection id="product-types">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Product Types</CardTitle>
               <CardDescription>A breakdown of your trips by the type of service used.</CardDescription>
@@ -284,7 +284,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="top-cities">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Top Cities</CardTitle>
               <CardDescription>Discover which cities you travel in the most.</CardDescription>
@@ -295,7 +295,7 @@ const Stats: React.FC<StatsProps> = ({
           </Card>
         </LazySection>
         <LazySection id="fare-split">
-          <Card>
+          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Fare Split Rides</CardTitle>
               <CardDescription>Summary of rides where the fare was split.</CardDescription>

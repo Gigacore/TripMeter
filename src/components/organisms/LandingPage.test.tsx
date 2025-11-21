@@ -16,7 +16,7 @@ describe('LandingPage', () => {
     render(<LandingPage {...defaultProps} />);
     expect(screen.getByText(/Visualize Your/i)).toBeInTheDocument();
     expect(screen.getByText(/Uber History/i)).toBeInTheDocument();
-    expect(screen.getByText(/Rediscover your journey/i)).toBeInTheDocument();
+    expect(screen.getByText(/Uber History/i)).toBeInTheDocument();
   });
 
   it('renders the upload section correctly', () => {

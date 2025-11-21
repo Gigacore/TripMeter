@@ -106,38 +106,44 @@ const MapModal: React.FC<MapModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col bg-white/90 dark:bg-black/90 backdrop-blur-xl border-gray-200 dark:border-gray-800 shadow-2xl">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-row flex-grow gap-4 min-h-0">
-          <div className="w-[380px] flex-shrink-0 flex flex-col border-r pr-4">
-            <div className="overflow-y-auto flex-grow space-y-2 pt-2">
-              <div className="text-sm font-medium text-muted-foreground px-2 pb-2">
+        <div className="flex flex-row flex-grow gap-6 min-h-0 pt-4">
+          <div className="w-[380px] flex-shrink-0 flex flex-col border-r border-gray-200/50 dark:border-gray-800/50 pr-6">
+            <div className="overflow-y-auto flex-grow space-y-2 pr-2 custom-scrollbar">
+              <div className="text-sm font-medium text-muted-foreground px-2 pb-2 sticky top-0 bg-white/90 dark:bg-black/90 backdrop-blur-sm z-10">
                 All Requests ({rows.length})
               </div>
-              <ul className="space-y-1">
+              <ul className="space-y-2">
                 {rows.map((row, index) => (
                   <li
                     key={`${row['Request id'] || 'row'}-${index}`}
                     onClick={() => handleSelectTrip(row)}
-                    className={cn("flex gap-3 p-2.5 cursor-pointer hover:bg-muted rounded-lg text-sm transition-colors", selectedTrip?.['Request id'] === row['Request id'] && "bg-muted")}
+                    className={cn(
+                      "group flex gap-3 p-3 cursor-pointer rounded-xl text-sm transition-all duration-200 border border-transparent",
+                      selectedTrip?.['Request id'] === row['Request id']
+                        ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 shadow-sm"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-gray-200 dark:hover:border-gray-800"
+                    )}
                   >
                     <div className="flex flex-col items-center h-full mt-1">
-                      <div className="w-2 h-2 rounded-full bg-primary/50" />
-                      <div className="flex-grow w-px bg-border my-1" />
-                      <div className="w-2 h-2 rounded-full bg-foreground/50" />
+                      <div className={cn("w-2.5 h-2.5 rounded-full transition-colors", selectedTrip?.['Request id'] === row['Request id'] ? "bg-purple-600 dark:bg-purple-400" : "bg-gray-300 dark:bg-gray-600 group-hover:bg-purple-400 dark:group-hover:bg-purple-500")} />
+                      <div className="flex-grow w-px bg-gray-200 dark:bg-gray-800 my-1" />
+                      <div className={cn("w-2.5 h-2.5 rounded-full transition-colors", selectedTrip?.['Request id'] === row['Request id'] ? "bg-black dark:bg-white" : "bg-gray-300 dark:bg-gray-600 group-hover:bg-gray-500 dark:group-hover:bg-gray-400")} />
                     </div>
                     <div className="flex-grow overflow-hidden">
                       <div className="flex justify-between items-start gap-2">
-                        <p className="font-medium truncate leading-tight" title={renderAddress(row, 'from')}>{renderAddress(row, 'from')}</p>
+                        <p className={cn("font-medium truncate leading-tight transition-colors", selectedTrip?.['Request id'] === row['Request id'] ? "text-purple-900 dark:text-purple-100" : "text-foreground")} title={renderAddress(row, 'from')}>{renderAddress(row, 'from')}</p>
                         <div title={getTripStatus(row.status).replace(/_/g, ' ')}>
                           <StatusIcon status={getTripStatus(row.status)} />
                         </div>
                       </div>
-                      <p className="text-muted-foreground truncate mt-0.5" title={renderAddress(row, 'to')}>{renderAddress(row, 'to')}</p>
+                      <p className="text-muted-foreground truncate mt-1" title={renderAddress(row, 'to')}>{renderAddress(row, 'to')}</p>
                       {getTripDate(row) && (
-                        <p className="text-xs text-muted-foreground/80 mt-1.5">
+                        <p className="text-xs text-muted-foreground/80 mt-2 flex items-center gap-1">
+                          <span className="inline-block w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                           {getTripDate(row)?.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         </p>
                       )}
@@ -147,8 +153,8 @@ const MapModal: React.FC<MapModalProps> = ({
               </ul>
             </div>
           </div>
-          <div className="flex-grow">
-            <Map rows={rows} focusedTrip={selectedTrip} distanceUnit={distanceUnit} convertDistance={convertDistance} />
+          <div className="flex-grow rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-inner">
+            <Map rows={rows} focusedTrip={selectedTrip} distanceUnit={distanceUnit} convertDistance={convertDistance} locations={[]} />
           </div>
         </div>
       </DialogContent>

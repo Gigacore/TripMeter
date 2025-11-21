@@ -59,7 +59,7 @@ function App() {
     setMapModalRows(tripRows);
     setMapModalTitle(
       title ||
-        `Found ${tripRows.length} trip${tripRows.length > 1 ? 's' : ''}`
+      `Found ${tripRows.length} trip${tripRows.length > 1 ? 's' : ''}`
     );
     setIsMapModalOpen(true);
   };
@@ -166,6 +166,12 @@ function App() {
           <Spinner />
         </div>
       )}
+      {/* Background Effects */}
+      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-black pointer-events-none">
+        <div className="absolute h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff15_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-purple-500 opacity-20 blur-[100px]"></div>
+        <div className="absolute right-0 bottom-0 -z-10 h-[310px] w-[310px] rounded-full bg-blue-500 opacity-10 blur-[100px]"></div>
+      </div>
       <Header
         onReset={resetMap}
         actionsEnabled={actionsEnabled}

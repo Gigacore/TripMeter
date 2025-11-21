@@ -76,14 +76,16 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
     children?: React.ReactNode;
     className?: string;
   }> = ({ icon, label, value, unit, children, className = '' }) => (
-    <div className={`flex flex-col rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-100/80 to-slate-200/70 p-3 sm:p-4 backdrop-blur-sm dark:border-slate-700 dark:from-slate-800/80 dark:to-slate-900/70 ${className}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">{label}</span>
-        <div className="text-emerald-500">{icon}</div>
+    <div className={`group flex flex-col rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-300">
+          {icon}
+        </div>
       </div>
-      <div className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+      <div className="mt-2 text-3xl font-bold text-foreground">
         {value}
-        {unit && <span className="ml-1 text-lg sm:text-xl font-medium text-slate-500 dark:text-slate-400">{unit}</span>}
+        {unit && <span className="ml-1 text-lg font-medium text-muted-foreground">{unit}</span>}
       </div>
       {children}
     </div>
@@ -102,7 +104,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
             />
           )}
           {currencies.length > 1 && (
-            <div className="relative flex flex-col rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-100/80 to-slate-200/70 p-3 sm:p-4 backdrop-blur-sm dark:border-slate-700 dark:from-slate-800/80 dark:to-slate-900/70">
+            <div className="group relative flex flex-col rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="flex-grow ">
                 <div
                   ref={swipeRef}
@@ -122,11 +124,13 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
                     >
                       {currencies.map(([currency, fare]) => (
                         <div key={currency} className="w-full flex-shrink-0">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">Total Fare</span>
-                            <div className="text-emerald-500"><Wallet size={20} /></div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-muted-foreground">Total Fare</span>
+                            <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-300">
+                              <Wallet size={20} />
+                            </div>
                           </div>
-                          <div className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+                          <div className="mt-2 text-3xl font-bold text-foreground">
                             {formatCurrency(fare, currency)}
                           </div>
                         </div>
@@ -137,7 +141,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
               </div>
               <div className="mt-auto flex items-center justify-center gap-2 pt-3">
                 {currencies.map((_, index) => (
-                  <button key={index} onClick={() => setActiveCurrencyIndex(index)} className={`h-2 w-2 rounded-full transition-all duration-300 ${activeCurrencyIndex === index ? 'w-4 bg-emerald-500' : 'bg-slate-400 hover:bg-slate-500 dark:bg-slate-600 dark:hover:bg-slate-500'}`} aria-label={`Go to currency ${index + 1}`} />
+                  <button key={index} onClick={() => setActiveCurrencyIndex(index)} className={`h-2 w-2 rounded-full transition-all duration-300 ${activeCurrencyIndex === index ? 'w-4 bg-purple-600 dark:bg-purple-400' : 'bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600'}`} aria-label={`Go to currency ${index + 1}`} />
                 ))}
               </div>
             </div>

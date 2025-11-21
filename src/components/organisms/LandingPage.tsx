@@ -40,13 +40,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden font-sans selection:bg-purple-500/30">
+    <div className="min-h-screen bg-transparent text-foreground flex flex-col overflow-x-hidden font-sans selection:bg-purple-500/30">
       {/* Background Effects */}
-      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-black">
-        <div className="absolute h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff15_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
-        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-purple-500 opacity-20 blur-[100px]"></div>
-        <div className="absolute right-0 bottom-0 -z-10 h-[310px] w-[310px] rounded-full bg-blue-500 opacity-10 blur-[100px]"></div>
-      </div>
+      {/* Background Effects - Moved to App.tsx */}
 
       <main className="flex-grow flex flex-col justify-center px-4 py-6 lg:py-12 relative z-10 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-20 items-center mb-12 lg:mb-24">
