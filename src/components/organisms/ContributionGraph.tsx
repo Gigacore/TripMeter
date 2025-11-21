@@ -181,7 +181,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data, view, onDay
   }, [dayData, firstDay]);
 
   return (
-    <div className="relative p-2 sm:p-4 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700" onMouseMove={handleMouseMove}>
+    <div className="relative" onMouseMove={handleMouseMove}>
       {tooltip.visible && (
         <div
           data-testid="contribution-tooltip"
