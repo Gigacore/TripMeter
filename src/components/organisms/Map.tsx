@@ -64,7 +64,7 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             mapRef.current = map;
             beginLayerRef.current = L.featureGroup().addTo(map);
             dropLayerRef.current = L.featureGroup().addTo(map);
-            heatLayerRef.current = (L as any).heatLayer([], { radius: 25 }).addTo(map);
+            heatLayerRef.current = (L as any).heatLayer([], { radius: 25 });
 
             L.control.layers(undefined, {
                 'Begintrip (green)': beginLayerRef.current,

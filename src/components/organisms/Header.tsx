@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ onReset, actionsEnabled, toggleSettings
   return (
     <TooltipProvider>
       <header className="sticky top-0 z-50 w-full border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-black/80 backdrop-blur-xl shadow-sm">
-        <div className="container mx-auto flex h-14 items-center">
+        <div className="container mx-auto flex h-14 items-center px-4">
           <div className="mr-4 flex items-center">
             <div className="mr-6 flex items-center space-x-2 group">
               <Gauge className="h-6 w-6 text-purple-500 dark:text-purple-400 transition-transform duration-300 group-hover:rotate-12" />

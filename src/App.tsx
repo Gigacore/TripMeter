@@ -11,6 +11,8 @@ import Header from './components/organisms/Header';
 import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
 
+import { MobileOptimizationBanner } from './components/molecules/MobileOptimizationBanner';
+
 const LandingPage = lazy(() => import('./components/organisms/LandingPage'));
 const MainView = lazy(() => import('./components/organisms/MainView'));
 const MapModal = lazy(() => import('./components/organisms/charts/MapModal'));
@@ -225,6 +227,7 @@ function App() {
           />
         )}
       </Suspense>
+      <MobileOptimizationBanner />
     </ThemeProvider>
   );
 }

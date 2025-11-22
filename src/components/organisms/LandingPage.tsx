@@ -1,6 +1,6 @@
 import React, { useRef, DragEvent, ChangeEvent, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Route, Sparkles, GitMerge, Zap, Globe, Activity } from 'lucide-react';
+import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Route, Sparkles, GitMerge, Zap, Globe, Activity, Scan } from 'lucide-react';
 import Footer from './Footer';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
@@ -70,7 +70,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
                   <button
                     className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-105 transition-all duration-300"
                   >
-                    <UploadCloud className="w-4 h-4" />
+                    <Scan className="w-4 h-4" />
                     <span className="font-medium">Analyze your rides</span>
                   </button>
                 </DialogTrigger>
@@ -106,7 +106,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
                           ) : (
                             <>
                               <div className={`mb-6 p-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-inner transition-transform duration-500 ${isDragging ? 'scale-110 rotate-6 ring-4 ring-purple-500/20' : 'group-hover:scale-105'}`}>
-                                <UploadCloud className={`h-12 w-12 ${isDragging ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                                <Scan className={`h-12 w-12 ${isDragging ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} />
                               </div>
                               <h3 className="text-2xl font-bold mb-3">
                                 {isDragging ? 'Drop it like it\'s hot!' : 'Drop your file'}
