@@ -1,7 +1,8 @@
 import React, { useRef, DragEvent, ChangeEvent, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Route, Sparkles, GitMerge, ArrowRight, Zap, Globe, Activity } from 'lucide-react';
+import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Route, Sparkles, GitMerge, Zap, Globe, Activity } from 'lucide-react';
 import Footer from './Footer';
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface LandingPageProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -18,6 +19,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
   const [isSampleLoading, setIsSampleLoading] = useState(false);
 
   const loadSampleFile = async () => {
+    // ... existing code
     setIsSampleLoading(true);
     try {
       const response = await fetch('/sample_trips_data_fares_randomized.csv');
@@ -45,33 +47,102 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
       {/* Background Effects - Moved to App.tsx */}
 
       <main className="flex-grow flex flex-col justify-center px-4 py-6 lg:py-12 relative z-10 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-20 items-center mb-12 lg:mb-24">
-          {/* Left Column: Hero & Actions */}
-          <div className="text-center lg:text-left animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="flex flex-col items-center justify-center text-center mb-12 lg:mb-24 max-w-4xl mx-auto">
+          {/* Hero & Actions */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 lg:mb-6 leading-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-gray-200 dark:to-gray-500">
                 Visualize Your
               </span>
               <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-gradient-x">
-                Uber History
+                Uber Rides
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-6 lg:mb-8">
-              Transform your raw data into stunning, interactive visualizations.
-              Uncover hidden patterns in your travel history with privacy-first analytics.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-6 lg:mb-8">
+              Transform your ride history into stunning, interactive visualizations.
+              Uncover insights and patterns in your travel history with privacy-first analytics.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-sm">
-              <a
-                href="https://help.uber.com/en/riders/article/request-a-copy-of-your-personal-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-105 transition-all duration-300"
-              >
-                <span className="font-medium">How to get your data</span>
-                <ArrowRight className="w-4 h-4 opacity-90 group-hover:translate-x-1 transition-transform duration-300" />
-              </a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-105 transition-all duration-300"
+                  >
+                    <UploadCloud className="w-4 h-4" />
+                    <span className="font-medium">Analyze your rides</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-200 dark:border-gray-800">
+
+                  <div className="mt-4">
+                    <div className="relative group">
+                      <div className={`absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 ${isDragging ? 'opacity-80' : ''}`}></div>
+                      <div className="relative bg-white/80 dark:bg-black/80 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden">
+                        <div
+                          className={`p-8 md:p-12 flex flex-col items-center justify-center text-center transition-all duration-300 cursor-pointer min-h-[300px]
+                            ${isDragging ? 'bg-purple-50/50 dark:bg-purple-900/20 scale-[0.99]' : 'hover:bg-gray-50/50 dark:hover:bg-gray-900/20'}
+                          `}
+                          onClick={() => !isProcessing && fileInputRef.current?.click()}
+                          onDrop={onDrop}
+                          onDragEnter={onDragEvents}
+                          onDragOver={onDragEvents}
+                          onDragLeave={onDragEvents}
+                        >
+                          {isProcessing ? (
+                            <div className="flex flex-col items-center gap-6">
+                              <div className="relative">
+                                <div className="absolute inset-0 bg-purple-500 blur-2xl opacity-20 animate-pulse"></div>
+                                <Loader2 className="h-16 w-16 animate-spin text-purple-600 dark:text-purple-400 relative z-10" />
+                              </div>
+                              <div className="space-y-2">
+                                <p className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse">
+                                  Crunching the numbers...
+                                </p>
+                                <p className="text-muted-foreground text-sm">This usually takes a few seconds</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className={`mb-6 p-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-inner transition-transform duration-500 ${isDragging ? 'scale-110 rotate-6 ring-4 ring-purple-500/20' : 'group-hover:scale-105'}`}>
+                                <UploadCloud className={`h-12 w-12 ${isDragging ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                              </div>
+                              <h3 className="text-2xl font-bold mb-3">
+                                {isDragging ? 'Drop it like it\'s hot!' : 'Drop your file'}
+                              </h3>
+                              <p className="text-muted-foreground mb-6 max-w-sm text-base">
+                                Drag & drop your <code className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 font-mono text-xs text-purple-600 dark:text-purple-400 border border-gray-200 dark:border-gray-700">trips_data.csv</code> file here
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-gray-100/80 dark:bg-gray-800/50 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-700/50">
+                                <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
+                                <span>Processed locally. 100% Private.</span>
+                              </div>
+                            </>
+                          )}
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".csv"
+                            onChange={onFileSelect}
+                            disabled={isProcessing}
+                            className="hidden"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {error && (
+                      <div className="mt-6 animate-in fade-in slide-in-from-top-2">
+                        <Alert variant="destructive" className="border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400">
+                          <AlertTitle>Oops! Something went wrong</AlertTitle>
+                          <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                      </div>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <button
                 onClick={loadSampleFile}
@@ -79,76 +150,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
                 className="px-6 py-3 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSampleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-purple-500" />}
-                <span className="font-medium">Try with sample data</span>
+                <span className="font-medium">Try sample data</span>
               </button>
             </div>
-          </div>
 
-          {/* Right Column: Upload Section */}
-          <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
-            <div className="relative group">
-              <div className={`absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 ${isDragging ? 'opacity-80' : ''}`}></div>
-              <div className="relative bg-white/80 dark:bg-black/80 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden">
-                <div
-                  className={`p-8 md:p-12 flex flex-col items-center justify-center text-center transition-all duration-300 cursor-pointer min-h-[300px]
-                    ${isDragging ? 'bg-purple-50/50 dark:bg-purple-900/20 scale-[0.99]' : 'hover:bg-gray-50/50 dark:hover:bg-gray-900/20'}
-                  `}
-                  onClick={() => !isProcessing && fileInputRef.current?.click()}
-                  onDrop={onDrop}
-                  onDragEnter={onDragEvents}
-                  onDragOver={onDragEvents}
-                  onDragLeave={onDragEvents}
-                >
-                  {isProcessing ? (
-                    <div className="flex flex-col items-center gap-6">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-purple-500 blur-2xl opacity-20 animate-pulse"></div>
-                        <Loader2 className="h-16 w-16 animate-spin text-purple-600 dark:text-purple-400 relative z-10" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse">
-                          Crunching the numbers...
-                        </p>
-                        <p className="text-muted-foreground text-sm">This usually takes a few seconds</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className={`mb-6 p-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-inner transition-transform duration-500 ${isDragging ? 'scale-110 rotate-6 ring-4 ring-purple-500/20' : 'group-hover:scale-105'}`}>
-                        <UploadCloud className={`h-12 w-12 ${isDragging ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} />
-                      </div>
-                      <h3 className="text-2xl font-bold mb-3">
-                        {isDragging ? 'Drop it like it\'s hot!' : 'Drop your file'}
-                      </h3>
-                      <p className="text-muted-foreground mb-6 max-w-sm text-base">
-                        Drag & drop your <code className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 font-mono text-xs text-purple-600 dark:text-purple-400 border border-gray-200 dark:border-gray-700">trips_data.csv</code> file here
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-gray-100/80 dark:bg-gray-800/50 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-700/50">
-                        <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
-                        <span>Processed locally. 100% Private.</span>
-                      </div>
-                    </>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".csv"
-                    onChange={onFileSelect}
-                    disabled={isProcessing}
-                    className="hidden"
-                  />
-                </div>
-              </div>
+            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <span>Don't have your data?</span>
+              <a
+                href="https://help.uber.com/en/riders/article/request-a-copy-of-your-personal-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 hover:text-purple-500 hover:underline transition-colors"
+              >
+                Learn how to get it
+              </a>
             </div>
-
-            {error && (
-              <div className="mt-6 animate-in fade-in slide-in-from-top-2">
-                <Alert variant="destructive" className="border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400">
-                  <AlertTitle>Oops! Something went wrong</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              </div>
-            )}
           </div>
         </div>
 
