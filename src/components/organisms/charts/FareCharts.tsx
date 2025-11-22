@@ -218,18 +218,17 @@ const FareCharts: React.FC<FareChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Lowest Fare"
-                value={formatCurrency(lowestFare.amount, activeCurrency)}
-                subValue={
-                  lowestFareTripsCount > 1 ? (
-                    `(${lowestFareTripsCount} trips)`
-                  ) : undefined
-                }
-                valueIcon={lowestFareTripsCount === 1 ? <Map size={16} /> : undefined}
-              />
-            </div>
+            <Stat
+              label="Lowest Fare"
+              value={formatCurrency(lowestFare.amount, activeCurrency)}
+              subValue={
+                lowestFareTripsCount > 1 ? (
+                  `(${lowestFareTripsCount} trips)`
+                ) : undefined
+              }
+              valueIcon={lowestFareTripsCount === 1 ? <Map size={16} /> : undefined}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : lowestFare ? (
           <Stat
@@ -252,18 +251,17 @@ const FareCharts: React.FC<FareChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Highest Fare"
-                value={formatCurrency(highestFare.amount, activeCurrency)}
-                subValue={
-                  highestFareTripsCount > 1 ? (
-                    `(${highestFareTripsCount} trips)`
-                  ) : undefined
-                }
-                valueIcon={highestFareTripsCount === 1 ? <Map size={16} /> : undefined}
-              />
-            </div>
+            <Stat
+              label="Highest Fare"
+              value={formatCurrency(highestFare.amount, activeCurrency)}
+              subValue={
+                highestFareTripsCount > 1 ? (
+                  `(${highestFareTripsCount} trips)`
+                ) : undefined
+              }
+              valueIcon={highestFareTripsCount === 1 ? <Map size={16} /> : undefined}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : highestFare ? (
           <Stat

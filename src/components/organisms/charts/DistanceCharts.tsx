@@ -149,14 +149,13 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Farthest"
-                value={longestTripByDist.toFixed(2)}
-                unit={distanceUnit}
-                valueIcon={<Map size={16} />}
-              />
-            </div>
+            <Stat
+              label="Farthest"
+              value={longestTripByDist.toFixed(2)}
+              unit={distanceUnit}
+              valueIcon={<Map size={16} />}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : (
           <Stat label="Farthest" value={longestTripByDist.toFixed(2)} unit={distanceUnit} />
@@ -174,14 +173,13 @@ const DistanceCharts: React.FC<DistanceChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Shortest"
-                value={shortestTripByDist.toFixed(2)}
-                unit={distanceUnit}
-                valueIcon={<Map size={16} />}
-              />
-            </div>
+            <Stat
+              label="Shortest"
+              value={shortestTripByDist.toFixed(2)}
+              unit={distanceUnit}
+              valueIcon={<Map size={16} />}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : (
           <Stat label="Shortest" value={shortestTripByDist.toFixed(2)} unit={distanceUnit} />

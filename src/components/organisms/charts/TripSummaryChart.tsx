@@ -84,13 +84,12 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
           convertDistance={convertDistance}
           title="All Trip Requests"
         >
-          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-            <Stat
-              label="Total Requests"
-              value={totalTrips}
-              valueIcon={<Map size={16} />}
-            />
-          </div>
+          <Stat
+            label="Total Requests"
+            value={totalTrips}
+            valueIcon={<Map size={16} />}
+            className="hover:bg-muted transition-colors duration-200"
+          />
         </RequestsMapModal>
 
         <RequestsMapModal
@@ -99,14 +98,13 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
           convertDistance={convertDistance}
           title="Successful Trips"
         >
-          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-            <Stat
-              label="Successful"
-              value={successfulTrips}
-              subValue={`${((successfulTrips / totalTrips) * 100).toFixed(1)}%`}
-              valueIcon={<Map size={16} />}
-            />
-          </div>
+          <Stat
+            label="Successful"
+            value={successfulTrips}
+            subValue={`${((successfulTrips / totalTrips) * 100).toFixed(1)}%`}
+            valueIcon={<Map size={16} />}
+            className="hover:bg-muted transition-colors duration-200"
+          />
         </RequestsMapModal>
 
         <RequestsMapModal
@@ -115,14 +113,13 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
           convertDistance={convertDistance}
           title="Rider Canceled Trips"
         >
-          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-            <Stat
-              label="Rider Canceled"
-              value={riderCanceledTrips}
-              subValue={`${((riderCanceledTrips / totalTrips) * 100).toFixed(1)}%`}
-              valueIcon={<Map size={16} />}
-            />
-          </div>
+          <Stat
+            label="Rider Canceled"
+            value={riderCanceledTrips}
+            subValue={`${((riderCanceledTrips / totalTrips) * 100).toFixed(1)}%`}
+            valueIcon={<Map size={16} />}
+            className="hover:bg-muted transition-colors duration-200"
+          />
         </RequestsMapModal>
 
         <RequestsMapModal
@@ -131,14 +128,13 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
           convertDistance={convertDistance}
           title="Driver Canceled Trips"
         >
-          <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-            <Stat
-              label="Driver Canceled"
-              value={driverCanceledTrips}
-              subValue={`${((driverCanceledTrips / totalTrips) * 100).toFixed(1)}%`}
-              valueIcon={<Map size={16} />}
-            />
-          </div>
+          <Stat
+            label="Driver Canceled"
+            value={driverCanceledTrips}
+            subValue={`${((driverCanceledTrips / totalTrips) * 100).toFixed(1)}%`}
+            valueIcon={<Map size={16} />}
+            className="hover:bg-muted transition-colors duration-200"
+          />
         </RequestsMapModal>
 
         {unfulfilledTrips > 0 && (
@@ -148,14 +144,13 @@ const TripSummaryChart: React.FC<TripSummaryChartProps> = ({ data, onShowTripLis
             convertDistance={convertDistance}
             title="Unfulfilled Requests"
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Unfulfilled"
-                value={unfulfilledTrips}
-                subValue={`${((unfulfilledTrips / totalTrips) * 100).toFixed(1)}%`}
-                valueIcon={<Map size={16} />}
-              />
-            </div>
+            <Stat
+              label="Unfulfilled"
+              value={unfulfilledTrips}
+              subValue={`${((unfulfilledTrips / totalTrips) * 100).toFixed(1)}%`}
+              valueIcon={<Map size={16} />}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         )}
       </div>

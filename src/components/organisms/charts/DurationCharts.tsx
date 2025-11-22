@@ -112,13 +112,12 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Longest"
-                value={formatDurationWithSeconds(longestTrip)}
-                valueIcon={<Map size={16} />}
-              />
-            </div>
+            <Stat
+              label="Longest"
+              value={formatDurationWithSeconds(longestTrip)}
+              valueIcon={<Map size={16} />}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : (
           <Stat label="Longest" value={formatDurationWithSeconds(longestTrip)} />
@@ -136,13 +135,12 @@ const DurationCharts: React.FC<DurationChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Shortest"
-                value={formatDurationWithSeconds(shortestTrip)}
-                valueIcon={<Map size={16} />}
-              />
-            </div>
+            <Stat
+              label="Shortest"
+              value={formatDurationWithSeconds(shortestTrip)}
+              valueIcon={<Map size={16} />}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : (
           <Stat label="Shortest" value={formatDurationWithSeconds(shortestTrip)} />

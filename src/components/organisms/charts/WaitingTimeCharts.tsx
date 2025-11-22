@@ -295,13 +295,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Longest Wait"
-                value={formatDurationWithSeconds(longestWaitingTime)}
-                valueIcon={<Map size={16} />}
-              />
-            </div>
+            <Stat
+              label="Longest Wait"
+              value={formatDurationWithSeconds(longestWaitingTime)}
+              valueIcon={<Map size={16} />}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : (
           <Stat label="Longest Wait" value={formatDurationWithSeconds(longestWaitingTime)} />
@@ -319,13 +318,12 @@ const WaitingTimeCharts: React.FC<WaitingTimeChartsProps> = ({
               </div>
             )}
           >
-            <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-              <Stat
-                label="Shortest Wait"
-                value={formatDurationWithSeconds(shortestWaitingTime)}
-                valueIcon={<Map size={16} />}
-              />
-            </div>
+            <Stat
+              label="Shortest Wait"
+              value={formatDurationWithSeconds(shortestWaitingTime)}
+              valueIcon={<Map size={16} />}
+              className="hover:bg-muted transition-colors duration-200"
+            />
           </RequestsMapModal>
         ) : (
           <Stat label="Shortest Wait" value={formatDurationWithSeconds(shortestWaitingTime)} />

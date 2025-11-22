@@ -117,14 +117,13 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
                 );
               }}
             >
-              <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-                <Stat
-                  label="Fastest Trip"
-                  value={fastestTripBySpeed.toFixed(2)}
-                  unit={distanceUnit === 'miles' ? 'mph' : 'km/h'}
-                  valueIcon={<Map size={16} />}
-                />
-              </div>
+              <Stat
+                label="Fastest Trip"
+                value={fastestTripBySpeed.toFixed(2)}
+                unit={distanceUnit === 'miles' ? 'mph' : 'km/h'}
+                valueIcon={<Map size={16} />}
+                className="hover:bg-muted transition-colors duration-200"
+              />
             </RequestsMapModal>
           ) : (
             <Stat label="Fastest Trip" value={fastestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
@@ -156,14 +155,13 @@ const SpeedCharts: React.FC<SpeedChartsProps> = ({
                 );
               }}
             >
-              <div className="cursor-pointer hover:bg-muted transition-colors duration-200 rounded-lg">
-                <Stat
-                  label="Slowest Trip"
-                  value={slowestTripBySpeed.toFixed(2)}
-                  unit={distanceUnit === 'miles' ? 'mph' : 'km/h'}
-                  valueIcon={<Zap size={16} />}
-                />
-              </div>
+              <Stat
+                label="Slowest Trip"
+                value={slowestTripBySpeed.toFixed(2)}
+                unit={distanceUnit === 'miles' ? 'mph' : 'km/h'}
+                valueIcon={<Zap size={16} />}
+                className="hover:bg-muted transition-colors duration-200"
+              />
             </RequestsMapModal>
           ) : (
             <Stat label="Slowest Trip" value={slowestTripBySpeed.toFixed(2)} unit={distanceUnit === 'miles' ? 'mph' : 'km/h'} />
