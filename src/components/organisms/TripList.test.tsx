@@ -5,6 +5,25 @@ import TripList from './TripList';
 import { assertAccessible } from '../../tests/utils';
 import { CSVRow } from '../../services/csvParser';
 
+// Mock react-window and react-virtualized-auto-sizer
+vi.mock('react-window', async () => {
+  const actual = await vi.importActual('react-window');
+  return {
+    ...actual,
+    FixedSizeList: ({ children, itemCount, itemData }: any) => (
+      <div>
+        {Array.from({ length: itemCount }).map((_, index) =>
+          children({ index, style: {}, data: itemData })
+        )}
+      </div>
+    ),
+  };
+});
+
+vi.mock('react-virtualized-auto-sizer', () => ({
+  default: ({ children }: any) => children({ height: 500, width: 500 }),
+}));
+
 const mockTrips: CSVRow[] = [
   { id: '1', status: 'completed', begintrip_address: 'A', dropoff_address: 'B' },
   { id: '2', status: 'rider_canceled', begintrip_address: 'C', dropoff_address: 'D' },

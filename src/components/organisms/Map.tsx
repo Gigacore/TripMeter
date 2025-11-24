@@ -3,6 +3,9 @@ import L, { LatLngExpression } from 'leaflet';
 import 'leaflet.heat';
 import 'leaflet-fullscreen';
 import 'leaflet-fullscreen/dist/leaflet.fullscreen.css';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { greenIcon, redIcon, blueIcon } from '../../constants';
 import { formatCurrency } from '../../utils/currency';
 import { toNumber } from '../../utils/formatters';
@@ -32,10 +35,10 @@ interface MapProps {
 
 const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, convertDistance, locations }) => {
     const mapRef = useRef<L.Map | null>(null);
-    const beginLayerRef = useRef<L.FeatureGroup | null>(null);
-    const dropLayerRef = useRef<L.FeatureGroup | null>(null);
+    const beginLayerRef = useRef<L.MarkerClusterGroup | null>(null);
+    const dropLayerRef = useRef<L.MarkerClusterGroup | null>(null);
     const mapIdRef = useRef(`map-${mapIdCounter++}`);
-    const heatLayerRef = useRef<any>(null); // Using any because leaflet.heat types are not available
+    const heatLayerRef = useRef<any>(null);
 
     const fitToLayers = () => {
         if (mapRef.current) {
@@ -62,8 +65,21 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             }).addTo(map);
 
             mapRef.current = map;
-            beginLayerRef.current = L.featureGroup().addTo(map);
-            dropLayerRef.current = L.featureGroup().addTo(map);
+            // Use markerClusterGroup instead of featureGroup
+            beginLayerRef.current = (L as any).markerClusterGroup({
+                maxClusterRadius: 50,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true
+            }).addTo(map);
+
+            dropLayerRef.current = (L as any).markerClusterGroup({
+                maxClusterRadius: 50,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true
+            }).addTo(map);
+
             heatLayerRef.current = (L as any).heatLayer([], { radius: 25 });
 
             L.control.layers(undefined, {
@@ -72,7 +88,6 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
                 'Heatmap': heatLayerRef.current
             }).addTo(map);
 
-            // Add fullscreen control
             (L.control as any).fullscreen().addTo(map);
         }
     }, [rows, locations]);
@@ -111,6 +126,9 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
             );
         };
 
+        const markers: L.Marker[] = [];
+        const dropMarkers: L.Marker[] = [];
+
         tripsToRender.forEach((r: CSVRow) => {
             const blt = toNumber(r.begintrip_lat);
             const bln = toNumber(r.begintrip_lng);
@@ -122,32 +140,47 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
                 heatPoints.push([dlt, dln]);
 
                 const m = L.marker([blt, bln], { icon: greenIcon });
-                m.bindPopup(createPopupContent('begin', r), {
-                    className: 'trip-popup-no-hover',
-                    offset: [0, -10],
-                    autoPan: true,
-                    closeButton: true,
-                    autoClose: false,
-                    closeOnClick: false
+                // Lazy popup binding
+                m.on('click', () => {
+                    if (!m.getPopup()) {
+                        m.bindPopup(createPopupContent('begin', r), {
+                            className: 'trip-popup-no-hover',
+                            offset: [0, -10],
+                            autoPan: true,
+                            closeButton: true,
+                            autoClose: false,
+                            closeOnClick: false
+                        }).openPopup();
+                    }
                 });
-                beginLayerRef.current?.addLayer(m);
+                markers.push(m);
 
                 const m2 = L.marker([dlt, dln], { icon: redIcon });
-                m2.bindPopup(createPopupContent('drop', r), {
-                    className: 'trip-popup-no-hover',
-                    offset: [0, -10],
-                    autoPan: true,
-                    closeButton: true,
-                    autoClose: false,
-                    closeOnClick: false
+                // Lazy popup binding
+                m2.on('click', () => {
+                    if (!m2.getPopup()) {
+                        m2.bindPopup(createPopupContent('drop', r), {
+                            className: 'trip-popup-no-hover',
+                            offset: [0, -10],
+                            autoPan: true,
+                            closeButton: true,
+                            autoClose: false,
+                            closeOnClick: false
+                        }).openPopup();
+                    }
                 });
-                dropLayerRef.current?.addLayer(m2);
+                dropMarkers.push(m2);
             }
         });
+
+        // Batch add layers
+        if (beginLayerRef.current) beginLayerRef.current.addLayers(markers);
+        if (dropLayerRef.current) dropLayerRef.current.addLayers(dropMarkers);
 
         heatLayerRef.current?.setLatLngs(heatPoints);
 
         if (locations) {
+            const locationMarkers: L.Marker[] = [];
             locations.forEach(loc => {
                 const icon = loc.type === 'pickup' ? greenIcon : loc.type === 'dropoff' ? redIcon : blueIcon;
                 const marker = L.marker([loc.lat, loc.lng], { icon });
@@ -157,8 +190,9 @@ const Map: React.FC<MapProps> = ({ rows, focusedTrip, layout, distanceUnit, conv
                     <b>Common Address:</b> ${loc.commonAddress || 'N/A'}<br>
                     <b>Coordinates:</b> ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}
                 `);
-                beginLayerRef.current?.addLayer(marker);
+                locationMarkers.push(marker);
             });
+            if (beginLayerRef.current) beginLayerRef.current.addLayers(locationMarkers);
         }
 
         if (rows.length > 0 || (locations && locations.length > 0)) {

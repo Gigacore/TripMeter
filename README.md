@@ -1,8 +1,8 @@
-# Trip Visualizer
+# TripMeter
 
 A comprehensive data visualization application designed to help users analyze and understand their personal Uber ride history. Upload your trip data and discover insights through interactive charts, graphs, and statistics.
 
-![Trip Visualizer](https://img.shields.io/badge/React-19.1.1-blue) ![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.13-38B2AC)
+![TripMeter](https://img.shields.io/badge/React-19.1.1-blue) ![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.13-38B2AC)
 
 ## ✨ Features
 
@@ -93,7 +93,7 @@ npm run preview
 2. **Upload to the app**:
    - Extract the downloaded ZIP file
    - Look for the `trips.csv` file
-   - Drag and drop it into the Trip Visualizer or click to browse
+   - Drag and drop it into the TripMeter or click to browse
 
 ## 🛠️ Tech Stack
 
