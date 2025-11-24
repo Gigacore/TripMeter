@@ -52,6 +52,19 @@ const Stats: React.FC<StatsProps> = ({
     }
   }, [currencies, activeCurrency]);
 
+  const productTypesCount = React.useMemo(() => {
+    if (!rows || rows.length === 0) return 0;
+    const types = new Set(rows.map(r => {
+      const p = r.product_type || 'N/A';
+      return p.toLowerCase().includes('auto') ? 'Auto' : p;
+    }));
+    return types.size;
+  }, [rows]);
+
+  const hasFareSplits = React.useMemo(() => {
+    return rows.some(row => row.status?.toLowerCase() === 'fare_split');
+  }, [rows]);
+
   return (
     <div className="flex flex-col gap-3 sm:gap-4 overflow-y-auto pr-1 sm:pr-2">
       <TopStats tripData={data} distanceUnit={distanceUnit} />
@@ -265,7 +278,7 @@ const Stats: React.FC<StatsProps> = ({
         <LazySection id="product-types">
           <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
             <CardHeader>
-              <CardTitle>Product Types</CardTitle>
+              <CardTitle>Product Types ({productTypesCount})</CardTitle>
               <CardDescription>A breakdown of your trips by the type of service used.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -289,17 +302,19 @@ const Stats: React.FC<StatsProps> = ({
             </CardContent>
           </Card>
         </LazySection>
-        <LazySection id="fare-split">
-          <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
-            <CardHeader>
-              <CardTitle>Fare Split Rides</CardTitle>
-              <CardDescription>Summary of rides where the fare was split.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FareSplitStats rows={rows} />
-            </CardContent>
-          </Card>
-        </LazySection>
+        {hasFareSplits && (
+          <LazySection id="fare-split">
+            <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
+              <CardHeader>
+                <CardTitle>Fare Split Rides</CardTitle>
+                <CardDescription>Summary of rides where the fare was split.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FareSplitStats rows={rows} />
+              </CardContent>
+            </Card>
+          </LazySection>
+        )}
       </div>
     </div>
   );

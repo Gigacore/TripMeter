@@ -45,9 +45,9 @@ const RequestsMapModal: React.FC<RequestsMapModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="flex flex-col max-w-[90vw] w-full h-[90vh] p-0 gap-0 overflow-hidden sm:rounded-xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
-          <div className="lg:col-span-1 h-full overflow-hidden border-r bg-background">
+      <DialogContent className="flex flex-col max-w-full md:max-w-[90vw] w-screen md:w-full h-screen md:h-[90vh] p-0 gap-0 overflow-hidden sm:rounded-xl">
+        <div className="flex flex-col md:flex-row h-full">
+          <div className="w-full md:w-1/3 h-1/2 md:h-full overflow-hidden md:border-r bg-background order-2 md:order-1">
             <TripList
               list={rows}
               title={title}
@@ -57,7 +57,7 @@ const RequestsMapModal: React.FC<RequestsMapModalProps> = ({
               renderTripStat={renderTripStat}
             />
           </div>
-          <div className="lg:col-span-2 h-full relative bg-muted/10">
+          <div className="w-full md:w-2/3 h-1/2 md:h-full relative bg-muted/10 order-1 md:order-2">
             <Map
               rows={rows}
               focusedTrip={focusedTrip}

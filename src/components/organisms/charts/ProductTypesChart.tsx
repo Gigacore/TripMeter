@@ -5,7 +5,7 @@ import { DistanceUnit } from '../../../App';
 import { formatCurrency } from '../../../utils/currency';
 import { formatDuration } from '../../../utils/formatters';
 import CostEfficiencyChart from '../CostEfficiencyChart';
-import Stat from '@/components/atoms/Stat';
+
 
 interface ProductTypeStats {
   name: string;
@@ -282,23 +282,21 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
 
   return (
     <div className="stats-group">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h3 className="text-lg font-semibold">Product Types</h3>
+      <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
         <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-1.5">
-        {metricOptions.map(option => (
-          <button
-            key={option.value}
-            onClick={() => setMetric(option.value)}
-            disabled={option.value === 'totalFare' && !activeCurrency}
-            className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              metric === option.value ?
+          {metricOptions.map(option => (
+            <button
+              key={option.value}
+              onClick={() => setMetric(option.value)}
+              disabled={option.value === 'totalFare' && !activeCurrency}
+              className={`flex-grow px-3 py-1.5 text-xs font-semibold rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${metric === option.value ?
                 'bg-primary text-primary-foreground shadow-sm' :
                 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
+                }`}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       </div>
       <ResponsiveContainer width="100%" height={700}>
@@ -322,9 +320,7 @@ const ProductTypesChart: React.FC<ProductTypesChartProps> = ({ rows, distanceUni
       <div className="mt-12">
         <h3 className="text-lg font-semibold">Ride Efficiency by Product</h3>
         <p className="text-sm text-muted-foreground mb-4">A comparison of distance per unit of currency across different service types.</p>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 w-full mb-4">
-          <Stat label="Unique Product Types" value={productTypeData.length} />
-        </div>
+
         <CostEfficiencyChart
           rows={rows}
           distanceUnit={distanceUnit}

@@ -1,6 +1,6 @@
 import React, { useRef, DragEvent, ChangeEvent, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Route, Sparkles, GitMerge, Zap, Globe, Activity, Scan } from 'lucide-react';
+import { UploadCloud, Map, BarChart, Clock, ShieldCheck, FileDown, Loader2, Route, Sparkles, GitMerge, DollarSign, Globe, Activity, Scan } from 'lucide-react';
 import Footer from './Footer';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
@@ -197,12 +197,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
             />
             <FeatureCard
               icon={<GitMerge className="h-6 w-6 text-indigo-500" />}
-              title="Streaks & Layovers"
+              title="Streaks"
               description="Analyze your longest streaks and the time between rides to understand your usage patterns."
               delay={300}
             />
             <FeatureCard
-              icon={<Zap className="h-6 w-6 text-amber-500" />}
+              icon={<DollarSign className="h-6 w-6 text-amber-500" />}
               title="Cost Efficiency"
               description="See how much you're spending per mile and minute to make smarter travel decisions."
               delay={400}

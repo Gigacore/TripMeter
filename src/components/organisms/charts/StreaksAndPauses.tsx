@@ -118,20 +118,11 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
           <p className="text-xs text-muted-foreground/80 -mt-1 mb-1">Most consecutive back-to-back trips.</p>
           <div className="text-2xl font-bold text-foreground">{longestConsecutiveTripsChain.length} {longestConsecutiveTripsChain.length === 1 ? 'trip' : 'trips'}</div>
           <div className="text-xs text-muted-foreground">
-            {longestConsecutiveTripsChain.length > 0 && (
-              <RequestsMapModal
-                rows={longestConsecutiveTripsChain}
-                distanceUnit={distanceUnit}
-                convertDistance={convertDistance}
-              >
-                <button
-                  className="text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded inline-flex items-center justify-center"
-                  aria-label={`View Longest Trip Chain on map`}
-                >
-                  <Map size={16} />
-                </button>
-              </RequestsMapModal>
+            {longestConsecutiveTripsChain.length > 0 && formatDateRange(
+              new Date(longestConsecutiveTripsChain[0].request_time).getTime(),
+              new Date(longestConsecutiveTripsChain[longestConsecutiveTripsChain.length - 1].request_time).getTime()
             )}
+            {renderMapButton(longestConsecutiveTripsChain, "Longest Trip Chain")}
           </div>
         </div>
       </div>
@@ -188,7 +179,6 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
           </div>
           <div className="text-xs text-muted-foreground">
             {formatDateRange(longestCancellationStreak.startDate, longestCancellationStreak.endDate)}
-            {renderMapButton(getTripsForStreak(longestCancellationStreak, 'timestamp', ['rider_canceled', 'driver_canceled']), "Rider Cancellation Streak")}
           </div>
         </div>
       </div>
@@ -220,7 +210,6 @@ const StreaksAndPauses: React.FC<StreaksAndPausesProps> = ({
           </div>
           <div className="text-xs text-muted-foreground">
             {formatDateRange(longestDriverCancellationStreak.startDate, longestDriverCancellationStreak.endDate)}
-            {renderMapButton(getTripsForStreak(longestDriverCancellationStreak, 'timestamp', ['driver_canceled']), "Driver Cancellation Streak")}
           </div>
         </div>
       </div>

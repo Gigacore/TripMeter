@@ -106,12 +106,12 @@ const MapModal: React.FC<MapModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col bg-white/90 dark:bg-black/90 backdrop-blur-xl border-gray-200 dark:border-gray-800 shadow-2xl">
+      <DialogContent className="max-w-6xl md:h-[90vh] h-screen w-screen md:w-auto max-w-full md:max-w-6xl flex flex-col bg-white/90 dark:bg-black/90 backdrop-blur-xl border-gray-200 dark:border-gray-800 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-row flex-grow gap-6 min-h-0 pt-4">
-          <div className="w-[380px] flex-shrink-0 flex flex-col border-r border-gray-200/50 dark:border-gray-800/50 pr-6">
+        <div className="flex flex-col md:flex-row flex-grow gap-6 min-h-0 pt-4">
+          <div className="w-full md:w-[380px] flex-shrink-0 flex flex-col md:border-r border-gray-200/50 dark:border-gray-800/50 md:pr-6 order-2 md:order-1">
             <div className="overflow-y-auto flex-grow space-y-2 pr-2 custom-scrollbar">
               <div className="text-sm font-medium text-muted-foreground px-2 pb-2 sticky top-0 bg-white/90 dark:bg-black/90 backdrop-blur-sm z-10">
                 All Requests ({rows.length})
@@ -153,7 +153,7 @@ const MapModal: React.FC<MapModalProps> = ({
               </ul>
             </div>
           </div>
-          <div className="flex-grow rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-inner">
+          <div className="flex-grow rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-inner order-1 md:order-2 h-[50vh] md:h-auto">
             <Map rows={rows} focusedTrip={selectedTrip} distanceUnit={distanceUnit} convertDistance={convertDistance} locations={[]} />
           </div>
         </div>
