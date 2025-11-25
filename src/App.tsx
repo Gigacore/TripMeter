@@ -1,5 +1,5 @@
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import './App.css';
 import 'leaflet/dist/leaflet.css';
 import { useTripData } from './hooks/useTripData';

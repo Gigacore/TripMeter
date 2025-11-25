@@ -1,5 +1,5 @@
 import currency from 'currency.js';
-import { getCurrencyCode as getCode, generateCurrencyMap } from '../components/organisms/charts/currency';
+import { getCurrencyCode as getCode, generateCurrencyMap } from './currency-map';
 
 export const formatCurrency = (
   amount: number | null | undefined,
@@ -56,11 +56,23 @@ export const divide = (a: number, b: number): number => {
   return currency(a).divide(b).value;
 };
 
-export const getAllCurrencies = (): { code: string; symbol: string; name: string }[] => {
-  const currencyMap = generateCurrencyMap();
-  return Object.entries(currencyMap).map(([name, code]) => ({
+export interface Currency {
+  code: string;
+  symbol: string;
+  name: string;
+}
+
+export const getAllCurrencies = (codes?: string[]): Currency[] => {
+  const currencyMap = generateCurrencyMap(codes);
+  const allCurrencies = Object.entries(currencyMap).map(([name, code]) => ({
     code,
     symbol: getCurrencySymbol(code),
     name,
   }));
+
+  if (codes) {
+    return allCurrencies.filter(currency => codes.includes(currency.code));
+  }
+
+  return allCurrencies;
 };
