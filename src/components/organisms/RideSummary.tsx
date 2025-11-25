@@ -144,7 +144,7 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                     </div>
                     <div>
                         <CardTitle className="text-2xl font-bold tracking-tight">Ride Summary</CardTitle>
-                        <CardDescription className="text-base">Your complete travel history analysis</CardDescription>
+                        <CardDescription className="text-base">Your travel history analysis</CardDescription>
                     </div>
                 </div>
             </CardHeader>
@@ -159,29 +159,12 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                         colorClass="text-blue-600 dark:text-blue-400"
                         bgClass="bg-blue-50 dark:bg-blue-900/20"
                     />
-                    <SummaryItem
-                        icon={Route}
-                        label="Total Distance"
-                        value={`${totalCompletedDistance.toFixed(2)} ${distanceUnit}`}
-                        subtext="Total distance covered"
-                        colorClass="text-emerald-600 dark:text-emerald-400"
-                        bgClass="bg-emerald-50 dark:bg-emerald-900/20"
-                    />
-                    <SummaryItem
-                        icon={Clock}
-                        label="Total Ride Time"
-                        value={formatDuration(totalTripDuration, true)}
-                        subtext="Time spent in rides"
-                        colorClass="text-amber-600 dark:text-amber-400"
-                        bgClass="bg-amber-50 dark:bg-amber-900/20"
-                    />
-
                     {currencies.length > 0 && (
                         <div className="sm:col-span-2 lg:col-span-1">
                             {currencies.length === 1 ? (
                                 <SummaryItem
                                     icon={Wallet}
-                                    label={`Total Fare (${currencies[0][0]})`}
+                                    label={`Total Spend (${currencies[0][0]})`}
                                     value={formatCurrency(currencies[0][1], currencies[0][0])}
                                     subtext="Total spend"
                                     colorClass="text-purple-600 dark:text-purple-400"
@@ -208,7 +191,7 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                                                 {currencies.map(([currency, fare]) => (
                                                     <div key={currency} className="w-full flex-shrink-0 flex flex-col h-full">
                                                         <div className="flex items-center justify-between mb-3">
-                                                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Fare ({currency})</p>
+                                                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Spend ({currency})</p>
                                                             <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
                                                                 <Wallet size={18} />
                                                             </div>
@@ -222,7 +205,7 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="mt-3 flex items-center justify-center gap-1.5">
+                                    <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1.5">
                                         {currencies.map((_, index) => (
                                             <button
                                                 key={index}
@@ -236,6 +219,22 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                             )}
                         </div>
                     )}
+                    <SummaryItem
+                        icon={Route}
+                        label="Total Distance"
+                        value={`${totalCompletedDistance.toFixed(2)} ${distanceUnit}`}
+                        subtext="Total distance covered"
+                        colorClass="text-emerald-600 dark:text-emerald-400"
+                        bgClass="bg-emerald-50 dark:bg-emerald-900/20"
+                    />
+                    <SummaryItem
+                        icon={Clock}
+                        label="Total Ride Time"
+                        value={formatDuration(totalTripDuration, true)}
+                        subtext="Time spent in rides"
+                        colorClass="text-amber-600 dark:text-amber-400"
+                        bgClass="bg-amber-50 dark:bg-amber-900/20"
+                    />
                 </div>
 
                 {/* Insights Row */}
@@ -246,7 +245,7 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                         </div>
                         <div className="text-sm">
                             <span className="text-muted-foreground block text-xs uppercase tracking-wider font-medium mb-0.5">Avg. Trip</span>
-                            <span className="font-bold text-foreground text-base">{avgCompletedDistance.toFixed(2)} {distanceUnit}</span>
+                            <span className="font-bold text-foreground text-base">{avgCompletedDistance.toFixed(1)} {distanceUnit}</span>
                             <span className="text-muted-foreground text-xs ml-1">({formatDuration(avgTripDuration, true)})</span>
                         </div>
                     </div>
@@ -273,7 +272,7 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                             <div className="text-sm">
                                 <span className="text-muted-foreground block text-xs uppercase tracking-wider font-medium mb-0.5">Top City</span>
                                 <span className="font-bold text-foreground text-base">{mostVisitedCity[0]}</span>
-                                <span className="text-muted-foreground text-xs ml-1">(<span>{mostVisitedCity[1]}</span> rides)</span>
+                                <span className="text-muted-foreground text-xs ml-1">({mostVisitedCity[1]} rides)</span>
                             </div>
                         </div>
                     )}
