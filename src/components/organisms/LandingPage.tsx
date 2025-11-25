@@ -74,14 +74,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileSelect, onSampleFileLoa
                     <span className="font-medium">Analyze your rides</span>
                   </button>
                 </DialogTrigger>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={onFileSelect}
-                  disabled={isProcessing}
-                  className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                  id="file-upload"
-                />
                 <DialogContent className="sm:max-w-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-200 dark:border-gray-800">
 
                   <div className="mt-4">

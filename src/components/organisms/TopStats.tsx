@@ -149,12 +149,7 @@ const TopStats: React.FC<TopStatsProps> = ({ tripData, distanceUnit }) => {
         </>
       )}
       <StatCard icon={<Route size={20} />} label="Total Distance" value={totalCompletedDistance.toFixed(2)} unit={distanceUnit}>
-        {currencies.length > 0 && costPerDistanceByCurrency[currencies[activeCurrencyIndex][0]] && (
-          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <TrendingUp size={14} className="text-muted-foreground" />
-            <span>{formatCurrency(costPerDistanceByCurrency[currencies[activeCurrencyIndex][0]], currencies[activeCurrencyIndex][0])} per {distanceUnit}</span>
-          </div>
-        )}
+
       </StatCard>
       <StatCard icon={<Clock size={20} />} label="Total Ride Time" value={formatDuration(totalTripDuration, true)} />
     </div>

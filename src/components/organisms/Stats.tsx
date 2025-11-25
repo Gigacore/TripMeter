@@ -13,7 +13,7 @@ import TopCities from './TopCities';
 import TripSummaryChart from './charts/TripSummaryChart';
 import TripsByYearChart from './charts/TripsByYearChart';
 import ProductTypesChart from './charts/ProductTypesChart';
-import TopStats from './TopStats';
+import RideSummary from './RideSummary';
 import FareDistanceScatterPlot from './FareDistanceScatterPlot';
 import CostEfficiencyChart from './CostEfficiencyChart';
 import CancellationBreakdownChart from './CancellationBreakdownChart';
@@ -67,7 +67,7 @@ const Stats: React.FC<StatsProps> = ({
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4 overflow-y-auto pr-1 sm:pr-2">
-      <TopStats tripData={data} distanceUnit={distanceUnit} />
+      <RideSummary data={data} rows={rows} distanceUnit={distanceUnit} />
       <div className="grid grid-cols-1 gap-4">
         <LazySection id="fare-insights">
           <Card className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-gray-200 dark:border-gray-800">
