@@ -273,7 +273,7 @@ const RideSummary: React.FC<RideSummaryProps> = ({ data, rows, distanceUnit }) =
                             <div className="text-sm">
                                 <span className="text-muted-foreground block text-xs uppercase tracking-wider font-medium mb-0.5">Top City</span>
                                 <span className="font-bold text-foreground text-base">{mostVisitedCity[0]}</span>
-                                <span className="text-muted-foreground text-xs ml-1">({mostVisitedCity[1]} rides)</span>
+                                <span className="text-muted-foreground text-xs ml-1">(<span>{mostVisitedCity[1]}</span> rides)</span>
                             </div>
                         </div>
                     )}
