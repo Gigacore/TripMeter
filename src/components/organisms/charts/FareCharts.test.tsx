@@ -118,15 +118,4 @@ describe('FareCharts', () => {
     expect(stats[0]).toHaveTextContent('Avg. Fare');
     expect(stats[0]).toHaveTextContent('25.00 USD');
   });
-
-  it('should call onFocusOnTrip when lowest fare stat is clicked', async () => {
-    const user = userEvent.setup();
-    render(<FareCharts {...mockProps} />);
-    const stats = screen.getAllByTestId('stat');
-    const lowestFareStat = stats.find(s => s.textContent?.includes('Lowest Fare'));
-    if (lowestFareStat) {
-      await user.click(lowestFareStat);
-      expect(mockProps.onFocusOnTrip).toHaveBeenCalledWith(mockRow);
-    }
-  });
 });

@@ -7,12 +7,14 @@ import { CSVRow } from '../../services/csvParser';
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
   BarChart: ({ data, children }: { data: any[], children: React.ReactNode }) => <div data-testid="bar-chart" data-data={JSON.stringify(data)}>{children}</div>,
+  LineChart: ({ data, children }: { data: any[], children: React.ReactNode }) => <div data-testid="line-chart" data-data={JSON.stringify(data)}>{children}</div>,
   CartesianGrid: () => <div />,
   XAxis: () => <div />,
   YAxis: () => <div />,
   Tooltip: () => <div />,
   Legend: () => <div />,
   Bar: () => <div />,
+  Line: () => <div />,
 }));
 
 const mockRows: CSVRow[] = [

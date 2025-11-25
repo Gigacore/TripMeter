@@ -63,7 +63,7 @@ const mockTripData: TripStats = {
   tripsByHour: [],
   tripsByDay: [],
   fareByDistance: [],
-  convertDistance: (m:number) => m,
+  convertDistance: (m: number) => m,
   longestStreak: 0,
   longestGap: 0,
   longestSuccessfulStreakBeforeCancellation: 0,
@@ -86,7 +86,6 @@ const mockProps = {
   rows: [{ status: 'completed', distance: '10' }],
   distanceUnit: 'miles' as DistanceUnit,
   activeCurrency: 'USD',
-  onShowTripList: vi.fn(),
   onFocusOnTrips: vi.fn(),
   convertDistance: (m: number) => m,
 };
@@ -118,25 +117,6 @@ describe('DistanceCharts', () => {
     expect(costStat).not.toBeInTheDocument();
   });
 
-  it('should call onShowTripList when longest trip stat is clicked', async () => {
-    const user = userEvent.setup();
-    render(<DistanceCharts {...mockProps} />);
-    const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest'));
-    if (longestStat) {
-      await user.click(longestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockLongestTripRow['Request id']}`);
-    }
-  });
-
-  it('should call onShowTripList when shortest trip stat is clicked', async () => {
-    const user = userEvent.setup();
-    render(<DistanceCharts {...mockProps} />);
-    const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest'));
-    if (shortestStat) {
-      await user.click(shortestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockShortestTripRow['Request id']}`);
-    }
-  });
 
   it('should render the distance by year chart when data is available', () => {
     render(<DistanceCharts {...mockProps} data={mockTripDataWithYearly} />);

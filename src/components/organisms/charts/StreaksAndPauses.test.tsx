@@ -6,6 +6,9 @@ import { CSVRow } from '@/services/csvParser';
 vi.mock('lucide-react', () => ({
   Flame: () => <div data-testid="flame-icon" />,
   Pause: () => <div data-testid="pause-icon" />,
+  Zap: () => <div data-testid="zap-icon" />,
+  Link2: () => <div data-testid="link2-icon" />,
+  Map: () => <div data-testid="map-icon" />,
 }));
 
 vi.mock('../MostTripsInADay', () => ({
@@ -25,6 +28,9 @@ const mockProps = {
   longestDriverCancellationStreak: { count: 1, startDate: new Date('2023-06-01').getTime(), endDate: new Date('2023-06-01').getTime() },
   mostTripsInADay: { count: 5, date: new Date('2023-07-01').getTime(), trips: [] as CSVRow[] },
   longestConsecutiveTripsChain: [{ id: '1' }] as CSVRow[],
+  rows: [] as CSVRow[],
+  distanceUnit: 'miles' as const,
+  convertDistance: (m: number) => m,
   onFocusOnTrip: vi.fn(),
 };
 
@@ -64,9 +70,9 @@ describe('StreaksAndPauses', () => {
     unmount();
 
     const multiDayProps = {
-        ...mockProps,
-        longestGap: { days: 2, startDate: new Date('2023-02-01').getTime(), endDate: new Date('2023-02-02').getTime() },
-      };
+      ...mockProps,
+      longestGap: { days: 2, startDate: new Date('2023-02-01').getTime(), endDate: new Date('2023-02-02').getTime() },
+    };
     render(<StreaksAndPauses {...multiDayProps} />);
     expect(screen.getByText('2 days')).toBeInTheDocument();
 

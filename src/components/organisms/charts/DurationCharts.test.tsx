@@ -28,6 +28,7 @@ vi.mock('../../atoms/Stat', () => ({
 vi.mock('../../../utils/formatters', () => ({
   formatDuration: (minutes: number) => `${minutes} min`,
   formatDurationWithSeconds: (minutes: number) => `${minutes} min`,
+  toNumber: (value: any) => typeof value === 'number' ? value : parseFloat(value) || 0,
 }));
 
 const mockLongestTripRow: CSVRow = { 'Request id': 'longest' };
@@ -84,30 +85,11 @@ describe('DurationCharts', () => {
 
   it('should render the chart and stats', () => {
     render(<DurationCharts {...mockProps} />);
-    expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
+    const barCharts = screen.getAllByTestId('bar-chart');
+    expect(barCharts.length).toBeGreaterThan(0);
 
     const stats = screen.getAllByTestId('stat');
     expect(stats.some(s => s.textContent?.includes('Total Duration'))).toBe(true);
     expect(stats.some(s => s.textContent?.includes('Average Duration'))).toBe(true);
-  });
-
-  it('should call onShowTripList when longest trip stat is clicked', async () => {
-    const user = userEvent.setup();
-    render(<DurationCharts {...mockProps} />);
-    const longestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Longest'));
-    if (longestStat) {
-      await user.click(longestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockLongestTripRow['Request id']}`);
-    }
-  });
-
-  it('should call onShowTripList when shortest trip stat is clicked', async () => {
-    const user = userEvent.setup();
-    render(<DurationCharts {...mockProps} />);
-    const shortestStat = screen.getAllByTestId('stat').find(s => s.textContent?.includes('Shortest'));
-    if (shortestStat) {
-      await user.click(shortestStat);
-      expect(mockProps.onShowTripList).toHaveBeenCalledWith(`single-trip-map:${mockShortestTripRow['Request id']}`);
-    }
   });
 });

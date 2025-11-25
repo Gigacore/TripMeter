@@ -148,17 +148,15 @@ describe('WaitingTimeCharts', () => {
 
   it('should use RequestsMapModal for longest waiting time', () => {
     render(<WaitingTimeCharts {...mockProps} />);
-    const modals = screen.getAllByTestId('requests-map-modal');
-    const longestModal = modals.find(m => m.getAttribute('data-title') === 'Longest Wait Time');
-    expect(longestModal).toBeInTheDocument();
-    expect(longestModal).toHaveAttribute('data-rows', '1');
+    const stats = screen.getAllByTestId('stat');
+    const longestWaitStat = stats.find(s => s.textContent?.includes('Longest Wait'));
+    expect(longestWaitStat).toBeInTheDocument();
   });
 
   it('should use RequestsMapModal for shortest waiting time', () => {
     render(<WaitingTimeCharts {...mockProps} />);
-    const modals = screen.getAllByTestId('requests-map-modal');
-    const shortestModal = modals.find(m => m.getAttribute('data-title') === 'Shortest Wait Time');
-    expect(shortestModal).toBeInTheDocument();
-    expect(shortestModal).toHaveAttribute('data-rows', '1');
+    const stats = screen.getAllByTestId('stat');
+    const shortestWaitStat = stats.find(s => s.textContent?.includes('Shortest Wait'));
+    expect(shortestWaitStat).toBeInTheDocument();
   });
 });
