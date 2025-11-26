@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import Header from './components/organisms/Header';
 import SettingsSheet from './components/organisms/SettingsSheet';
 import { useFileHandler } from './hooks/useFileHandler';
+import { useTranslation } from 'react-i18next';
 
 import { MobileOptimizationBanner } from './components/molecules/MobileOptimizationBanner';
 
@@ -20,6 +21,7 @@ const MapModal = lazy(() => import('./components/organisms/charts/MapModal'));
 export type DistanceUnit = 'miles' | 'km';
 
 function App() {
+  const { t } = useTranslation();
   const {
     rows,
     error,
@@ -61,7 +63,7 @@ function App() {
     setMapModalRows(tripRows);
     setMapModalTitle(
       title ||
-      `Found ${tripRows.length} trip${tripRows.length > 1 ? 's' : ''}`
+      t('foundTrips', { count: tripRows.length })
     );
     setIsMapModalOpen(true);
   };
@@ -81,7 +83,7 @@ function App() {
       const trip = rows.find(r => r['Request id'] === tripId);
       if (trip) {
         setMapModalRows([trip]);
-        setMapModalTitle('Trip Details');
+        setMapModalTitle(t('tripDetails'));
         setIsMapModalOpen(true);
       }
       return;
@@ -91,59 +93,59 @@ function App() {
     switch (type) {
       case 'all-map':
         setMapModalRows(rows);
-        setMapModalTitle(`All Trip Requests (${rows.length})`);
+        setMapModalTitle(t('allTripRequests', { count: rows.length }));
         setIsMapModalOpen(true);
         return;
       case 'successful-map':
         list = rows.filter(r => r.status?.toLowerCase() === 'completed');
         setMapModalRows(list);
-        setMapModalTitle(`Successful Trips (${list.length})`);
+        setMapModalTitle(t('successfulTrips', { count: list.length }));
         setIsMapModalOpen(true);
         return;
       case 'rider_canceled-map':
         list = rows.filter(r => r.status?.toLowerCase() === 'rider_canceled');
         setMapModalRows(list);
-        setMapModalTitle(`Rider Canceled Trips (${list.length})`);
+        setMapModalTitle(t('riderCanceledTrips', { count: list.length }));
         setIsMapModalOpen(true);
         return;
       case 'driver_canceled-map':
         list = rows.filter(r => r.status?.toLowerCase() === 'driver_canceled');
         setMapModalRows(list);
-        setMapModalTitle(`Driver Canceled Trips (${list.length})`);
+        setMapModalTitle(t('driverCanceledTrips', { count: list.length }));
         setIsMapModalOpen(true);
         return;
       case 'unfulfilled-map': {
         const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
         list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase() || ''));
         setMapModalRows(list);
-        setMapModalTitle(`Unfulfilled Trips (${list.length})`);
+        setMapModalTitle(t('unfulfilledTrips', { count: list.length }));
         setIsMapModalOpen(true);
         return;
       }
       case 'all':
         list = rows;
-        title = `All Trip Requests (${rows.length})`;
+        title = t('allTripRequests', { count: rows.length });
         break;
       case 'successful':
         list = rows.filter(r => r.status?.toLowerCase() === 'completed');
-        title = `Successful Trips (${list.length})`;
+        title = t('successfulTrips', { count: list.length });
         break;
       case 'canceled':
         list = rows.filter(r => ['rider_canceled', 'driver_canceled'].includes(r.status?.toLowerCase() || ''));
-        title = `Canceled Trips (${list.length})`;
+        title = t('canceledTrips', { count: list.length });
         break;
       case 'rider_canceled':
         list = rows.filter(r => r.status?.toLowerCase() === 'rider_canceled');
-        title = `Rider Canceled Trips (${list.length})`;
+        title = t('riderCanceledTrips', { count: list.length });
         break;
       case 'driver_canceled':
         list = rows.filter(r => r.status?.toLowerCase() === 'driver_canceled');
-        title = `Driver Canceled Trips (${list.length})`;
+        title = t('driverCanceledTrips', { count: list.length });
         break;
       case 'unfulfilled': {
         const knownStatuses = ['completed', 'rider_canceled', 'driver_canceled'];
         list = rows.filter(r => !knownStatuses.includes(r.status?.toLowerCase() || ''));
-        title = `Unfulfilled Trips (${list.length})`;
+        title = t('unfulfilledTrips', { count: list.length });
         break;
       }
       default: return;
