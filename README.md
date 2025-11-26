@@ -52,10 +52,6 @@ https://tripmeter.gigacore.workers.dev/
 ### Installation
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/trip-visualizer.git
-   cd trip-visualizer
-   ```
 
 2. **Install dependencies**
    ```bash
@@ -138,7 +134,7 @@ npm run preview
 ## 📂 Project Structure
 
 ```
-trip-visualizer/
+TripMeter/
 ├── src/
 │   ├── components/
 │   │   ├── atoms/          # Basic UI elements (Button, Input, Stat)
@@ -230,7 +226,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 📧 Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/yourusername/trip-visualizer/issues) on GitHub.
+If you encounter any issues or have questions, please [open an issue](https://github.com/Gigacore/TripMeter/issues) on GitHub.
 
 ---
 
