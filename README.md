@@ -4,6 +4,9 @@ A comprehensive data visualization application designed to help users analyze an
 
 ![TripMeter](https://img.shields.io/badge/React-19.1.1-blue) ![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.13-38B2AC)
 
+## Demo
+https://tripmeter.gigacore.workers.dev/
+
 ## ✨ Features
 
 ### 📊 Comprehensive Analytics
