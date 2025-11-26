@@ -1,0 +1,44 @@
+
+> tripmeter@0.0.0 test
+> vitest run src/components/organisms/charts/DistanceCharts.test.tsx
+
+
+ RUN  v3.2.4 /Users/sansunda/Documents/Code/github/trip-visualizer
+
+ ❯ src/components/organisms/charts/DistanceCharts.test.tsx (6 tests | 1 failed) 115ms
+   ✓ DistanceCharts > should render the chart and stats 25ms
+   ✓ DistanceCharts > should render the cost per distance when activeCurrency is provided 4ms
+   ✓ DistanceCharts > should not render cost per distance when activeCurrency is null 6ms
+   ✓ DistanceCharts > should call onShowTripList when longest trip stat is clicked 3ms
+   × DistanceCharts > should call onShowTripList when shortest trip stat is clicked 72ms
+     → Cannot read properties of null (reading 'toFixed')
+   ✓ DistanceCharts > should render the distance by year chart when data is available 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/organisms/charts/DistanceCharts.test.tsx > DistanceCharts > should call onShowTripList when shortest trip stat is clicked
+TypeError: Cannot read properties of null (reading 'toFixed')
+ ❯ formatCurrency src/components/organisms/charts/DistanceCharts.test.tsx:32:67
+     30| 
+     31| vi.mock('../../../utils/currency', () => ({
+     32|   formatCurrency: (amount: number, currency: string) => `${amount.toFi…
+       |                                                                   ^
+     33| }));
+     34| 
+ ❯ src/components/organisms/TripList.tsx:106:20
+ ❯ TripList src/components/organisms/TripList.tsx:45:15
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+ ❯ beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:18
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  13:27:21
+   Duration  2.14s (transform 126ms, setup 97ms, collect 442ms, tests 115ms, environment 790ms, prepare 91ms)
+
