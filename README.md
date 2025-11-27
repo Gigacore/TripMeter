@@ -1,6 +1,6 @@
 # TripMeter
 
-A comprehensive data visualization application designed to help users analyze and understand their personal Uber ride history. Upload your trip data and discover insights through interactive charts, graphs, and statistics.
+A comprehensive data visualization application designed to help users analyze and understand their personal Uber ride history. Drop your trip data and discover insights through interactive charts, graphs, and statistics.
 
 ![TripMeter](https://img.shields.io/badge/React-19.1.1-blue) ![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.13-38B2AC)
 
@@ -40,7 +40,7 @@ https://tripmeter.gigacore.workers.dev/
 - **Responsive Design**: Fully optimized for desktop, tablet, and mobile devices
 - **Dark/Light Theme**: Automatic theme switching based on system preferences
 - **Export Capabilities**: Download charts and statistics for sharing
-- **Sample Data**: Try the app with sample data before uploading your own
+- **Sample Data**: Try the app with sample data before using your own
 - **Privacy First**: All data processing happens locally in your browser - no server uploads
 
 ## 🚀 Getting Started
