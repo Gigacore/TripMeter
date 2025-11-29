@@ -7,6 +7,8 @@ A comprehensive data visualization application designed to help users analyze an
 ## Demo
 https://tripmeter.gigacore.workers.dev/
 
+![Screenshot_29-11-2025_122826_tripmeter gigacore workers dev](https://github.com/user-attachments/assets/72912150-fccb-4541-ac98-df14a4463454)
+
 ## ✨ Features
 
 ### 📊 Comprehensive Analytics
